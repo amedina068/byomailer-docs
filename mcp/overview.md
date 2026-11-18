@@ -31,13 +31,22 @@ The server accepts an API token only. It uses the same Sanctum tokens as the RES
 
 - A team member creates an API token in **Settings, API Tokens** (`/settings/api-tokens`). For the steps, read [Connect an MCP client](connect-clients.md).
 - The server does not offer OAuth. The app registers no OAuth routes for the MCP server.
-- A token does not expire. `config/sanctum.php` sets no expiration time.
+- A token has an expiration date, or no expiration date if you selected **Never**. After the date, the request gets `401`. `config/sanctum.php` sets no global expiration time.
 - A token works for the account of its user. All data that the tools read or change belongs to that account.
 - BYOMailer refuses the token of a user that the owner deactivated. It also refuses the token of an archived team member and of a team member with an open invitation. The request then gets `401`.
 
-The MCP tools do not check the role of the team member (admin, editor or viewer). A token of a viewer can use the tools that change data.
+## Access levels
 
-TODO(owner): The MCP tools do not check the team role, so a viewer token can create and change records. Is this the intended behavior?
+The server shows and runs only the tools that the token and the user can use. `ByoMailerServer::createContext()` filters the tools on each request:
+
+| Token and user | Tools |
+|---|---|
+| A read and write token of an admin or an editor | All tools. |
+| A read-only token (ability `read`) | Only the tools with the `IsReadOnly` annotation, for example the list, details, stats and content tools. |
+| Any token of a viewer | Only the tools with the `IsReadOnly` annotation. |
+| A token without the `read` ability | No tools. |
+
+`tools/list` does not show a tool that the token cannot use. A call to such a tool gets the JSON-RPC error `-32602` with the message `Tool [<name>] not found.`
 
 For more about tokens, read [API authentication](../api/authentication.md).
 

@@ -5,10 +5,13 @@
 // 2. Each internal link resolves to a page, and each anchor to a heading.
 // 3. Each `php artisan <command>` in a page exists in the app.
 // 4. Each environment variable in the code of a page exists in the app.
+// 5. Each endpoint on an API page (`GET /api/v1/...` and each curl URL) is
+//    an operation in the OpenAPI spec of the app (`docs/api/openapi.yaml`),
+//    and each operation of the spec is on an API page.
 //
-// Checks 3 and 4 need the source of the app. Set BYOMAILER_APP_PATH to the
+// Checks 3, 4 and 5 need the source of the app. Set BYOMAILER_APP_PATH to the
 // app folder. If BYOMAILER_APP_PATH is not set, the script runs checks 1 and 2
-// only. If the app folder has `vendor/`, the script reads the commands from
+// only. If the app has no `docs/api/openapi.yaml`, the script skips check 5. If the app folder has `vendor/`, the script reads the commands from
 // `php artisan list`. If not, it reads the signatures in
 // `app/Console/Commands` and a fixed list of framework commands.
 //
@@ -34,6 +37,7 @@ const NON_PAGES = new Set(['README.md', 'CONTRIBUTING.md']);
 const EXTERNAL_ENV = new Map([
   ['BYOMAILER_APP_PATH', 'read by the scripts of this repository'],
   ['BYOMAILER_APP_TOKEN', 'a secret of the CI of this repository'],
+  ['YOUR_API_TOKEN', 'the placeholder token of the Postman files of the app'],
 ]);
 
 // Framework commands that the fallback mode accepts when `vendor/` is missing.
@@ -322,6 +326,100 @@ function listFiles(dir, extension = '') {
 }
 
 // ---------------------------------------------------------------------------
+// Check 5: API endpoints against the OpenAPI spec
+// ---------------------------------------------------------------------------
+
+const API_PREFIX = '/api/v1';
+let endpointCount = 0;
+let operationCount = 0;
+
+if (appPath) {
+  const specFile = join(appPath, 'docs', 'api', 'openapi.yaml');
+  if (existsSync(specFile)) {
+    const operations = loadOperations(readFileSync(specFile, 'utf8'));
+    const specPaths = [...new Set([...operations.keys()].map((key) => key.split(' ')[1]))];
+    const documented = new Set();
+    operationCount = operations.size;
+
+    for (const [file, text] of sources) {
+      if (!relative(root, file).startsWith(`api${'/'}`)) continue;
+      for (const line of lines(text)) {
+        // `GET /api/v1/contacts/{contactId}`: the method and the path must be an operation.
+        for (const match of line.text.matchAll(/\b(GET|POST|PUT|PATCH|DELETE) (\/api\/v1\/[^\s`)|?]*)/g)) {
+          endpointCount++;
+          const path = match[2].slice(API_PREFIX.length).replace(/\/$/, '');
+          const key = `${match[1].toLowerCase()} ${normalizePath(path)}`;
+          if (!operations.has(key)) {
+            fail(file, line.number, `endpoint is not in the OpenAPI spec: ${match[1]} ${match[2]}`);
+          } else {
+            documented.add(key);
+          }
+        }
+
+        // A curl URL with real IDs: the path must match a path of the spec.
+        for (const match of line.text.matchAll(/https:\/\/byomailer\.example(\/api\/v1\/[^\s"'?\\]*)/g)) {
+          endpointCount++;
+          const path = match[1].slice(API_PREFIX.length).replace(/\/$/, '');
+          if (!specPaths.some((specPath) => pathPattern(specPath).test(path))) {
+            fail(file, line.number, `URL path is not in the OpenAPI spec: ${match[1]}`);
+          }
+        }
+      }
+    }
+
+    for (const [key, original] of operations) {
+      if (!documented.has(key)) {
+        errors.push(`api/: the OpenAPI operation ${original} is on no API page`);
+      }
+    }
+  } else {
+    warnings.push(`The app has no docs/api/openapi.yaml, so the endpoint check did not run.`);
+  }
+}
+
+/**
+ * Reads the operations of the `paths` section of the spec that Scramble
+ * writes: a path key at two spaces and a method key at four spaces.
+ * Returns a map from "method /path/{}" to "METHOD /api/v1/path/{name}".
+ */
+function loadOperations(yaml) {
+  const operations = new Map();
+  let inPaths = false;
+  let path = null;
+  for (const line of yaml.split('\n')) {
+    if (/^\S/.test(line)) {
+      inPaths = line.startsWith('paths:');
+      continue;
+    }
+    if (!inPaths) continue;
+    const pathMatch = line.match(/^  ['"]?(\/[^'":]*)['"]?:\s*$/);
+    if (pathMatch) {
+      path = pathMatch[1];
+      continue;
+    }
+    const methodMatch = line.match(/^    (get|post|put|patch|delete):\s*$/);
+    if (methodMatch && path) {
+      operations.set(`${methodMatch[1]} ${normalizePath(path)}`, `${methodMatch[1].toUpperCase()} ${API_PREFIX}${path}`);
+    }
+  }
+  return operations;
+}
+
+/** Replaces each `{name}` path parameter with `{}`, so the names can differ. */
+function normalizePath(path) {
+  return path.replace(/\{[^}]+\}/g, '{}');
+}
+
+/** A regular expression that matches a spec path with real values in its parameters. */
+function pathPattern(specPath) {
+  const source = specPath
+    .split(/(\{[^}]*\})/)
+    .map((part) => (part.startsWith('{') ? '[^/]+' : part.replace(/[.*+?^$()|[\]\\]/g, '\\$&')))
+    .join('');
+  return new RegExp(`^${source}$`);
+}
+
+// ---------------------------------------------------------------------------
 // Report
 // ---------------------------------------------------------------------------
 
@@ -330,7 +428,9 @@ for (const error of errors) console.error(error);
 
 console.log(
   `Checked ${files.length} files: ${linkCount} internal links, ` +
-    (appPath ? `${commandCount} artisan commands, ${envCount} environment variables.` : 'commands and variables skipped.'),
+    (appPath
+      ? `${commandCount} artisan commands, ${envCount} environment variables, ${endpointCount} API endpoints against ${operationCount} OpenAPI operations.`
+      : 'commands, variables and API endpoints skipped.'),
 );
 
 if (errors.length > 0) {

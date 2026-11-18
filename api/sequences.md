@@ -83,6 +83,50 @@ curl https://byomailer.example/api/v1/sequences/7 \
   -H "Accept: application/json"
 ```
 
+Response `200`:
+
+```json
+{
+  "data": {
+    "id": 7,
+    "name": "Onboarding",
+    "status": "live",
+    "contacts_count": 318,
+    "completed_count": 0,
+    "active_count": 318,
+    "steps_count": 1,
+    "steps": [
+      {
+        "id": 31,
+        "sequence_id": 7,
+        "delay_days": 0,
+        "delay_type": "days",
+        "status": "live",
+        "filters": [],
+        "message": {
+          "id": 88,
+          "subject": "Welcome",
+          "preview_text": "Glad that you are here",
+          "html_content": "<p>Hi {{ first_name }}</p>",
+          "text_content": "Hi {{ first_name }}",
+          "email_identity_id": 3,
+          "email_template_id": null,
+          "template_slot_content": "<p>Hi {{ first_name }}</p>",
+          "email_template": null,
+          "email_identity": null
+        },
+        "created_at": "2026-02-01T09:00:00.000000Z"
+      }
+    ],
+    "segment_id": null,
+    "filters": [],
+    "content_variables": { "first_name": "there" },
+    "created_at": "2026-02-01T09:00:00.000000Z",
+    "project_ids": [2]
+  }
+}
+```
+
 ## The step object
 
 | Field | Type | Description |
@@ -278,6 +322,13 @@ curl "https://byomailer.example/api/v1/sequences/7/steps/31/contact-mails/export
   -H "Authorization: Bearer <your-token>" \
   -H "Accept: application/json" \
   -o step-31-mails.csv
+```
+
+Response `200` (`text/csv`), with the first row and one mail:
+
+```csv
+email,name,status,variant,subject,from_email,from_name,scheduled_at,sent_at,delivered_at,opened_at,clicked_at,bounced_at,complained_at,rejected_at,unsubscribed_at,failure_reason,body
+ana@example.com,Ana,opened,,Welcome,news@example.com,Example News,2026-02-01 09:00:00,2026-02-01 09:00:05,2026-02-01 09:00:07,2026-02-01 10:12:40,,,,,,,"Hi Ana"
 ```
 
 TODO(owner): `SequenceStepContactMailExportController` validates `current_only` but does not pass it to `ContactMailQuery::forUser()`. Must the export use it?

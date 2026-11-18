@@ -25,12 +25,14 @@ The server does not offer OAuth. A client must let you set a custom header.
 1. Log in to BYOMailer.
 2. Open **Settings, API Tokens** (`/settings/api-tokens`).
 3. In **Token name**, type a name for the client, for example `Claude Code`.
-4. Click **Create Token**.
-5. Copy the token. BYOMailer shows it only one time.
+4. In **Access**, select **Read only** or **Read and write**. With **Read only**, the client gets only the tools that read data.
+5. In **Expiration**, select **Never**, or a number of days: 30, 90 or 365.
+6. Click **Create Token**.
+7. Copy the token. BYOMailer shows it only one time.
 
-The token acts as your user in your account. Each team member creates a separate token. A token does not expire. To stop a token, delete it on the same page.
+The token acts as your user in your account. Each team member creates a separate token. A token with an expiration date stops working after that date. To stop a token earlier, delete it on the same page.
 
-WARNING: Do not put the token in a file that you commit or share. A person with the token can read and change all data of the account.
+WARNING: Do not put the token in a file that you commit or share. A person with a read and write token can read and change all data of the account.
 
 For more about tokens, read [API authentication](../api/authentication.md).
 

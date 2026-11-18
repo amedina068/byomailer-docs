@@ -28,11 +28,10 @@ The code also has the value `invited`. The **Team** page does not offer it.
 | Change the role of a team member | Yes | No | No |
 | Archive and restore team members | Yes | No | No |
 | Manage webhooks (dashboard and API) | Yes | No | No |
-| All other pages and API endpoints | Yes | Yes | Yes |
+| Read all pages and API endpoints | Yes | Yes | Yes |
+| Change data, send mail and make API tokens | Yes | Yes | No |
 
-The code checks only for the admin role. An editor and a viewer have the same access. A viewer can create, edit and send newsletters, sequences and other records.
-
-TODO(owner): `UserRole::Viewer` has no check in the code. Must a viewer have read-only access?
+A viewer has read-only access in the dashboard, the API and the MCP server. The `EnforceAccessLevel` middleware refuses each request of a viewer that changes data, with `403`. A viewer can still change the own profile and password, and delete the own account and the own API tokens.
 
 ### What team members share
 
@@ -156,12 +155,16 @@ Each team member has their own API tokens. A token acts as the team member that 
 
 1. Open **Settings** > **API Tokens**.
 2. Enter a **Token name**, for example `CRM sync`. The maximum is 255 characters.
-3. Click **Create Token**.
-4. Copy the token at once.
+3. In **Access**, select **Read only** or **Read and write**.
+4. In **Expiration**, select **Never**, or a number of days: 30, 90 or 365.
+5. Click **Create Token**.
+6. Copy the token at once.
 
 WARNING: Copy the token and keep it secret. BYOMailer shows it only one time, and a person with the token can read your data and send email.
 
-The **Existing Tokens** list shows the name, the creation time and the last use of each token. The tokens do not expire.
+A read-only token can read data through the API and the MCP server. It cannot change data or send mail. A token with an expiration date stops working after that date. A token with **Never** does not expire. A viewer cannot make tokens.
+
+The **Existing Tokens** list shows the name, the access, the expiration date, the creation time and the last use of each token. A token that BYOMailer made before access levels existed shows as **Read and write**.
 
 ### Delete a token
 

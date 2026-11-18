@@ -13,13 +13,17 @@ The API uses personal API tokens from Laravel Sanctum. Each token belongs to one
 1. Log in to the dashboard.
 2. Open **Settings**, then **API Tokens** (`/settings/api-tokens`).
 3. In **Token name**, type a name for the token. The name is text of 255 characters or fewer.
-4. Click **Create Token**.
-5. Copy the token from the **Token created successfully** box.
-6. Keep the token in a secret store.
+4. In **Access**, select **Read only** or **Read and write**.
+5. In **Expiration**, select **Never**, or a number of days: 30, 90 or 365.
+6. Click **Create Token**.
+7. Copy the token from the **Token created successfully** box.
+8. Keep the token in a secret store.
 
 WARNING: Copy the token before you leave the page. BYOMailer shows the full token only one time.
 
-The **Existing Tokens** list shows the name of each token, when you made it, and when it was last used.
+The **Existing Tokens** list shows the name, the access and the expiration date of each token, when you made it, and when it was last used.
+
+A team member with the Viewer role cannot make API tokens.
 
 WARNING: Never put an API token in browser code or in a public repository. The token gives full access to the data of your account.
 
@@ -43,17 +47,31 @@ The same token also works for the MCP server. See [Connect clients](../mcp/conne
 
 ## Token abilities and expiry
 
-BYOMailer makes each token with the default Sanctum abilities, that is, all abilities. The dashboard has no option to limit a token. The API does not check token abilities.
+Each token has Sanctum abilities. The **Access** choice sets them:
 
-A token does not expire. The `expiration` value in `config/sanctum.php` is `null`.
+| Access | Abilities | What the token can do |
+|---|---|---|
+| Read only | `read` | Read data. Each request that changes data or sends mail gets `403`. |
+| Read and write | `read`, `write` | Read and change data, and send mail. |
+
+A token that BYOMailer made before access levels existed has all abilities (`*`). It has read and write access.
+
+The `EnforceAccessLevel` middleware checks each API request:
+
+- A request with a token that has no `read` ability gets `403` with the message `This API token has no read access.`
+- A `POST`, `PUT`, `PATCH` or `DELETE` request with no `write` ability gets `403` with the message `You have read-only access.`
+- `POST /api/v1/newsletters/contacts/preview` only reads data, so a read-only token can use it.
+
+A token with an expiration date stops working after that date. The next request gets `401`. A token with **Never** does not expire, because `expiration` in `config/sanctum.php` is `null`.
 
 If you set the `SANCTUM_TOKEN_PREFIX` environment variable, Sanctum adds that prefix to new tokens. Secret scanners can then find a leaked token.
 
 ## Roles
 
-The API does not check the role of the token user, with one exception. Only a token of a user with the `admin` role can use the [webhook](webhooks.md) endpoints. A token of an `editor` or a `viewer` gets `403` on those endpoints.
+The role of the token user also limits the API:
 
-TODO(owner): No REST API controller checks the role, so a `viewer` token can create, change and delete records. Is this intended?
+- A user with the Viewer role has read-only access. Each request of a Viewer that changes data gets `403`, also with a read and write token.
+- Only a user with the `admin` role can use the [webhook](webhooks.md) endpoints. A token of another user gets `403` on those endpoints.
 
 ## Revoke a token
 

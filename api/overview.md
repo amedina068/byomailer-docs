@@ -100,7 +100,7 @@ These list endpoints return all the records in one response, with no pagination:
 | `204` | BYOMailer deleted the record. The body is empty. |
 | `308` | The path is unversioned. Follow the `Location` header. |
 | `401` | The token is missing, not valid, or refused. See [Authentication](authentication.md). |
-| `403` | The token user does not have the necessary role. |
+| `403` | The token has no access for the request, or the user does not have the necessary role. See [Token abilities and expiry](authentication.md#token-abilities-and-expiry). |
 | `404` | The record does not exist, or it belongs to another account. |
 | `422` | The input is not valid. Read the `errors` object. |
 | `429` | You sent too many requests. See [Rate limits](#rate-limits). |
@@ -152,7 +152,7 @@ Each instance serves the OpenAPI document of the API. The pages do not need a lo
 | `/docs/api.json` | The OpenAPI document as JSON. |
 | `/documentation/api` | The API reference pages of the in-app documentation. |
 
-See [OpenAPI and Postman](openapi.md) for the downloads and for how to make the document again.
+The app repository also has the OpenAPI document and a Postman collection in `docs/api/`. See [OpenAPI and Postman](openapi.md) for the files, the import steps and how to make the files again.
 
 ## Other ways to use the data
 
