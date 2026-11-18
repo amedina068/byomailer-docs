@@ -70,6 +70,10 @@ The code of the app is in a separate repository. The docs describe that code, an
 - [Webhook endpoints](api/webhooks.md)
 - [OpenAPI and Postman](api/openapi.md)
 
+### SDKs
+
+- [SDKs](sdks/overview.md)
+
 ### MCP server
 
 - [MCP server overview](mcp/overview.md)
@@ -128,7 +132,7 @@ To check the front matter and the links only:
 node scripts/check-docs.mjs
 ```
 
-To also check the artisan commands and the environment variables against the app, give the path of an app checkout:
+To also check the artisan commands, the environment variables and the API endpoints against the app, give the path of an app checkout:
 
 ```bash
 BYOMAILER_APP_PATH=../byomailer node scripts/check-docs.mjs
@@ -139,6 +143,10 @@ The script then makes sure that:
 - each `php artisan <command>` in a page exists in the app,
 - each environment variable in the code of a page exists in `.env.example`, `config/`, the Docker files, `deploy/`, the tests or the CI of the app,
 - each internal link and each anchor resolves.
+- each endpoint on an API page (`GET /api/v1/...` and each `https://byomailer.example/api/v1/...` URL) is an operation or a path in `docs/api/openapi.yaml` of the app,
+- each operation of `docs/api/openapi.yaml` is on an API page.
+
+If the app checkout has no `docs/api/openapi.yaml`, the script skips the API endpoint check and prints a warning.
 
 If the app checkout has a `vendor/` folder, the script reads the command list from `php artisan list`. If not, it reads the command signatures in `app/Console/Commands`.
 

@@ -50,6 +50,35 @@ curl https://byomailer.example/api/v1/webhook-endpoints \
   -H "Accept: application/json"
 ```
 
+Response `200`:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "uuid": "2f3e4d5c-8888-4c3b-9d7e-1a2b3c4d5e6f",
+      "url": "https://example.com/webhooks/byomailer",
+      "description": "CRM sync",
+      "events": ["contact.subscribed", "newsletter.sent"],
+      "active": true,
+      "disabled_reason": null,
+      "consecutive_failures": 0,
+      "last_triggered_at": "2026-03-02T10:00:00+00:00",
+      "disabled_at": null,
+      "created_at": "2026-03-01T09:00:00+00:00"
+    }
+  ],
+  "links": { "first": null, "last": null, "prev": null, "next": null },
+  "meta": {
+    "path": "https://byomailer.example/api/v1/webhook-endpoints",
+    "per_page": 25,
+    "next_cursor": null,
+    "prev_cursor": null
+  }
+}
+```
+
 ## Get an endpoint
 
 `GET /api/v1/webhook-endpoints/{webhookEndpointId}`

@@ -77,6 +77,69 @@ curl "https://byomailer.example/api/v1/newsletters?status=sent" \
   -H "Accept: application/json"
 ```
 
+Response `200`:
+
+```json
+{
+  "data": [
+    {
+      "id": 41,
+      "uuid": "6c1d2e3f-4444-4c3b-9d7e-1a2b3c4d5e6f",
+      "title": "February update",
+      "status": "sent",
+      "subject": "What is new in February",
+      "preview_text": null,
+      "email_identity_id": 3,
+      "email_identity": {
+        "id": 3,
+        "uuid": "1a2b3c4d-5555-4c3b-9d7e-1a2b3c4d5e6f",
+        "email": "news@example.com",
+        "name": "Example News",
+        "domain": "example.com",
+        "identity_status": "verified",
+        "verified_at": "2026-01-02T09:00:00.000000Z",
+        "created_at": "2026-01-01T09:00:00.000000Z",
+        "updated_at": "2026-01-02T09:00:00.000000Z"
+      },
+      "email_template_id": null,
+      "from_email": "news@example.com",
+      "from_name": "Example News",
+      "scheduled_at": "2026-02-03T09:00:00.000000Z",
+      "sent_at": "2026-02-03T09:04:12.000000Z",
+      "segment_id": null,
+      "filters": [],
+      "content_variables": {},
+      "ab_test_enabled": false,
+      "ab_test_winner_variant": null,
+      "subject_b": null,
+      "preview_text_b": null,
+      "total_contacts_reached": 1250,
+      "project_ids": [],
+      "metrics": {
+        "total": 1250,
+        "sent": 1250,
+        "pending": 0,
+        "opened": 512,
+        "bounced": 4,
+        "unsubscribed": 3,
+        "complained": 0,
+        "open_rate": 41,
+        "unsubscribe_rate": 0.2
+      },
+      "created_at": "2026-02-01T09:00:00.000000Z",
+      "updated_at": "2026-02-03T09:04:12.000000Z"
+    }
+  ],
+  "links": { "first": null, "last": null, "prev": null, "next": null },
+  "meta": {
+    "path": "https://byomailer.example/api/v1/newsletters",
+    "per_page": 25,
+    "next_cursor": null,
+    "prev_cursor": null
+  }
+}
+```
+
 ## Get a newsletter
 
 `GET /api/v1/newsletters/{newsletterId}`
