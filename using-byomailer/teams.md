@@ -39,14 +39,11 @@ Many records belong to the account. Each team member sees and changes them, also
 
 - Contacts, lists, topics, tags and contact attributes, on the pages, in the import and export, and in the API.
 - Segments and webhooks.
+- The AWS credentials and the sender identities. See [Connect AWS SES](../getting-started/connect-aws-ses.md).
+- Sequences and their steps, on the pages, in the API and in MCP.
+- Automations and visual automations. An automation runs for each contact of the account, also for a contact that another team member added.
 
-Some records stay with the team member who made them:
-
-- The AWS credentials. See [Connect AWS SES](../getting-started/connect-aws-ses.md).
-- The **Sequences** page shows only the sequences of the signed-in team member.
-- An automation runs only for the contacts that the same team member added.
-
-TODO(owner): Sequences, automations and the AWS credentials are still scoped to one team member (`SequenceController::index`, `AutomationRunner`, `User::sesCredential`). Must they belong to the account, as contacts and lists do?
+Each record keeps the team member who made it. This value does not limit access.
 
 ## Invite a team member
 

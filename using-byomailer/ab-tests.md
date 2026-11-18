@@ -89,6 +89,4 @@ You can pick the winner only one time, and only while the status is `ab_testing`
 
 ## Webhooks
 
-BYOMailer sends the `newsletter.sent` webhook event when a newsletter finishes sending. For a newsletter with an A/B test, BYOMailer does not send this event. See [Webhooks](webhooks.md).
-
-TODO(owner): The code does not send `newsletter.sent` for an A/B test, also not when you pick the winner. Is that the intended behavior?
+BYOMailer sends the `newsletter.sent` webhook event when a newsletter finishes sending. For a newsletter with an A/B test, BYOMailer sends this event when you pick the winner, in the dashboard or with the API. The event fires one time. If two requests pick a winner at the same time, only the first request wins. See [Webhooks](webhooks.md).

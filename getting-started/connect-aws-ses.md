@@ -20,9 +20,9 @@ You need these items:
 
 The access policy of the SQS queue must allow the SNS topics of your AWS account. Give your AWS account ID to the owner of the instance before you start. The owner adds it to the queue policy.
 
-BYOMailer stores the AWS credentials for each user. The user who connects AWS sends with these credentials.
+The AWS credentials belong to the account. One team member connects AWS one time, and each team member of the account sends with these credentials. Each team member can also use each sender identity of the account.
 
-TODO(owner): The code stores the AWS credentials by user (`User::sesCredential`), and the newsletter schedule accepts only sender identities of the current user. Must each team member of an account connect AWS and add a sender identity, or can team members share the credentials of the account?
+If a second team member opens the onboarding or saves new keys, BYOMailer updates the credentials of the account. It does not make a second set.
 
 ## Open the AWS onboarding
 
