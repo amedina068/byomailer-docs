@@ -165,6 +165,21 @@ BYOMailer does not save the workflow in these cases:
 
 A visual automation has the status `draft` or `live`. A new visual automation has the status `draft`. To go live, all the sequences of its **Add to sequence** nodes must be live.
 
+### How a contact enters a workflow
+
+A queued listener enrolls the contact when its trigger event occurs:
+
+| Trigger | Event |
+|---|---|
+| `contact_added_to_list` | The contact joins the list. |
+| `removed_from_list` | The contact leaves the list. |
+| `tag_added` | The contact gets the tag. |
+| `removed_tag` | The contact loses the tag. |
+| `added_to_sequence` | The contact joins the sequence. |
+| `sequence_finished` | The contact finishes the sequence. |
+
+Only live workflows of the account of the contact enroll the contact. A trigger without a value matches each list, tag or sequence. The listeners run on the `automations` queue, so the queue worker must run.
+
 ### How a workflow runs
 
 Each contact in a workflow has one enrollment. A contact can be in a workflow only one time.
@@ -183,5 +198,3 @@ If the contact unsubscribes, BYOMailer ends the enrollment and skips the remaini
 If you pause a workflow, the steps of its contacts wait. They continue when the workflow is live again.
 
 The page of a workflow shows the number of contacts that wait at each node. The **Contacts** page of a workflow lists the enrolled contacts.
-
-TODO(owner): On `oss/prep`, no listener or job calls `VisualAutomationEngine::enroll()`. Thus a trigger event does not put a contact into a visual automation. How does a contact enter a visual automation?

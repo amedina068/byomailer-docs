@@ -25,7 +25,7 @@ These details apply:
 
 - `contact.subscribed` fires when the contact opts in to a list for the first time.
 - `contact.unsubscribed` does not fire when BYOMailer unsubscribes a contact because of a bounce or a complaint. See [Deliverability](deliverability.md).
-- `newsletter.sent` does not fire for a newsletter with an A/B test. See [A/B tests](ab-tests.md).
+- For a newsletter with an A/B test, `newsletter.sent` fires when you pick the winner. See [A/B tests](ab-tests.md).
 - `sequence.completed` also fires when a contact exits a sequence because it does not match the sequence filters. See [Sequences](sequences.md).
 
 ## Add an endpoint

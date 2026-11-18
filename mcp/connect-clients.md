@@ -79,7 +79,7 @@ TODO(owner): The in-app guide gives one `mcpServers` block with `"type": "http"`
 
 ## Claude.ai
 
-TODO(owner): The server accepts only a bearer token in the `Authorization` header, and the app has no OAuth routes for `/mcp`. Can a user connect Claude.ai to the server? If yes, give the steps.
+Claude.ai is not supported. The custom connectors of Claude.ai sign in with OAuth. The BYOMailer MCP server accepts only an API token in the `Authorization` header, and it has no OAuth routes. Use Claude Code or another client on this page.
 
 ## Other clients
 

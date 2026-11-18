@@ -65,8 +65,8 @@ The subject and the content can use template variables, for example `{{ name }}`
 
 ### What happens
 
-1. The API or the MCP server adds the contact to the list.
-2. A queued job sends the opt-in email through the Amazon SES account of the team member that created the list.
+1. A team member, an automation, the API, the MCP server or an import adds the contact to the list.
+2. A queued job sends the opt-in email through the Amazon SES credentials of the account.
 3. The contact clicks the link. The link has the form `https://byomailer.example/opt-in/<uuid>`.
 4. BYOMailer sets `opted_in_at` and shows the page "Subscription Confirmed".
 5. On the first confirmation, BYOMailer sends the `contact.subscribed` webhook event.
@@ -75,11 +75,18 @@ The queue worker must run for step 2. See [Queues and Horizon](../self-hosting/q
 
 The opt-in link uses the main host of the instance (`APP_URL`). The host of a custom link domain also accepts the `opt-in/` path. See [Custom domains](custom-domains.md).
 
-### What double opt-in does not do
+### Unconfirmed contacts
 
-BYOMailer adds the contact to the list before the contact confirms. A list filter on a newsletter or a sequence does not check `opted_in_at`. As a result, a contact that did not confirm can get email that targets the list.
+BYOMailer adds the contact to the list before the contact confirms. Until the contact confirms, these rules apply:
 
-TODO(owner): `ContactFilterService` does not read `opted_in_at`. Must a list filter skip contacts that did not confirm the opt-in?
+- A list filter with **any** or **all** on a newsletter or a sequence skips the contact. The filter counts the contact only when `opted_in_at` has a value.
+- A list filter with **none** excludes the contact, confirmed or not.
+- The contact gets no topics of the list. BYOMailer adds the topics when the contact confirms.
+- An import into the list does not set `opted_in_at`.
+
+BYOMailer sends the opt-in email one time, when the contact joins the list. A second add of a contact that is already on the list sends no email. The job sends no email to an unsubscribed contact or to a contact that confirmed.
+
+If you turn on double opt-in for a list that has contacts, the contacts without `opted_in_at` stop matching the list filter. Contacts that the API or an import added before have a value. Contacts that the dashboard or an automation added before have no value.
 
 The opt-in email has a `List-Unsubscribe` header. If the contact uses this link, or the `{{ unsubscribe_url }}` link of the opt-in email, BYOMailer unsubscribes the contact.
 

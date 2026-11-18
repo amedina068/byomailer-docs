@@ -28,12 +28,10 @@ The email editor has two upload paths:
 
 | Upload | Route | Disk |
 |---|---|---|
-| An image that a user adds in the text editor | `POST /editor/images` | Always the `public` disk, folder `editor-images`. |
+| An image that a user adds in the text editor | `POST /editor/images` | The storage of the user, if it is set and verified. If not, the disk of `MEDIA_DISK`. Folder `editor-images`. |
 | An image that a user adds to the image gallery | `POST /gallery/images` | The storage of the user, if it is set and verified. If not, the disk of `MEDIA_DISK`. |
 
-Both paths accept JPEG, PNG, GIF and WebP files of 5 MB or less.
-
-TODO(owner): The text editor upload (`EditorImageController`) always uses the `public` disk. It ignores `MEDIA_DISK` and the storage settings of the user. Is this intentional?
+Both paths accept JPEG, PNG, GIF and WebP files of 5 MB or less. Both paths select the disk with `UserFilesystemManager::diskFor()`.
 
 ## `MEDIA_DISK`
 

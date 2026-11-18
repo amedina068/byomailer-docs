@@ -1,6 +1,6 @@
 ---
 title: Contacts
-description: List, read, create, update and unsubscribe contacts, and add or remove them from lists.
+description: List, read, create, update, unsubscribe and subscribe contacts, and add or remove them from lists.
 order: 4
 ---
 
@@ -144,8 +144,8 @@ Response: `201` with the contact if BYOMailer created it. `200` with the contact
 What BYOMailer does:
 
 - For an existing contact, it merges the new custom attributes with the old ones. A key that you send replaces the old value of that key.
-- If the list needs opt-in, BYOMailer queues the opt-in email. Else it marks the contact as opted in to the list.
-- If the contact is unsubscribed and did not unsubscribe itself, BYOMailer resubscribes it.
+- If the list needs opt-in and the contact is new on the list, BYOMailer queues the opt-in email. The contact counts as a member of the list only after it confirms. If the list has no opt-in, BYOMailer marks the contact as opted in to the list.
+- If the contact is unsubscribed and did not unsubscribe itself, BYOMailer subscribes it again.
 - If the contact unsubscribed itself, it stays unsubscribed.
 - If the email address is on the blacklist, a new contact gets `422` with `This email address has been blacklisted.` An existing contact stays unsubscribed.
 
@@ -173,7 +173,9 @@ curl -X PATCH https://byomailer.example/api/v1/contacts/1 \
 
 Response `200`: the updated contact.
 
-The resubscribe and blacklist rules of the create call also apply here.
+An update never changes the subscription. An unsubscribed contact stays unsubscribed. To subscribe the contact again, use [Subscribe a contact again](#subscribe-a-contact-again) or add the contact to a list.
+
+If the new `email` is on the blacklist, BYOMailer unsubscribes the contact.
 
 `PUT` and `PATCH` do the same partial update. You can send the current `email` of the contact. The request does not get `422` for it.
 
@@ -191,7 +193,28 @@ curl -X POST https://byomailer.example/api/v1/contacts/1/unsubscribe \
 
 Response `200`: the contact.
 
-Because `unsubscribed_by_contact` is `false`, a later create or update call resubscribes the contact.
+Because `unsubscribed_by_contact` is `false`, an add to a list or the subscribe endpoint can subscribe the contact again. An update cannot.
+
+## Subscribe a contact again
+
+`POST /api/v1/contacts/{contactId}/subscribe`
+
+Clears an unsubscribe that your account made, in the dashboard or with the API. The contact then gets newsletters and sequence emails again. The request has no body.
+
+```bash
+curl -X POST https://byomailer.example/api/v1/contacts/1/subscribe \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Accept: application/json"
+```
+
+Response `200`: the contact. A subscribed contact does not change.
+
+The request fails with `422` in these cases:
+
+| Case | Field | Message |
+|---|---|---|
+| The contact unsubscribed through an email link. | `contact` | `The contact unsubscribed through an email link. Only the contact can subscribe again.` |
+| The email address is on the blacklist. | `email` | `This email address has been blacklisted.` |
 
 ## Remove a contact from a list
 

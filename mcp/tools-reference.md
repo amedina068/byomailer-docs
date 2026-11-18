@@ -484,7 +484,7 @@ This tool takes no arguments.
 
 **Create Contact Tool**
 
-> Create a contact for the authenticated account, or reuse the contact that already has this email. Optional name, tag names, and one list. A new blacklisted email is rejected. An existing email keeps attributes you do not send. Tags are added and never removed — removing a tag is not available through this API. When list_id is set, the contact is added to that list; a list that requires opt-in queues the opt-in email. Find list ids with view-newsletter-filters. Returns the contact id and whether a new row was created.
+> Create a contact for the authenticated account, or reuse the contact that already has this email. Optional name, tag names, and one list. A new blacklisted email is rejected. An existing email keeps attributes you do not send. Tags are added and never removed — removing a tag is not available through this API. When list_id is set, the contact is added to that list and an unsubscribe that an admin made is cleared; a list that requires opt-in queues the opt-in email. Without list_id, the subscription never changes. Find list ids with view-newsletter-filters. Returns the contact id and whether a new row was created.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |

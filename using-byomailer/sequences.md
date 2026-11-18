@@ -98,11 +98,11 @@ BYOMailer also shows two warnings. A warning does not stop the change:
 
 ### Pause a sequence or a step
 
-CAUTION: Pause a sequence or a step only if you want to stop its pending emails for good. When a pending email is due and its sequence or step is not live, BYOMailer deletes the email.
+A paused sequence or step sends no email. Its pending emails stay pending, also when they come due during the pause.
 
-The contact stays in the sequence. BYOMailer schedules the next step only after a delivery or a skip, so this contact gets no more steps of the sequence.
+When you activate the sequence or the step again, BYOMailer sends the emails that came due during the pause within a few minutes. Then the contacts continue with the next steps.
 
-TODO(owner): The code deletes a due email when its sequence or step is not live, and the contact then gets no more steps. Is that the intended behavior of a pause?
+BYOMailer deletes a pending email only when its step, its sequence or its content no longer exists, or when the contact left the sequence.
 
 ## Enrollment
 
@@ -225,7 +225,8 @@ The jobs send at most the max send rate of your SES account each second. Before 
 | The address is not on the suppression list. | The email fails with the reason `blacklisted`. |
 | The contact did not unsubscribe and is not sunset. | The email fails with the reason `unsubscribed` or `sunset`. |
 | Your AWS credentials have `ses:SendEmail`. | The email fails with the reason `ses_permission_missing`. |
-| The sequence and the step are live, and the contact is in the sequence. | BYOMailer deletes the email. |
+| The step, the sequence and its content exist, and the contact is in the sequence. | BYOMailer deletes the email. |
+| The sequence and the step are live. | The email stays pending. It sends when both are live again. |
 | The contact matches the sequence filters. | The contact exits the sequence. |
 | The contact matches the step filters. | The contact skips the step. |
 

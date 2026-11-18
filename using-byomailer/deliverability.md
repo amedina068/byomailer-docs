@@ -58,9 +58,13 @@ The suppression list applies in these places:
 - A sequence email to a suppressed address fails with the reason `blacklisted`.
 - The API and the MCP server do not make a new contact with a suppressed address.
 
-The dashboard has no page that lists the suppression list or removes an address from it.
+The dashboard has no page that lists the suppression list. To remove one address, use the **Subscribe** button on the contact page:
 
-TODO(owner): How does an owner remove an address from the suppression list, for example after a mailbox problem is corrected?
+- If the reason is `bounce` or `soft_bounce`, **Subscribe** opens a confirmation. After you confirm, BYOMailer removes the address from the suppression list of the account and subscribes the contact again.
+- If the reason is `complaint`, the page hides **Subscribe**. BYOMailer does not mail the address again.
+- If the server operator added the address for all accounts, the page also hides **Subscribe**.
+
+A new bounce lowers the reputation of your SES account. Subscribe a bounced address again only when you know that the mailbox works.
 
 ## The reputation page
 
@@ -162,9 +166,7 @@ The command `summary:send-weekly` sends a summary email to each team member of e
 
 The command sends the email only on Friday at 17:00 in the time zone of the account. The option `--client=<id>` limits the command to one account.
 
-The schedule of this command is turned off in `routes/console.php`. Thus BYOMailer does not send the weekly summary.
-
-TODO(owner): The schedule of `summary:send-weekly` is commented out. Is the weekly summary a feature of this release?
+The scheduler runs the command every hour from Thursday to Saturday (UTC). Each run sends only to the accounts where the local time is Friday 17:00. BYOMailer sends the email through the system mailer. Archived and invited team members get no email.
 
 ## GeoIP of opens
 
