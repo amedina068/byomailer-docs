@@ -53,7 +53,7 @@ See [Reverse proxy and TLS](reverse-proxy-and-tls.md).
 2. Wait until `docker compose ps` shows `web` as `healthy`.
 3. If a migration fails, read the error in the log. Make sure that the `mysql` service is healthy and that `DB_PASSWORD` is correct.
 
-TODO(owner): The `web` health check calls `/up` inside the container. If the host of that request is not the host of `APP_URL`, `RestrictHostToLinkRoutes` answers 404. Does the health check pass when `APP_URL` is a public domain?
+The health check of the `web` service calls `/up` on `localhost` inside the container. BYOMailer answers `/up` on each host, so the check passes for each value of `APP_URL`.
 
 ## The setup URL is gone
 

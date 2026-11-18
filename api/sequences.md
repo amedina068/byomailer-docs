@@ -43,8 +43,8 @@ Response `200`:
       "status": "live",
       "steps_count": 4,
       "contacts_count": 318,
-      "completed_count": 0,
-      "active_count": 318,
+      "completed_count": 120,
+      "active_count": 198,
       "project_ids": [2]
     }
   ],
@@ -58,7 +58,7 @@ Response `200`:
 }
 ```
 
-TODO(owner): The API sequence queries do not count completed contacts, so `completed_count` is always `0` and `active_count` equals `contacts_count`. The dashboard controller counts them. Must the API do the same?
+`contacts_count` is the number of enrolled contacts. `completed_count` is the number of contacts that finished the sequence. `active_count` is `contacts_count` minus `completed_count`.
 
 ## Get a sequence
 
@@ -257,7 +257,7 @@ Response `200`: `id`, `sequence_id`, `subject`, `delay_days`, `delay_type`, `sta
 
 `GET /api/v1/sequences/{sequenceId}/variables`
 
-Returns the `{{ variables }}` that the steps use (`detected_variables`), and the default of each variable (`content_variables`). The list does not have the reserved variables `content`, `unsubscribe_url`, `preferences_url` and `opt_in_url`.
+Returns the `{{ variables }}` that the steps use (`detected_variables`), and the default of each variable (`content_variables`). The list does not have the reserved variables `content`, `unsubscribe_url`, `preferences_url`, `opt_in_url` and `postal_address`.
 
 ```bash
 curl https://byomailer.example/api/v1/sequences/7/variables \
@@ -313,7 +313,7 @@ Returns a CSV file with one row for each mail of the step. The file name is `seq
 | `sent_before` | string | A date on or after `sent_after`. Only mails sent at or before it. |
 | `sort` | string | `id`, `email`, `name`, `subject`, `status`, or a time column (`scheduled_at`, `sent_at`, `delivered_at`, `opened_at`, `clicked_at`, `bounced_at`, `rejected_at`, `complained_at`, `unsubscribed_at`, `created_at`). The default is `id`. |
 | `direction` | string | `asc` or `desc`. The default is `desc`. |
-| `current_only` | boolean | Accepted, but it has no effect. |
+| `current_only` | boolean | Deprecated. The export ignores it. |
 
 The CSV columns: `email`, `name`, `status`, `variant`, `subject`, `from_email`, `from_name`, `scheduled_at`, `sent_at`, `delivered_at`, `opened_at`, `clicked_at`, `bounced_at`, `complained_at`, `rejected_at`, `unsubscribed_at`, `failure_reason`, `body`.
 
@@ -331,4 +331,4 @@ email,name,status,variant,subject,from_email,from_name,scheduled_at,sent_at,deli
 ana@example.com,Ana,opened,,Welcome,news@example.com,Example News,2026-02-01 09:00:00,2026-02-01 09:00:05,2026-02-01 09:00:07,2026-02-01 10:12:40,,,,,,,"Hi Ana"
 ```
 
-TODO(owner): `SequenceStepContactMailExportController` validates `current_only` but does not pass it to `ContactMailQuery::forUser()`. Must the export use it?
+The export always writes the full history of the step. It also writes the mails of contacts that moved to a later step or finished the sequence.

@@ -85,7 +85,7 @@ An automation with the action **Add to sequence** can go live only when the sequ
 
 The MCP server can save a paused automation that points to a draft sequence. Make the sequence live before you make the automation live.
 
-TODO(owner): The validation accepts the type `multistep`, but the listeners run only automations with the type `simple`. What does `multistep` do?
+Each automation has the type `simple`. The dashboard, the MCP server and the validation accept no other type.
 
 ## Visual automations
 

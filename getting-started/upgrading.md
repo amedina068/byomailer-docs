@@ -10,11 +10,16 @@ An upgrade replaces the code and runs the new database migrations. Back up the i
 
 ## Read the changes first
 
-The release notes are in `resources/release-notes.json`. Each key is a date (`YYYY-MM-DD`), and each value is a list of changes. The app shows them at `/documentation/release-notes`.
+`CHANGELOG.md` lists the changes of each version. BYOMailer uses semantic versioning, and each release has a Git tag `vX.Y.Z`.
 
-Read the release notes from the date of your current version to today. Look for changes to environment variables, to `docker-compose.yml`, and to the AWS permissions.
+To find the version that runs:
 
-TODO(owner): The release notes have dates but no version numbers, and the repository has no tags and no `CHANGELOG.md` on `oss/prep`. How does a self-hoster find the version that runs, and which version to upgrade to?
+- In a Git install, run `git describe --tags`.
+- With the published image, read the value of `BYOMAILER_VERSION` in `.env`.
+
+Read `CHANGELOG.md` from your version to the new version before you upgrade. Look for changes to environment variables, to `docker-compose.yml`, and to the AWS permissions.
+
+The dashboard also shows dated release notes at `/documentation/release-notes`. They come from `resources/release-notes.json` and have no version numbers.
 
 ## Back up first
 
@@ -54,7 +59,17 @@ CAUTION: Do not start an upgrade without a database backup. The migrations chang
 
 The `web` service runs the new migrations each time it starts, before NGINX serves requests. The `horizon`, `scheduler`, and `ses-events` services start only after the `web` service is healthy. Only the `web` service runs the migrations.
 
-TODO(owner): A published Docker image is in an open pull request (`docker-compose.image.yml`), not on `oss/prep`. When it is merged, how does a self-hoster upgrade with the image?
+## Upgrade with the published image
+
+If you use `docker-compose.image.yml`, do these steps:
+
+1. Back up the instance.
+2. If you set an exact version, set the new `BYOMAILER_VERSION` in `.env`.
+3. Run `docker compose -f docker-compose.image.yml pull`.
+4. Run `docker compose -f docker-compose.image.yml up -d`. If you use the `ses-events` worker, add `--profile ses`.
+5. Wait until the `web` service shows `healthy`. The `web` service runs the migrations.
+
+With `BYOMAILER_VERSION=latest`, each pull can move to a new version. Set an exact version to control the time of the upgrade.
 
 ## Upgrade a manual install
 
@@ -129,7 +144,9 @@ php artisan byomailer:install --promote=person@example.com
 
 In Docker, put `docker compose exec web` before the command.
 
-TODO(owner): The app has one-time commands for older data: `ses-events:migrate-to-sqs`, `ses:migrate-configuration-sets`, and `ses:backfill-tenants`. Does an upgrade of a self-hosted instance ever need them?
+An instance that started on version 0.1.0 or later does not need `ses-events:migrate-to-sqs`, `ses:migrate-configuration-sets` or `ses:backfill-tenants`. These commands convert data from development builds before the first release. The current AWS onboarding creates the SQS subscription, the tenant and one configuration set for each identity.
+
+Before this release, the **Update Credentials** form in **Settings > Email Credentials** erased the SNS topic and the tenant of the account. If a user saved new keys with that form, the SES events of the account stopped. To correct this, the user runs the AWS onboarding again at `/onboarding/aws`.
 
 ## Rotate the application key
 

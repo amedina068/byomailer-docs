@@ -38,7 +38,9 @@ The stack has three volumes:
 - For each account that sends email, an AWS account with SES.
 - For the instance, one SQS queue for the SES events. Read [SES events](../self-hosting/ses-events.md).
 
-TODO(owner): Each release will publish a Docker image (`docker-compose.image.yml` and a publish workflow are in an open pull request, not on `oss/prep`). Where is the image, and which tags does it have?
+Each release publishes a Docker image to `ghcr.io/<owner>/byomailer`. A Git tag `v1.2.3` gives the image tags `1.2.3`, `1.2`, `1` and `latest`. `docker-compose.image.yml` uses this image, so you do not need to build it. See [Release process](../contributing/release-process.md#docker-image).
+
+TODO(owner): Which GitHub owner publishes the image? `docker-compose.image.yml` uses the placeholder `ghcr.io/OWNER/byomailer`, and Docker refuses an image name with capitals. Until it changes, set `BYOMAILER_IMAGE`.
 
 ## Install
 

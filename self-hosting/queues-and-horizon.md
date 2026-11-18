@@ -79,7 +79,11 @@ docker compose exec web php artisan queue:retry all
 
 You can also retry a job from the Horizon dashboard.
 
-TODO(owner): Is it safe to retry a failed newsletter or sequence job, or can a retry send an email to a contact two times?
+A retry does not send a newsletter email to a contact two times. BYOMailer keeps one email row for each contact and newsletter. A retried chunk job skips each contact that already has a row. As a result, a retry also does not send the emails that have the status `failed`.
+
+A retried sequence job sends only the emails that are still `pending`, not sent, and not claimed again by a later scheduler run.
+
+One exception exists. If a worker stops after SES accepted an email, but before BYOMailer saved the `sent` status, that email can go out again.
 
 ## Restart the workers
 

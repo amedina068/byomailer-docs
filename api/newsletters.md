@@ -256,9 +256,7 @@ curl -X POST https://byomailer.example/api/v1/newsletters \
 
 Response `201`: the newsletter.
 
-The API saves `email_identity_id` only when `status` is `live`. In a draft request, BYOMailer validates the field but does not save it.
-
-TODO(owner): `NewsletterController` saves the sender identity only for a `live` request. A draft from the API has no sender, so the test-mail endpoint refuses it. Is this intended?
+BYOMailer saves `email_identity_id` for a draft and for a `live` request. To send a [test email](#send-a-test-email), the newsletter must have a sender identity.
 
 ## Change a newsletter
 
@@ -405,7 +403,7 @@ Response `200`: the newsletter.
 
 `GET /api/v1/newsletters/{newsletterId}/variables`
 
-Returns the `{{ variables }}` that the subject and the body use (`detected_variables`), and the default of each variable (`content_variables`). A default fills a variable when the contact has no value for it. The list does not have the reserved variables `content`, `unsubscribe_url`, `preferences_url` and `opt_in_url`.
+Returns the `{{ variables }}` that the subject and the body use (`detected_variables`), and the default of each variable (`content_variables`). A default fills a variable when the contact has no value for it. The list does not have the reserved variables `content`, `unsubscribe_url`, `preferences_url`, `opt_in_url` and `postal_address`.
 
 ```bash
 curl https://byomailer.example/api/v1/newsletters/42/variables \

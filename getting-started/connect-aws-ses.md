@@ -174,7 +174,7 @@ If a step fails, the screen shows **Verification Failed** and one of these error
 | "Failed to subscribe SNS topic: ..." | AWS refused the subscription to the SQS queue. |
 | "Failed to provision SES tenant: ..." | The IAM user cannot create the SES tenant. |
 
-TODO(owner): Step 3 of the onboarding screen tells the user to set the SNS_WEBHOOK_ENDPOINT variable, but no code reads it. SES events come through SQS. Can that text go?
+BYOMailer receives the SES events through the SQS queue of the instance. You do not need a public webhook URL.
 
 ## Look at the connection
 
@@ -184,9 +184,9 @@ Open **Settings > Email Credentials**. The page shows:
 - The SES sending quota: **Sandbox** or **Production**, the sending status, the emails sent in the last 24 hours, the 24-hour limit, and the **Max Send Rate**. Click **Refresh** to read the quota again.
 - **API Permissions**: the SES permissions that BYOMailer found for the IAM user. Click **Recheck** to read them again.
 
-To use new keys, run the AWS onboarding again at `/onboarding/aws`. It replaces the saved keys and creates a new SNS topic.
+To rotate the keys, use the **Update Credentials** form. It changes only the keys and the region. It keeps the SNS topic, the SQS subscription, the SES tenant and the permission checks of the account.
 
-TODO(owner): The **Update Credentials** form in **Settings > Email Credentials** saves only the keys and the region. It does not create the SNS topic, the SQS subscription, or the SES tenant, so new sender identities get no event destination. Is that intended, or must the form run the same steps as the onboarding?
+To move to another AWS account or region, run the AWS onboarding again at `/onboarding/aws`. It replaces the saved keys and creates a new SNS topic.
 
 ## Step 5: Add a sender identity
 

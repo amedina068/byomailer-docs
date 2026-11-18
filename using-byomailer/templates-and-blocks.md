@@ -112,7 +112,7 @@ BYOMailer replaces the placeholder at send time with the current HTML of the blo
 
 If you delete a block, the emails that use it get an empty string in its place.
 
-TODO(owner): BYOMailer replaces the blocks before the variables, but it reads the variable names from the message, not from the block. Can a block contain `{{ variable }}` placeholders?
+A block can contain `{{ variable }}` placeholders. BYOMailer inserts the blocks first. Then it replaces the variables of the message and of its blocks with the values of the contact. The **Variables** step shows only the variables of the message. A variable that is only in a block gets the global default of the attribute, if the contact has no value.
 
 ## Variables
 

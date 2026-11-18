@@ -81,9 +81,7 @@ BYOMailer adds the contact to the list before the contact confirms. A list filte
 
 TODO(owner): `ContactFilterService` does not read `opted_in_at`. Must a list filter skip contacts that did not confirm the opt-in?
 
-The opt-in email has a `List-Unsubscribe` header. The unsubscribe routes accept only newsletter and sequence emails, so this header link returns `404` for an opt-in email.
-
-TODO(owner): Is the `404` from the unsubscribe routes for an opt-in email (mailable `MailList`) intended?
+The opt-in email has a `List-Unsubscribe` header. If the contact uses this link, or the `{{ unsubscribe_url }}` link of the opt-in email, BYOMailer unsubscribes the contact.
 
 ## Topics
 

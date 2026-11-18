@@ -1,12 +1,12 @@
 ---
 title: Release process
-description: Add release notes for a change that users can see, and the open questions about versions, tags and images.
+description: Add release notes and changelog lines for a change that users can see, and how versions, tags and images work.
 order: 4
 ---
 
 # Release process
 
-This page explains the release notes of the app. The other parts of a release (the version, the changelog, the tag and the Docker image) are not in the code yet.
+This page explains the release notes, the changelog, the version, the tag and the Docker image of a release.
 
 ## Release notes
 
@@ -57,22 +57,29 @@ php artisan test --compact --filter=test_release_notes_page_renders_data_from_re
 
 ## Version scheme
 
-`composer.json` and `package.json` have no version field. The app repository has no Git tags.
-
-TODO(owner): Which version scheme does BYOMailer use (for example, semantic versioning that starts at 1.0.0), and where does the version number live?
+BYOMailer uses semantic versioning. The first version is 0.1.0. The version number lives in `CHANGELOG.md` and in the Git tag of the release. `composer.json` and `package.json` have no version field.
 
 ## Changelog
 
-TODO(owner): The app has no changelog file on `oss/prep`. Which file holds the changelog, which format does it use, and how does it relate to `resources/release-notes.json`?
+`CHANGELOG.md` holds the changelog in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. A pull request that changes the behavior for users adds one line under `[Unreleased]`. Use one of these sections: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
+
+`CHANGELOG.md` lists the changes of each version of the code. `resources/release-notes.json` holds the dated notes that the dashboard shows. A change for users goes in both files.
 
 ## Tags
 
-TODO(owner): Which steps make a release tag (the tag name format, who creates it, and from which branch)?
+The tag name is `v` and the version, for example `v0.1.0`. The Docker workflow builds an image only for a tag with this format.
+
+TODO(owner): Who creates the release tag, from which branch, and how does the `[Unreleased]` section of `CHANGELOG.md` become a version?
 
 ## Docker image
 
-The CI on `oss/prep` does not build or publish a Docker image. The `Dockerfile` builds the image locally.
+A push of a Git tag `v*` builds the image for `linux/amd64` and `linux/arm64`, and publishes it to `ghcr.io/<owner>/byomailer`. `<owner>` is the GitHub owner of the repository, in lowercase. A maintainer can also start the workflow manually.
 
-TODO(owner): Where does the project publish the Docker image, which tags does it get, and which event starts the publish?
+| Git tag | Image tags |
+|---|---|
+| `v1.2.3` | `1.2.3`, `1.2`, `1` and `latest` |
+| `v0.4.1` | `0.4.1`, `0.4` and `latest`. A `v0` tag gets no major tag. |
+| `v1.3.0-rc.1` | `1.3.0-rc.1` only. `latest` stays on the last stable release. |
+| A manual run on a branch | The branch name and `sha-<commit>` |
 
 For the upgrade steps of an instance, read [Upgrading](../getting-started/upgrading.md).

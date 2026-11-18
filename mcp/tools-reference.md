@@ -643,7 +643,7 @@ This tool takes no arguments.
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `name` | string | Yes |  | Name for the automation. |
-| `type` | string | No | `simple`, `multistep` | Automation type. Use "simple" unless told otherwise. |
+| `type` | string | No | `simple` | Automation type. The only type is "simple". |
 | `condition` | object | Yes |  | The trigger. Use view-automation-options to find the ids. |
 | `condition.type` | string | No | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed` | The event that starts the automation. |
 | `condition.value` | string | No |  | The list, tag or sequence id of the event. For "attribute_changed" with operator "changed_to", the new attribute value. |
@@ -663,7 +663,7 @@ This tool takes no arguments.
 | --- | --- | --- | --- | --- |
 | `automation_id` | integer | Yes |  | Id of the automation to update. Use list-automations to discover ids. |
 | `name` | string | No |  | Name for the automation. |
-| `type` | string | No | `simple`, `multistep` | Automation type. Use "simple" unless told otherwise. |
+| `type` | string | No | `simple` | Automation type. The only type is "simple". |
 | `condition` | object | No |  | The trigger. Use view-automation-options to find the ids. |
 | `condition.type` | string | No | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed` | The event that starts the automation. |
 | `condition.value` | string | No |  | The list, tag or sequence id of the event. For "attribute_changed" with operator "changed_to", the new attribute value. |

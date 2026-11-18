@@ -48,9 +48,9 @@ curl https://byomailer.example/api/v1/lists \
 
 ## Data scope
 
-Each request acts for the user that owns the token. BYOMailer limits each query to the account of that user. Team members of the same account see the same contacts, lists, newsletters and sequences. A record of another account gets `404`, as if it does not exist.
+Each request acts for the user that owns the token. BYOMailer limits each query to the account of that user. Team members of the same account see the same contacts, lists, topics, tags, newsletters and sequences. A record of another account gets `404`, as if it does not exist.
 
-Some endpoints have a smaller scope. The [tags](tags.md) list shows only the tags of the token user. The [topics](topics.md) endpoints accept only a list that the token user made. The [webhook](webhooks.md) endpoints accept only a token of an admin.
+The [webhook](webhooks.md) endpoints accept only a token of an admin.
 
 ## Cursor pagination
 

@@ -42,15 +42,22 @@ Custom link domains need Cloudflare for SaaS. See [Optional integrations](option
 
 ## Trusted proxies
 
-`bootstrap/app.php` trusts proxy headers only from the IP ranges in `config/trustedproxies.php`. That file lists the Cloudflare edge ranges and nothing else. BYOMailer reads `X-Forwarded-For` and `X-Forwarded-Proto` only when the request comes from one of these ranges.
+BYOMailer reads the forwarded headers (`X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Port` and `X-Forwarded-Proto`) only from a trusted proxy. By default, it trusts the Cloudflare edge ranges in `config/trustedproxies.php`. The `TRUSTED_PROXIES` setting replaces this list.
 
 If Cloudflare is in front of the instance, `$request->ip()` is the IP of the visitor. Per-IP rate limits then apply to each visitor.
 
-If your reverse proxy is not Cloudflare, BYOMailer does not read the forwarded headers from it. The client IP is then the IP of the proxy, and the request scheme is the scheme between the proxy and the `web` service.
+If your reverse proxy is not Cloudflare and `TRUSTED_PROXIES` is empty, BYOMailer does not read the forwarded headers from it. The client IP is then the IP of the proxy. The request scheme is the scheme between the proxy and the `web` service, so signed links (preferences, invitations) fail the check.
 
-TODO(owner): The `signed` middleware checks the full URL, with the scheme. Behind a proxy that is not Cloudflare, how does an instance make BYOMailer see `https` requests, so that signed links (preferences, invitations) pass the check?
+To trust your own proxy:
 
-TODO(owner): The code has a fixed list of trusted proxies. Do you plan a setting to trust a local reverse proxy?
+1. Set `TRUSTED_PROXIES` in `.env` to the IP addresses or CIDR ranges of the proxy, comma-separated. For example: `TRUSTED_PROXIES=10.0.0.0/8`.
+2. If the proxy runs on the same Docker host, use the address that the `web` container sees, for example `172.16.0.0/12`.
+3. Make sure that the proxy sends `X-Forwarded-Proto: https`.
+4. Restart the app services.
+
+The value replaces the Cloudflare ranges. If Cloudflare is in front of your proxy, BYOMailer reads the client IP that your proxy forwards.
+
+CAUTION: Do not set `TRUSTED_PROXIES=*` when the app port is open to the internet. A client can then set its own IP.
 
 ## Keep port 8080 private
 
@@ -64,9 +71,7 @@ Then only a reverse proxy on the same server can reach the `web` service.
 
 ## Upload size
 
-The image upload of the email editor accepts files of 5 MB or less (`max:5120` in `GalleryImageUploadRequest` and `EditorImageUploadRequest`). The contact import accepts `csv`, `txt`, `xlsx` and `xls` files, with no size rule in `ImportContactsRequest`. Make sure that the reverse proxy accepts request bodies of at least 5 MB.
-
-TODO(owner): What maximum upload size do PHP and NGINX in the Docker image accept for a contact import file?
+The image upload of the email editor accepts files of 5 MB or less (`max:5120` in `GalleryImageUploadRequest` and `EditorImageUploadRequest`). The contact import accepts `csv`, `txt`, `xlsx` and `xls` files of 20 MB or less (`ImportContactsRequest::MAX_FILE_KILOBYTES`). In the Docker image, NGINX and PHP accept request bodies of 100 MB. Make sure that the reverse proxy accepts request bodies of at least 20 MB.
 
 ## Example: Caddy
 
