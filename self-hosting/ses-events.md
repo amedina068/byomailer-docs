@@ -51,7 +51,13 @@ The pattern `mailautomation-*` matches the topic names that BYOMailer creates.
 
 BYOMailer creates the subscription without raw message delivery. Do not turn on raw message delivery. `ProcessSesEventJob` refuses a payload with no SNS envelope.
 
-TODO(owner): The sending account creates the SNS subscription to the queue. When the queue is in a different AWS account, AWS sends a `SubscriptionConfirmation` message to the queue, and `ProcessSesEventJob` skips that message type. Who confirms the subscription in that case, and how?
+The sending account creates the SNS subscription to the queue. When the queue is in a different AWS account, AWS puts a `SubscriptionConfirmation` message in the queue. The `ses-events` worker confirms the subscription:
+
+1. It makes sure that a tenant of the instance owns the topic.
+2. It makes sure that AWS signed the message.
+3. It opens the `SubscribeURL` of the message.
+
+After that, the SES events of the sending account arrive in the queue. If the worker does not run when AWS sends the message, the message waits in the queue until the worker reads it.
 
 TODO(owner): The worker leaves a message with an invalid body in the queue and logs "leaving for DLQ". What dead-letter queue and redrive policy (`maxReceiveCount`) do you recommend?
 

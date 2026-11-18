@@ -157,7 +157,7 @@ See [Unsubscribe and preferences](../using-byomailer/unsubscribe-and-preferences
 
 `PUT /api/v1/contacts/{contactId}`
 
-Changes the fields that you send. The body fields are the same as for [Add a contact to a list](#add-a-contact-to-a-list), but `email` is optional. A new `email` must not belong to another contact of the token user.
+Changes the fields that you send. The body fields are the same as for [Add a contact to a list](#add-a-contact-to-a-list), but `email` is optional. A new `email` must not belong to another contact of your account.
 
 ```bash
 curl -X PATCH https://byomailer.example/api/v1/contacts/1 \
@@ -175,7 +175,7 @@ Response `200`: the updated contact.
 
 The resubscribe and blacklist rules of the create call also apply here.
 
-TODO(owner): The `PUT` route names its parameter `{contact}`, but `ContactRequest` reads `contactId`. So with `PUT`, the unique email rule does not ignore the contact itself, and an unchanged `email` can get `422`. Is this a bug, or must the docs say "use `PATCH`"?
+`PUT` and `PATCH` do the same partial update. You can send the current `email` of the contact. The request does not get `422` for it.
 
 ## Unsubscribe a contact
 

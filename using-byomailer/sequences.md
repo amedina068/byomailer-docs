@@ -235,10 +235,8 @@ If SES returns a throttle error, the email stays pending. A later run sends it.
 
 If your AWS credentials do not have the `ses:SendEmail` permission, sequence emails fail with the reason `ses_permission_missing`.
 
-Every day at 09:00, the command `ses:send-sequence-blocked-digest` sends an email to each team member who has such failed emails. The subject is `Daily digest: sequence emails blocked by missing permissions`. The email gives the number of blocked emails and a link to the email credentials page. BYOMailer sends this email through the system mailer. See [System mail](../self-hosting/system-mail.md).
+Every day at 09:00, the command `ses:send-sequence-blocked-digest` sends an email to each team member who has such failed emails. The subject is `Daily digest: sequence emails blocked by missing permissions`. The email gives the number of sequence emails that wait for the permission, and a link to the email credentials page. This number includes the blocked emails of all earlier days. BYOMailer sends this email through the system mailer. See [System mail](../self-hosting/system-mail.md).
 
 Every hour, the command `ses:sync-configuration-sets` checks the permissions again. When `ses:SendEmail` is back, it sets the blocked emails back to `pending`. The next scheduler run sends them.
 
 To correct the problem, add `ses:SendEmail` to the IAM policy of the AWS user. See [Connect AWS SES](../getting-started/connect-aws-ses.md).
-
-TODO(owner): The digest counts all failed emails with the reason `ses_permission_missing`, with no date limit, but the email says "today". Must the count include only the emails of the last day?

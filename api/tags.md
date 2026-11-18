@@ -8,7 +8,7 @@ order: 7
 
 A tag is a label on a contact. See [Tags and attributes](../using-byomailer/tags-and-attributes.md) for the concepts. To add or remove a tag on a contact, send `tags` or `remove_tags` to the [contact endpoints](contacts.md).
 
-The tag endpoints work only on the tags of the token user. The list does not show the tags that another team member made. A change or a delete of such a tag gets `404`.
+The tag endpoints work on all the tags of your account, also the tags that another team member made.
 
 ## The tag object
 
@@ -23,7 +23,7 @@ The tag endpoints work only on the tags of the token user. The list does not sho
 
 `GET /api/v1/tags`
 
-Returns all the tags of the token user, newest first. This endpoint has no pagination.
+Returns all the tags of your account, newest first. This endpoint has no pagination.
 
 ```bash
 curl https://byomailer.example/api/v1/tags \
@@ -52,7 +52,7 @@ Response `200`:
 
 | Body field | Type | Required | Rules |
 |---|---|---|---|
-| `name` | string | Yes | 255 characters or fewer. Unique among the tags of the token user. |
+| `name` | string | Yes | 255 characters or fewer. Unique among the tags of your account. |
 
 ```bash
 curl -X POST https://byomailer.example/api/v1/tags \
@@ -74,7 +74,7 @@ Response `201`: a `data` object with the tag.
 
 | Body field | Type | Required | Rules |
 |---|---|---|---|
-| `name` | string | Yes | 255 characters or fewer. Unique among the tags of the token user. |
+| `name` | string | Yes | 255 characters or fewer. Unique among the tags of your account. |
 
 ```bash
 curl -X PATCH https://byomailer.example/api/v1/tags/3 \

@@ -202,4 +202,4 @@ For each variable and each contact, BYOMailer uses the first value that is not e
 
 BYOMailer saves the values for each contact when it sends the email. A later change to the contact does not change an email that BYOMailer already sent.
 
-TODO(owner): The Variables step lists `{{ postal_address }}` as a variable, because `DetectsTemplateVariables` does not reserve it. BYOMailer fills it from the account at send time. Must the step hide `postal_address`?
+The **Variables** step does not show `{{ postal_address }}`. BYOMailer fills it with the postal address of the account when it sends the email. Set the address in **Settings > Profile**.

@@ -35,15 +35,18 @@ A viewer has read-only access in the dashboard, the API and the MCP server. The 
 
 ### What team members share
 
-Many records belong to the account, for example segments, attributes and webhooks. Some pages show only the records that the signed-in team member created:
+Many records belong to the account. Each team member sees and changes them, also when another team member made them:
 
-- The **Contacts** page and the contact export.
-- The **Lists** page, the list pages and the list picker of the import.
-- The **Tags** page.
+- Contacts, lists, topics, tags and contact attributes, on the pages, in the import and export, and in the API.
+- Segments and webhooks.
 
-A team member can still open the page of a contact that another team member created.
+Some records stay with the team member who made them:
 
-TODO(owner): `ContactController::index`, `MailListController` and `TagController::index` filter on `user_id`, but most other pages filter on `client_id`. Must team members see all contacts, lists and tags of the account?
+- The AWS credentials. See [Connect AWS SES](../getting-started/connect-aws-ses.md).
+- The **Sequences** page shows only the sequences of the signed-in team member.
+- An automation runs only for the contacts that the same team member added.
+
+TODO(owner): Sequences, automations and the AWS credentials are still scoped to one team member (`SequenceController::index`, `AutomationRunner`, `User::sesCredential`). Must they belong to the account, as contacts and lists do?
 
 ## Invite a team member
 

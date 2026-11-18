@@ -47,9 +47,26 @@ If the key is empty, the command stops with `MAXMIND_LICENSE_KEY is not set.` Wh
 
 The `rollbar` log channel sends the log entries to Rollbar. The `stack` channel uses it only when `LOG_STACK` contains `rollbar`.
 
-`docker-compose.yml` sets `LOG_CHANNEL=stderr` for each app service. The `stack` channel, and so `LOG_STACK`, is then not in use.
+`docker-compose.yml` sets `LOG_CHANNEL=stderr` for each app service. This value replaces the value in `.env`. To send the errors of a Docker instance to Rollbar, use a Compose override file:
 
-TODO(owner): How does a Docker instance turn on Rollbar, when `docker-compose.yml` sets `LOG_CHANNEL=stderr`?
+1. Set `ROLLBAR_TOKEN` in `.env`.
+2. Create `docker-compose.override.yml` next to `docker-compose.yml`, with this content:
+
+   ```yaml
+   services:
+     web:
+       environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
+     horizon:
+       environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
+     scheduler:
+       environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
+     ses-events:
+       environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
+   ```
+
+3. Run `docker compose up -d`.
+
+The logs still go to the container output. The `rollbar` channel also sends them to Rollbar. If you use `docker-compose.image.yml`, give the override file with a second `-f` option.
 
 ## Custom link domains (Cloudflare for SaaS)
 
@@ -189,7 +206,7 @@ The feature is on when `SNAPSBREW_SIGNED_URL_KEY` and `SNAPSBREW_OG_TEMPLATE_ID`
 
 No code in `app/` sends a Slack message.
 
-TODO(owner): Which feature uses `SLACK_BOT_USER_OAUTH_TOKEN` and `SLACK_BOT_USER_DEFAULT_CHANNEL`, or can they go out of `.env.example`?
+No feature uses `SLACK_BOT_USER_OAUTH_TOKEN` or `SLACK_BOT_USER_DEFAULT_CHANNEL`. The Slack notification package is not installed. Leave the two variables empty.
 
 ## Outgoing webhook limits
 

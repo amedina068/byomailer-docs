@@ -88,7 +88,7 @@ Example of a stored value:
 
 BYOMailer compares values as text when it checks for a change. An array or an object becomes its JSON text. This comparison decides if an `attribute_changed` automation starts.
 
-TODO(owner): What does a `{{ placeholder }}` show when the attribute value is an array or an object? `Contact::getTemplateAttribute()` casts the value to a string.
+If the value is an array or an object, a `{{ placeholder }}` shows its JSON text. For example, `{{ interests }}` shows `["design","email"]`.
 
 ### Attributes in emails
 

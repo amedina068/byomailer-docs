@@ -98,7 +98,7 @@ The events SEND, DELIVERY, BOUNCE, COMPLAINT, REJECT and RENDERING_FAILURE are a
 
 Every hour, the command `ses:sync-configuration-sets` reads the event types of each configuration set from SES. It saves the tracking state that it finds. Thus a change in the SES console also shows in BYOMailer.
 
-TODO(owner): When BYOMailer makes an identity, it makes the configuration set with all event types, also OPEN and CLICK. It saves the choice of the wizard only in the database. The hourly sync then sets both flags back to on. Must the wizard choice turn off the events in SES?
+When BYOMailer makes an identity, it sets the event types of the configuration set from the **Track opens** and **Track clicks** choices of the wizard. The hourly sync then reads the same choices back from SES.
 
 To serve the tracking links from your own domain, see [Custom domains](custom-domains.md).
 

@@ -36,7 +36,7 @@ All the tasks are in `routes/console.php`. The times are in UTC, because `config
 
 `routes/console.php` also contains `summary:send-weekly` (`SendWeeklySummaryMail`), but the schedule entry is a comment. That task does not run.
 
-TODO(owner): Does the scheduler need `onOneServer()` for instances with more than one scheduler process?
+Run one scheduler process for each instance. The Docker stack runs one. The tasks do not use `onOneServer()`, so with two scheduler processes each process runs each task. The newsletter and sequence tasks claim their rows, so no email goes out two times. The other tasks run two times. For example, users then get two permission alert emails.
 
 ## Make sure that the scheduler runs
 

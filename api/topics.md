@@ -8,7 +8,7 @@ order: 6
 
 A topic is a subject inside a list. A contact can unsubscribe from one topic and stay on the list. See [Lists and topics](../using-byomailer/lists-and-topics.md) for the concepts.
 
-The topic endpoints accept only a list that the token user made. For a list of another team member, the API returns `404`.
+The topic endpoints accept each list of your account, also a list that another team member made.
 
 ## The topic object
 

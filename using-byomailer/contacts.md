@@ -52,9 +52,7 @@ The **Contacts** page shows 25 contacts on each page, newest first. You can use 
 | **Import contacts** | Opens the CSV import. |
 | **Add to sequence** | Adds the selected contacts to a live sequence. |
 
-The page does not hide sunset contacts. It hides only the unsubscribed contacts.
-
-TODO(owner): The page text says "Inactive or unsubscribed contacts are hidden by default", but `ContactController::index` filters only on `unsubscribed_at`. Must the page also hide sunset contacts?
+The page does not hide sunset contacts. It hides only the unsubscribed contacts. The page text says "Unsubscribed contacts are hidden by default."
 
 ## The contact page
 

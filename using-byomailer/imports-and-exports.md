@@ -80,11 +80,11 @@ If the first row has no `email` column, BYOMailer imports nothing.
 | File types | `csv`, `txt`, `xlsx`, `xls` |
 | Lists for each import | 1, required |
 | Rows for each queued batch | 50 |
-| File size | No rule in the validation |
+| File size | 20 MB at most |
 
-TODO(owner): The import request has no file size rule, and the repository sets no `upload_max_filesize`, `post_max_size` or proxy body size. What is the largest file that an instance accepts?
+A larger file gets the error `The import file must not be larger than 20 MB.` In the Docker image, NGINX and PHP accept request bodies of 100 MB. In an install without Docker, set `upload_max_filesize` and `post_max_size` in PHP to 20 MB or more. Make sure that your reverse proxy also accepts a body of 20 MB.
 
-TODO(owner): The import finds an existing contact by `user_id` and `email`, but the database key is `client_id` and `email`. What happens when a team member imports an email that another team member added?
+The import finds an existing contact by its email address in the whole account. When a team member imports an email that another team member added, BYOMailer updates that contact. The contact keeps the team member who added it first.
 
 ## Export contacts
 
@@ -111,7 +111,7 @@ The dates have the format `Y-m-d H:i:s`.
 
 By default the export does not include unsubscribed contacts. To include them, select **Status** > **Include unsubscribed** before you export.
 
-TODO(owner): The export and the contacts page read `$user->contacts()`, and the attribute columns read only the attributes with the `user_id` of the team member. Must a team member see the contacts and attributes that other team members added?
+The export contains the contacts of the whole account. It has one column for each attribute of the account, also the attributes that another team member added.
 
 ## Export the emails of a sequence step
 

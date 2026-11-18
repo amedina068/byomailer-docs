@@ -151,12 +151,12 @@ When the variables of an integration are empty, the integration is off and BYOMa
 | `SNAPSBREW_BASE_URL` | `https://app.snapsbrew.com` | `https://app.snapsbrew.com` | Open Graph images for the documentation pages. |
 | `SNAPSBREW_SIGNED_URL_KEY` | empty | - | The key that signs the image URLs. |
 | `SNAPSBREW_OG_TEMPLATE_ID` | empty | - | The image template. |
-| `SLACK_BOT_USER_OAUTH_TOKEN` | empty | - | Slack notifications. |
-| `SLACK_BOT_USER_DEFAULT_CHANNEL` | empty | - | The default Slack channel. |
+| `SLACK_BOT_USER_OAUTH_TOKEN` | empty | - | Not in use. |
+| `SLACK_BOT_USER_DEFAULT_CHANNEL` | empty | - | Not in use. |
 
 The Cloudflare feature needs `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, and `CLOUDFLARE_CNAME_TARGET`. [Optional integrations](../self-hosting/optional-integrations.md) explains each integration.
 
-TODO(owner): `config/services.php` reads the two `SLACK_BOT_USER_*` variables, but no code in `app/` reads `services.slack`. Do these variables have a use, or can they go?
+No feature of BYOMailer uses the two `SLACK_BOT_USER_*` variables. They come from the default Laravel configuration, and the Slack notification package is not installed. Leave them empty.
 
 ## Outgoing webhooks
 
