@@ -11,7 +11,6 @@ Each integration on this page is off by default. While its environment variables
 | Integration | Turned on by |
 |---|---|
 | [MaxMind GeoIP](#maxmind-geoip) | `MAXMIND_LICENSE_KEY` |
-| [Plausible Analytics](#plausible-analytics) | `PLAUSIBLE_SCRIPT_URL` |
 | [Rollbar](#rollbar) | `ROLLBAR_TOKEN` and `rollbar` in `LOG_STACK` |
 | [Custom link domains](#custom-link-domains-cloudflare-for-saas) | `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ZONE_ID` |
 | [Custom tracking domains](#custom-tracking-domains-tracking-proxy) | `TRACKING_PROXY_IP` and `TRACKING_PROXY_ASK_TOKEN` |
@@ -38,14 +37,6 @@ docker compose exec web php artisan geoip:download
 ```
 
 If the key is empty, the command stops with `MAXMIND_LICENSE_KEY is not set.` While the database file is missing, BYOMailer records no location. It also skips private IP addresses.
-
-## Plausible Analytics
-
-| Variable | Purpose |
-|---|---|
-| `PLAUSIBLE_SCRIPT_URL` | The URL of the Plausible script, for example `https://plausible.io/js/script.js`. |
-
-When the variable is set, the pages of the app load the script. The `data-domain` is the host of `APP_URL`. The unsubscribe confirmation page and the preference center of contacts do not load the script.
 
 ## Rollbar
 

@@ -138,7 +138,6 @@ When the variables of an integration are empty, the integration is off and BYOMa
 |---|---|---|---|
 | `MAXMIND_LICENSE_KEY` | empty | - | The city and the country of opens (MaxMind GeoLite2). The scheduler downloads the database only when the key is set. |
 | `MAXMIND_DATABASE_PATH` | commented out | `storage/app/geoip/GeoLite2-City.mmdb` | The path of the GeoLite2 database. |
-| `PLAUSIBLE_SCRIPT_URL` | empty | - | The Plausible Analytics script for the app pages. |
 | `CLOUDFLARE_API_TOKEN` | empty | - | Custom link domains through Cloudflare for SaaS. |
 | `CLOUDFLARE_ZONE_ID` | empty | - | The Cloudflare zone of the custom hostnames. |
 | `CLOUDFLARE_CNAME_TARGET` | empty | - | The host that the CNAME record of a customer points to. |
