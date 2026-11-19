@@ -38,6 +38,12 @@ const EXTERNAL_ENV = new Map([
   ['BYOMAILER_APP_PATH', 'read by the scripts of this repository'],
   ['BYOMAILER_APP_TOKEN', 'a secret of the CI of this repository'],
   ['YOUR_API_TOKEN', 'the placeholder token of the Postman files of the app'],
+  ['BYOMAILER_URL', 'read by the SDKs and their Laravel and Rails integrations'],
+  ['BYOMAILER_TOKEN', 'read by the SDKs and their Laravel and Rails integrations'],
+  ['BYOMAILER_WEBHOOK_SECRET', 'read by the SDKs and their Laravel and Rails integrations'],
+  ['BYOMAILER_TIMEOUT', 'read by the Laravel integration of the PHP SDK'],
+  ['BYOMAILER_RETRIES', 'read by the Laravel integration of the PHP SDK'],
+  ['BYOMAILER_WEBHOOK_TOLERANCE', 'read by the Laravel integration of the PHP SDK'],
 ]);
 
 // Framework commands that the fallback mode accepts when `vendor/` is missing.
