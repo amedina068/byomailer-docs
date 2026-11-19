@@ -19,7 +19,7 @@ To find the version that runs:
 
 Read `CHANGELOG.md` from your version to the new version before you upgrade. Look for changes to environment variables, to `docker-compose.yml`, and to the AWS permissions.
 
-The dashboard also shows dated release notes at `/documentation/release-notes`. They come from `resources/release-notes.json` and have no version numbers.
+The [release notes](release-notes.md) list the changes that users can see, by date. They have no version numbers.
 
 ## Back up first
 

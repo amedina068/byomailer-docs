@@ -17,6 +17,7 @@ The code of the app is in a separate repository. The docs describe that code, an
 - [Connect AWS SES](getting-started/connect-aws-ses.md)
 - [Send your first newsletter](getting-started/first-newsletter.md)
 - [Upgrade BYOMailer](getting-started/upgrading.md)
+- [Release notes](getting-started/release-notes.md)
 
 ### Self-hosting
 

@@ -1,6 +1,6 @@
 ---
 title: Release process
-description: Add release notes and changelog lines for a change that users can see, and how versions, tags and images work.
+description: Write release notes and changelog lines for a change that users can see, and how versions, tags and images work.
 order: 4
 ---
 
@@ -10,50 +10,34 @@ This page explains the release notes, the changelog, the version, the tag and th
 
 ## Release notes
 
-`resources/release-notes.json` holds the release notes. The instance shows them at `/documentation/release-notes`.
+[Release notes](../getting-started/release-notes.md) in this docs repository holds the release notes. The app repository has no release notes file.
 
-After a change that users can see, add a line to this file. Add it under the date of the change, in the same pull request.
+### In a pull request of the app
 
-### Format
+A pull request with a change that users can see has a `## Release note` section in its body. Write one or two short sentences in plain text. Tell the user what changed and what to do.
 
-The file is one JSON object:
+```markdown
+## Release note
 
-- Each key is a date in the form `YYYY-MM-DD`.
-- Each value is an array of strings. Each string is one release note.
-
-```json
-{
-    "2026-01-15": [
-        "New example feature. Open Settings, Example to use it.",
-        "The example page now shows the date of the last change."
-    ],
-    "2026-01-14": [
-        "The example list now loads faster."
-    ]
-}
+The example list now loads faster.
 ```
 
-`App\Support\ReleaseNotes` reads the file. It sorts the dates from new to old, and it shows each date as, for example, `January 15, 2026`.
+A pull request without a change for users has no `## Release note` section.
+
+### When a release goes out
+
+1. Collect the `## Release note` sections of the merged pull requests.
+2. Open `getting-started/release-notes.md` in the docs repository.
+3. Find the heading of the release date, for example `## November 19, 2026`. If it does not exist, add it above the other dates.
+4. Add one bullet for each note. Copy the text of the note as it is.
+5. Open a pull request in the docs repository.
 
 ### Rules
 
-- Write plain text. The page shows each string as it is, so Markdown or HTML shows as raw text.
-- Write one change in each string. Keep it short, and tell the user what to do.
-- If a date already has a key, add the line to its array. Do not add a second key with the same date.
-- Make sure that the file is valid JSON. If the JSON is not valid, the loader throws an exception, and the release notes page breaks.
-
-`tests/Feature/DocumentationTest.php` renders the release notes page from the file. Run it after you change the file:
-
-```bash
-php artisan test --compact --filter=test_release_notes_page_renders_data_from_release_notes_file
-```
-
-### Example
-
-1. Open `resources/release-notes.json`.
-2. Find the key of today. If it does not exist, add it at the top of the object.
-3. Add one string for the change.
-4. Run the test above.
+- Write plain text. Do not use Markdown links or HTML in a note.
+- Write one change in each bullet.
+- Keep the newest date first. Do not add a second heading for the same date.
+- Do not change old notes.
 
 ## Version scheme
 
@@ -63,7 +47,7 @@ BYOMailer uses semantic versioning. The first version is 0.1.0. The version numb
 
 `CHANGELOG.md` holds the changelog in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. A pull request that changes the behavior for users adds one line under `[Unreleased]`. Use one of these sections: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
 
-`CHANGELOG.md` lists the changes of each version of the code. `resources/release-notes.json` holds the dated notes that the dashboard shows. A change for users goes in both files.
+`CHANGELOG.md` lists the changes of each version of the code. The release notes page of the docs lists the changes that users can see, by date. A change for users goes in `CHANGELOG.md` and in the `## Release note` section of the pull request.
 
 ## Tags
 

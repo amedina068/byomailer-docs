@@ -53,7 +53,6 @@ Production uses MySQL and Redis. The tests and local development use SQLite.
 | `resources/js/pages` | The Inertia pages |
 | `resources/js/components`, `composables`, `layouts` | The shared Vue code |
 | `resources/js/actions`, `resources/js/routes`, `resources/js/wayfinder` | Route helpers that Wayfinder makes. Git ignores these folders. |
-| `resources/release-notes.json` | The release notes. Read [Release process](release-process.md). |
 | `database/` | The migrations, the factories and the seeders |
 | `tests/` | `Unit/`, `Feature/`, `Concerns/`, `Ssr/` and `load/`. Read [Testing](testing.md). |
 | `public/docs/` | `openapi.json` and `api-documentation.md` |
