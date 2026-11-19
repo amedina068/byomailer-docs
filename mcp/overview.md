@@ -54,7 +54,7 @@ For more about tokens, read [API authentication](../api/authentication.md).
 
 The server publishes 44 tools. Some tool names end with `-tool`, for example `create-newsletter-tool`. Other tool names have no suffix, for example `schedule-newsletter`.
 
-The server instructions and some tool descriptions name tools without the `-tool` suffix. Use the names that `tools/list` returns. This page uses those names.
+The server instructions, the tool descriptions and the error messages use the names that `tools/list` returns. This page uses the same names.
 
 ## Workflow for newsletters
 

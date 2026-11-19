@@ -69,7 +69,7 @@ Read [the MCP overview](overview.md) for the workflow and the error format.
 
 **List Newsletters Tool**
 
-> List the newsletters belonging to the authenticated account, returning each id, title, status, subject and sent date. Use the returned id with the newsletter-stats or newsletter-content tools.
+> List the newsletters belonging to the authenticated account, returning each id, title, status, subject and sent date. Use the returned id with the newsletter-stats-tool or newsletter-content-tool tools.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -81,7 +81,7 @@ Read [the MCP overview](overview.md) for the workflow and the error format.
 
 **Newsletter Stats Tool**
 
-> Get the delivery and engagement stats for a single newsletter: totals plus sent, delivered, opened, bounced, unsubscribed and complained counts with delivery/open/unsubscribe rates. Includes A/B variant metrics when A/B testing is enabled. Find the newsletter id with the list-newsletters tool.
+> Get the delivery and engagement stats for a single newsletter: totals plus sent, delivered, opened, bounced, unsubscribed and complained counts with delivery/open/unsubscribe rates. Includes A/B variant metrics when A/B testing is enabled. Find the newsletter id with the list-newsletters-tool tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -91,7 +91,7 @@ Read [the MCP overview](overview.md) for the workflow and the error format.
 
 **Newsletter Content Tool**
 
-> Get the full content of a single newsletter: title, subject, preview text, sender, html and text body, content variables (the saved default of each {{ variable }}), detected variables (the {{ variables }} that the content uses), and the B variant content when A/B testing is enabled. Find the newsletter id with the list-newsletters tool.
+> Get the full content of a single newsletter: title, subject, preview text, sender, html and text body, content variables (the saved default of each {{ variable }}), detected variables (the {{ variables }} that the content uses), and the B variant content when A/B testing is enabled. Find the newsletter id with the list-newsletters-tool tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -101,7 +101,7 @@ Read [the MCP overview](overview.md) for the workflow and the error format.
 
 **View Newsletter Filters Tool**
 
-> Describe the audience targeting filters available when creating a newsletter for the authenticated account. Returns the filter schema (categories, operators, modes) plus the account's concrete building blocks: tags, lists, topics, attribute keys, countries, timezones and newsletters that can be referenced by id/name in a filter. Use the result to assemble the "filters" array for the calculate-newsletter-contacts and create-newsletter tools.
+> Describe the audience targeting filters available when creating a newsletter for the authenticated account. Returns the filter schema (categories, operators, modes) plus the account's concrete building blocks: tags, lists, topics, attribute keys, countries, timezones and newsletters that can be referenced by id/name in a filter. Use the result to assemble the "filters" array for the calculate-newsletter-contacts-tool and create-newsletter-tool tools.
 
 This tool takes no arguments.
 
@@ -109,7 +109,7 @@ This tool takes no arguments.
 
 **Calculate Newsletter Contacts Tool**
 
-> Count how many contacts would receive a newsletter sent to the given audience filters, without creating or sending anything. Pass the same "filters" array you would use with create-newsletter (omit it to count every active contact). Use view-newsletter-filters to discover valid filter values. Returns the recipient count and the sanitized filters that were applied.
+> Count how many contacts would receive a newsletter sent to the given audience filters, without creating or sending anything. Pass the same "filters" array you would use with create-newsletter-tool (omit it to count every active contact). Use view-newsletter-filters-tool to discover valid filter values. Returns the recipient count and the sanitized filters that were applied.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -119,13 +119,13 @@ This tool takes no arguments.
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 
 ## create-newsletter-tool
 
 **Create Newsletter Tool**
 
-> Create a draft newsletter for the authenticated account. Drafts are never sent. Schedule a draft with schedule-newsletter after the user confirms. Optionally attach a sender (email_identity_id), template (email_template_id), audience filters and content_variables (the default value of each {{ variable }}). Use view-newsletter-filters to build the filters array and calculate-newsletter-contacts to preview the audience size first. Returns the new newsletter id and status.
+> Create a draft newsletter for the authenticated account. Drafts are never sent. Schedule a draft with schedule-newsletter after the user confirms. Optionally attach a sender (email_identity_id), template (email_template_id), audience filters and content_variables (the default value of each {{ variable }}). Use view-newsletter-filters-tool to build the filters array and calculate-newsletter-contacts-tool to preview the audience size first. Returns the new newsletter id and status.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -141,18 +141,18 @@ This tool takes no arguments.
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 | `content_variables` | object | No |  | Default values of the {{ variable }} placeholders, as an object of variable name to text (maximum 255 characters each). A default fills the placeholder when the contact has no value for it, for example {"checkout_url": "https://example.com/checkout"}. The object replaces all saved defaults. An empty object clears them. |
 
 ## update-newsletter-tool
 
 **Update Newsletter Tool**
 
-> Update a draft or scheduled newsletter for the authenticated account. A scheduled newsletter is live: it sends to real contacts at its scheduled time, so the tool refuses the change until you ask the user to confirm and call it again with confirm_live set to true. A newsletter that is sending or already sent is locked and this tool returns an error. The status never changes here: use schedule-newsletter to schedule or unschedule. Pass content_variables to replace the default value of each {{ variable }}. Only the fields you pass are changed; omitted fields keep their current values. Use view-newsletter-filters to build the filters array and calculate-newsletter-contacts to preview the audience size first. Returns the newsletter id and status.
+> Update a draft or scheduled newsletter for the authenticated account. A scheduled newsletter is live: it sends to real contacts at its scheduled time, so the tool refuses the change until you ask the user to confirm and call it again with confirm_live set to true. A newsletter that is sending or already sent is locked and this tool returns an error. The status never changes here: use schedule-newsletter to schedule or unschedule. Pass content_variables to replace the default value of each {{ variable }}. Only the fields you pass are changed; omitted fields keep their current values. Use view-newsletter-filters-tool to build the filters array and calculate-newsletter-contacts-tool to preview the audience size first. Returns the newsletter id and status.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `newsletter_id` | integer | Yes |  | Id of the draft or scheduled newsletter to update. Use list-newsletters to discover ids. |
+| `newsletter_id` | integer | Yes |  | Id of the draft or scheduled newsletter to update. Use list-newsletters-tool to discover ids. |
 | `title` | string | No |  | Internal title for the newsletter. |
 | `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
 | `preview_text` | string | No |  | Inbox preview / preheader text. |
@@ -165,7 +165,7 @@ This tool takes no arguments.
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 | `content_variables` | object | No |  | Default values of the {{ variable }} placeholders, as an object of variable name to text (maximum 255 characters each). A default fills the placeholder when the contact has no value for it, for example {"checkout_url": "https://example.com/checkout"}. The object replaces all saved defaults. An empty object clears them. |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
 
@@ -173,7 +173,7 @@ This tool takes no arguments.
 
 **Send Newsletter Test Mail Tool**
 
-> Send a one-off test copy of a newsletter to the authenticated user's own email address so they can preview it. The newsletter must already have a sender identity attached. Does not send to the newsletter audience. Find the newsletter id with list-newsletters or create-newsletter.
+> Send a one-off test copy of a newsletter to the authenticated user's own email address so they can preview it. The newsletter must already have a sender identity attached. Does not send to the newsletter audience. Find the newsletter id with list-newsletters-tool or create-newsletter-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -183,11 +183,11 @@ This tool takes no arguments.
 
 **Schedule Newsletter Tool**
 
-> Schedule a draft newsletter to send at a future time (action "schedule"), move a scheduled newsletter to a new time (action "schedule"), or cancel the schedule and return it to draft (action "unschedule"). This affects real contacts, so the first call only returns a preview: the change, the send time and the number of recipients. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. The dashboard runs the same checks before scheduling: subject and body, the SES account status, and the SES permissions. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the schedule. The preview and the result list them in warnings. Show the warnings to the user. Set the sender first with update-newsletter. This tool never sends a newsletter immediately.
+> Schedule a draft newsletter to send at a future time (action "schedule"), move a scheduled newsletter to a new time (action "schedule"), or cancel the schedule and return it to draft (action "unschedule"). This affects real contacts, so the first call only returns a preview: the change, the send time and the number of recipients. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. The dashboard runs the same checks before scheduling: subject and body, the SES account status, and the SES permissions. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the schedule. The preview and the result list them in warnings. Show the warnings to the user. Set the sender first with update-newsletter-tool. This tool never sends a newsletter immediately.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `newsletter_id` | integer | Yes |  | Id of the newsletter. Use list-newsletters to discover ids. |
+| `newsletter_id` | integer | Yes |  | Id of the newsletter. Use list-newsletters-tool to discover ids. |
 | `action` | string | Yes | `schedule`, `unschedule` | "schedule" sets or moves the send time. "unschedule" returns a scheduled newsletter to draft. |
 | `scheduled_at` | string | No |  | Required for "schedule". The send time in ISO 8601 with a UTC offset, for example 2026-11-02T09:00:00-05:00. It must be in the future. |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
@@ -196,7 +196,7 @@ This tool takes no arguments.
 
 **List Sequences Tool**
 
-> List the sequences belonging to the authenticated account, returning each id, name, status, step count and contact count. Use the returned id with the sequence-stats or sequence-content tools.
+> List the sequences belonging to the authenticated account, returning each id, name, status, step count and contact count. Use the returned id with the sequence-stats-tool or sequence-content-tool tools.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -208,37 +208,37 @@ This tool takes no arguments.
 
 **Create Sequence Tool**
 
-> Create a draft sequence (automated drip campaign) for the authenticated account. Sequences are always created as drafts. Activate a sequence with set-sequence-status after the user confirms. Pass filters to limit which contacts the sequence targets (use view-newsletter-filters to build them). Pass content_variables to set the default value of each {{ variable }} that the steps use, for example a fallback checkout_url. Add steps with create-sequence-step and edit the sequence later with update-sequence. Returns the new sequence id, status, saved filters and content variables.
+> Create a draft sequence (automated drip campaign) for the authenticated account. Sequences are always created as drafts. Activate a sequence with set-sequence-status after the user confirms. Pass filters to limit which contacts the sequence targets (use view-newsletter-filters-tool to build them). Pass content_variables to set the default value of each {{ variable }} that the steps use, for example a fallback checkout_url. Add steps with create-sequence-step-tool and edit the sequence later with update-sequence-tool. Returns the new sequence id, status, saved filters and content variables.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `name` | string | Yes |  | Name for the sequence. |
-| `filters` | array of object | No |  | Sequence filters. Only contacts who match them receive the sequence. Use view-newsletter-filters to build the array. Omit to target every active contact. |
+| `filters` | array of object | No |  | Sequence filters. Only contacts who match them receive the sequence. Use view-newsletter-filters-tool to build the array. Omit to target every active contact. |
 | `filters[].connector` | string | No | `and`, `or` | How this filter joins the previous one. Defaults to "and". |
 | `filters[].category` | string | No | `attributes`, `tags`, `lists`, `topics`, `date`, `engagement`, `location` | The filter category. |
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 | `content_variables` | object | No |  | Default values of the {{ variable }} placeholders, as an object of variable name to text (maximum 255 characters each). A default fills the placeholder when the contact has no value for it, for example {"checkout_url": "https://example.com/checkout"}. The object replaces all saved defaults. An empty object clears them. |
 
 ## update-sequence-tool
 
 **Update Sequence Tool**
 
-> Update a sequence of any status. A live sequence sends to real contacts now, so the tool refuses the change until you ask the user to confirm and call it again with confirm_live set to true. Draft and paused sequences need no confirmation. The status never changes here: use set-sequence-status. Only the fields you pass are changed; omitted fields keep their current values. Pass filters to replace the sequence filters (an empty array clears them). Filters and a saved segment are exclusive, so passing filters removes a saved segment from the sequence. Pass content_variables to replace the default values of the {{ variables }} (an empty object clears them). Find sequence ids with list-sequences and read the current filters and content variables with sequence-content. Returns the sequence id, status, saved filters and content variables.
+> Update a sequence of any status. A live sequence sends to real contacts now, so the tool refuses the change until you ask the user to confirm and call it again with confirm_live set to true. Draft and paused sequences need no confirmation. The status never changes here: use set-sequence-status. Only the fields you pass are changed; omitted fields keep their current values. Pass filters to replace the sequence filters (an empty array clears them). Filters and a saved segment are exclusive, so passing filters removes a saved segment from the sequence. Pass content_variables to replace the default values of the {{ variables }} (an empty object clears them). Find sequence ids with list-sequences-tool and read the current filters and content variables with sequence-content-tool. Returns the sequence id, status, saved filters and content variables.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `sequence_id` | integer | Yes |  | Id of the sequence to update. Use list-sequences to discover sequence ids. |
+| `sequence_id` | integer | Yes |  | Id of the sequence to update. Use list-sequences-tool to discover sequence ids. |
 | `name` | string | No |  | New name for the sequence. |
-| `filters` | array of object | No |  | Sequence filters. Only contacts who match them receive the sequence. Use view-newsletter-filters to build the array. The array replaces the current filters. Pass an empty array to clear them. |
+| `filters` | array of object | No |  | Sequence filters. Only contacts who match them receive the sequence. Use view-newsletter-filters-tool to build the array. The array replaces the current filters. Pass an empty array to clear them. |
 | `filters[].connector` | string | No | `and`, `or` | How this filter joins the previous one. Defaults to "and". |
 | `filters[].category` | string | No | `attributes`, `tags`, `lists`, `topics`, `date`, `engagement`, `location` | The filter category. |
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 | `content_variables` | object | No |  | Default values of the {{ variable }} placeholders, as an object of variable name to text (maximum 255 characters each). A default fills the placeholder when the contact has no value for it, for example {"checkout_url": "https://example.com/checkout"}. The object replaces all saved defaults. An empty object clears them. |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
 
@@ -246,7 +246,7 @@ This tool takes no arguments.
 
 **Create Sequence Step Tool**
 
-> Add a draft step to an existing sequence. Steps are always created as drafts. Activate a step with set-sequence-step-status after the user confirms. Set how long after the previous step it sends with delay_type (days or hours) and delay_days. Optionally pass step filters: a contact who does not match them skips this step only. Find the sequence id with list-sequences and a verified sender with view-newsletter-filters. Returns the new step id and status.
+> Add a draft step to an existing sequence. Steps are always created as drafts. Activate a step with set-sequence-step-status after the user confirms. Set how long after the previous step it sends with delay_type (days or hours) and delay_days. Optionally pass step filters: a contact who does not match them skips this step only. Find the sequence id with list-sequences-tool and a verified sender with view-newsletter-filters-tool. Returns the new step id and status.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -257,23 +257,23 @@ This tool takes no arguments.
 | `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
 | `preview_text` | string | No |  | Inbox preview / preheader text. |
 | `html_content` | string | No |  | HTML body of the step. Plain-text is derived automatically. |
-| `filters` | array of object | No |  | Step filters. A contact who does not match them skips only this step and moves on to the next step. The sequence filters still apply first. Use view-newsletter-filters to build the array. Omit to send this step to every contact in the sequence. |
+| `filters` | array of object | No |  | Step filters. A contact who does not match them skips only this step and moves on to the next step. The sequence filters still apply first. Use view-newsletter-filters-tool to build the array. Omit to send this step to every contact in the sequence. |
 | `filters[].connector` | string | No | `and`, `or` | How this filter joins the previous one. Defaults to "and". |
 | `filters[].category` | string | No | `attributes`, `tags`, `lists`, `topics`, `date`, `engagement`, `location` | The filter category. |
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 
 ## update-sequence-step-tool
 
 **Update Sequence Step Tool**
 
-> Update a step of a sequence, of any status. A live step sends to real contacts, so the tool refuses the change until you ask the user to confirm and call it again with confirm_live set to true. Draft and paused steps need no confirmation. The status never changes here: use set-sequence-step-status. Only the fields you pass are changed; omitted fields keep their current values. Pair delay_type and delay_days to reschedule the step. Pass filters to replace the step filters (an empty array clears them). Find step ids with sequence-content and a verified sender with view-newsletter-filters. Returns the step id and status.
+> Update a step of a sequence, of any status. A live step sends to real contacts, so the tool refuses the change until you ask the user to confirm and call it again with confirm_live set to true. Draft and paused steps need no confirmation. The status never changes here: use set-sequence-step-status. Only the fields you pass are changed; omitted fields keep their current values. Pair delay_type and delay_days to reschedule the step. Pass filters to replace the step filters (an empty array clears them). Find step ids with sequence-content-tool and a verified sender with view-newsletter-filters-tool. Returns the step id and status.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `sequence_step_id` | integer | Yes |  | Id of the step to update. Use sequence-content to discover step ids. |
+| `sequence_step_id` | integer | Yes |  | Id of the step to update. Use sequence-content-tool to discover step ids. |
 | `delay_type` | string | No |  | Unit for the delay before this step sends: "days" or "hours". Required together with delay_days. |
 | `delay_days` | integer | No |  | How many days (max 365) or hours (max 8760) after the previous step to send. Required together with delay_type. |
 | `email_identity_id` | integer | No |  | Verified sender identity id to send this step from. |
@@ -281,24 +281,24 @@ This tool takes no arguments.
 | `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
 | `preview_text` | string | No |  | Inbox preview / preheader text. |
 | `html_content` | string | No |  | HTML body of the step. Plain-text is derived automatically. |
-| `filters` | array of object | No |  | Step filters. A contact who does not match them skips only this step and moves on to the next step. The sequence filters still apply first. Use view-newsletter-filters to build the array. Pass an empty array to clear the filters. |
+| `filters` | array of object | No |  | Step filters. A contact who does not match them skips only this step and moves on to the next step. The sequence filters still apply first. Use view-newsletter-filters-tool to build the array. Pass an empty array to clear the filters. |
 | `filters[].connector` | string | No | `and`, `or` | How this filter joins the previous one. Defaults to "and". |
 | `filters[].category` | string | No | `attributes`, `tags`, `lists`, `topics`, `date`, `engagement`, `location` | The filter category. |
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
 
 ## set-sequence-status
 
 **Set Sequence Status Tool**
 
-> Activate (status "live") or pause (status "paused") a sequence. This affects real contacts, so the first call only returns a preview: the change, the enrolled contacts, the pending mails, the live steps and the live automations that add contacts to the sequence. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. A sequence sends only through its live steps, so activate the steps with set-sequence-step-status too. The dashboard runs the same checks: activation fails when the account cannot send email. A live step without a {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. Find sequence ids with list-sequences.
+> Activate (status "live") or pause (status "paused") a sequence. This affects real contacts, so the first call only returns a preview: the change, the enrolled contacts, the pending mails, the live steps and the live automations that add contacts to the sequence. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. A sequence sends only through its live steps, so activate the steps with set-sequence-step-status too. The dashboard runs the same checks: activation fails when the account cannot send email. A live step without a {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. Find sequence ids with list-sequences-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `sequence_id` | integer | Yes |  | Id of the sequence. Use list-sequences to discover sequence ids. |
+| `sequence_id` | integer | Yes |  | Id of the sequence. Use list-sequences-tool to discover sequence ids. |
 | `status` | string | Yes | `live`, `paused` | "live" activates the sequence. "paused" stops it. |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
 
@@ -306,11 +306,11 @@ This tool takes no arguments.
 
 **Set Sequence Step Status Tool**
 
-> Activate (status "live") or pause (status "paused") one step of a sequence. This affects real contacts, so the first call only returns a preview: the change, the contacts enrolled in the sequence and the pending mails of this step. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. The dashboard runs the same checks: activation fails when the account cannot send email or the step has no subject or body. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. A live step sends only while its sequence is live. Find step ids with sequence-content.
+> Activate (status "live") or pause (status "paused") one step of a sequence. This affects real contacts, so the first call only returns a preview: the change, the contacts enrolled in the sequence and the pending mails of this step. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. The dashboard runs the same checks: activation fails when the account cannot send email or the step has no subject or body. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. A live step sends only while its sequence is live. Find step ids with sequence-content-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `sequence_step_id` | integer | Yes |  | Id of the sequence step. Use sequence-content to discover step ids. |
+| `sequence_step_id` | integer | Yes |  | Id of the sequence step. Use sequence-content-tool to discover step ids. |
 | `status` | string | Yes | `live`, `paused` | "live" activates the step. "paused" stops it. |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
 
@@ -318,7 +318,7 @@ This tool takes no arguments.
 
 **Send Sequence Step Test Mail Tool**
 
-> Send a one-off test copy of a single sequence step to the authenticated user's own email address so they can preview it. The step must already have a sender identity attached. Does not send to the sequence audience and does not start or advance the sequence for anyone. Find the sequence and step ids with list-sequences and sequence-content.
+> Send a one-off test copy of a single sequence step to the authenticated user's own email address so they can preview it. The step must already have a sender identity attached. Does not send to the sequence audience and does not start or advance the sequence for anyone. Find the sequence and step ids with list-sequences-tool and sequence-content-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -329,7 +329,7 @@ This tool takes no arguments.
 
 **Sequence Stats Tool**
 
-> Get the sequence-level stats for a single sequence: contact, unsubscribe and click totals plus aggregate mail metrics (sent/delivered/opened/bounced rates) across all steps. For a per-step breakdown use the sequence-step-stats tool. Find the sequence id with the list-sequences tool.
+> Get the sequence-level stats for a single sequence: contact, unsubscribe and click totals plus aggregate mail metrics (sent/delivered/opened/bounced rates) across all steps. For a per-step breakdown use the sequence-step-stats-tool tool. Find the sequence id with the list-sequences-tool tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -339,7 +339,7 @@ This tool takes no arguments.
 
 **Sequence Content Tool**
 
-> Get the full content of a single sequence and every one of its steps: name, status, content variables (the saved default of each {{ variable }}), detected variables (the {{ variables }} that the steps use), and for each step the delay, subject, preview text, html and text body. Find the sequence id with the list-sequences tool.
+> Get the full content of a single sequence and every one of its steps: name, status, content variables (the saved default of each {{ variable }}), detected variables (the {{ variables }} that the steps use), and for each step the delay, subject, preview text, html and text body. Find the sequence id with the list-sequences-tool tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -349,7 +349,7 @@ This tool takes no arguments.
 
 **Sequence Step Content Tool**
 
-> Get the full content of a single sequence step: delay, status, step filters, subject, preview text, html and text body, sender identity and template. Find the sequence and step ids with the list-sequences and sequence-content tools.
+> Get the full content of a single sequence step: delay, status, step filters, subject, preview text, html and text body, sender identity and template. Find the sequence and step ids with the list-sequences-tool and sequence-content-tool tools.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -360,7 +360,7 @@ This tool takes no arguments.
 
 **Sequence Step Stats Tool**
 
-> Get the stats for a single sequence step: contacts reached, unsubscribe and click totals, plus mail metrics (sent/delivered/opened/bounced rates) for contacts whose furthest progress is this step. Find the sequence and step ids with the list-sequences and sequence-content tools.
+> Get the stats for a single sequence step: contacts reached, unsubscribe and click totals, plus mail metrics (sent/delivered/opened/bounced rates) for contacts whose furthest progress is this step. Find the sequence and step ids with the list-sequences-tool and sequence-content-tool tools.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -371,7 +371,7 @@ This tool takes no arguments.
 
 **List Sequence Step Contact Mails Tool**
 
-> List contact emails for one sequence step with filters, sorting and pagination. Defaults to contacts currently at this step, matching sequence-step-stats; set current_only false to include all historical mails. Find sequence and step ids with list-sequences and sequence-content.
+> List contact emails for one sequence step with filters, sorting and pagination. Defaults to contacts currently at this step, matching sequence-step-stats-tool; set current_only false to include all historical mails. Find sequence and step ids with list-sequences-tool and sequence-content-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -464,17 +464,17 @@ This tool takes no arguments.
 
 **List Contacts Tool**
 
-> List the contacts of the authenticated account, oldest id first. Filter with "filters" in the view-newsletter-filters format (tags, lists, topics, attributes, dates, engagement, location) and with "search" on the name or email. Unsubscribed contacts are excluded unless include_unsubscribed is true. Each contact includes its tag names, list ids and custom attributes. To read the next page, send next_after_id from the result as after_id. The cursor stays correct when you change the listed contacts between pages, so use this tool to collect the ids for bulk-update-contacts.
+> List the contacts of the authenticated account, oldest id first. Filter with "filters" in the view-newsletter-filters-tool format (tags, lists, topics, attributes, dates, engagement, location) and with "search" on the name or email. Unsubscribed contacts are excluded unless include_unsubscribed is true. Each contact includes its tag names, list ids and custom attributes. To read the next page, send next_after_id from the result as after_id. The cursor stays correct when you change the listed contacts between pages, so use this tool to collect the ids for bulk-update-contacts.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `filters` | array of object | No |  | Audience filters in the view-newsletter-filters format. Omit to list every contact. |
+| `filters` | array of object | No |  | Audience filters in the view-newsletter-filters-tool format. Omit to list every contact. |
 | `filters[].connector` | string | No | `and`, `or` | How this filter joins the previous one. Defaults to "and". |
 | `filters[].category` | string | No | `attributes`, `tags`, `lists`, `topics`, `date`, `engagement`, `location` | The filter category. |
 | `filters[].mode` | string | No | `all`, `any`, `none` | Match mode for attributes/tags/lists/topics (location uses any\|none). |
 | `filters[].operator` | string | No |  | Operator for date or engagement filters. |
 | `filters[].field` | string | No |  | Field for location filters: country or timezone. |
-| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters. |
+| `filters[].values` | array | No |  | Filter values. Shape depends on category — see view-newsletter-filters-tool. |
 | `search` | string | No |  | Optional case-insensitive search on the contact name or email. |
 | `include_unsubscribed` | boolean | No |  | Include unsubscribed contacts. Default false. |
 | `after_id` | integer | No |  | Return only contacts with an id above this value. Send next_after_id from the previous page. |
@@ -484,31 +484,31 @@ This tool takes no arguments.
 
 **Create Contact Tool**
 
-> Create a contact for the authenticated account, or reuse the contact that already has this email. Optional name, tag names, and one list. A new blacklisted email is rejected. An existing email keeps attributes you do not send. Tags are added and never removed — removing a tag is not available through this API. When list_id is set, the contact is added to that list and an unsubscribe that an admin made is cleared; a list that requires opt-in queues the opt-in email. Without list_id, the subscription never changes. Find list ids with view-newsletter-filters. Returns the contact id and whether a new row was created.
+> Create a contact for the authenticated account, or reuse the contact that already has this email. Optional name, tag names, and one list. A new blacklisted email is rejected. An existing email keeps attributes you do not send. Tags are added and never removed — removing a tag is not available through this API. When list_id is set, the contact is added to that list and an unsubscribe that an admin made is cleared; a list that requires opt-in queues the opt-in email. Without list_id, the subscription never changes. Find list ids with view-newsletter-filters-tool. Returns the contact id and whether a new row was created.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `email` | string | Yes |  | Email address. Reuses the account contact with this exact email when one exists. |
 | `name` | string | No |  | Optional display name. Omitted leaves the current name unchanged. |
 | `tags` | array of string | No |  | Optional tag names to add. Unknown names are created. Existing tags on the contact are kept. To remove tags, use bulk-update-contacts. |
-| `list_id` | integer | No |  | Optional mailing list id. Find ids with view-newsletter-filters. A list that requires opt-in queues the opt-in email. |
+| `list_id` | integer | No |  | Optional mailing list id. Find ids with view-newsletter-filters-tool. A list that requires opt-in queues the opt-in email. |
 
 ## add-contact-to-list
 
 **Add Contact To List Tool**
 
-> Add an existing contact to a mailing list without removing their other lists. A list that requires opt-in queues the opt-in email and does not mark the contact opted in. Calling it again for a list they already belong to does not send another subscription event. To change many contacts at once, use bulk-update-contacts. Find the contact with find-contact and the list id with view-newsletter-filters.
+> Add an existing contact to a mailing list without removing their other lists. A list that requires opt-in queues the opt-in email and does not mark the contact opted in. Calling it again for a list they already belong to does not send another subscription event. To change many contacts at once, use bulk-update-contacts. Find the contact with find-contact and the list id with view-newsletter-filters-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `contact_id` | integer | Yes |  | Id of the contact. Find it with find-contact. |
-| `list_id` | integer | Yes |  | Id of the mailing list. Find it with view-newsletter-filters. |
+| `list_id` | integer | Yes |  | Id of the mailing list. Find it with view-newsletter-filters-tool. |
 
 ## add-tags-to-contact
 
 **Add Tags To Contact Tool**
 
-> Add tags to an existing contact by name. Tags already on the contact stay. A name that does not exist yet is created for this account. create-tag remains the strict way to create a tag and still errors on a duplicate name. To remove tags, or to change many contacts at once, use bulk-update-contacts. Find the contact with find-contact.
+> Add tags to an existing contact by name. Tags already on the contact stay. A name that does not exist yet is created for this account. create-tag-tool remains the strict way to create a tag and still errors on a duplicate name. To remove tags, or to change many contacts at once, use bulk-update-contacts. Find the contact with find-contact.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -519,7 +519,7 @@ This tool takes no arguments.
 
 **Remove Contact From List Tool**
 
-> Remove a contact from one mailing list. Their other lists stay. The contact row is not deleted. Find the contact with find-contact and the list id with view-newsletter-filters.
+> Remove a contact from one mailing list. Their other lists stay. The contact row is not deleted. Find the contact with find-contact and the list id with view-newsletter-filters-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -530,7 +530,7 @@ This tool takes no arguments.
 
 **Bulk Update Contacts Tool**
 
-> Update up to 100 existing contacts in one call. Each item names one contact by contact_id or by exact email, and gives its own changes: name, add_tags, remove_tags, set_attributes, remove_attributes, add_to_lists and remove_from_lists. Only the fields you send change. Unknown tag names in add_tags are created. Unknown tag names in remove_tags are ignored. set_attributes merges into the custom attributes of the contact. Adding a contact to a list that requires opt-in queues the opt-in email. Tag, list and attribute changes run the live automations of the account. Items are independent: a failed item does not stop the other items, and the result reports each item as updated or failed. Find the contacts with list-contacts and the list ids with view-newsletter-filters.
+> Update up to 100 existing contacts in one call. Each item names one contact by contact_id or by exact email, and gives its own changes: name, add_tags, remove_tags, set_attributes, remove_attributes, add_to_lists and remove_from_lists. Only the fields you send change. Unknown tag names in add_tags are created. Unknown tag names in remove_tags are ignored. set_attributes merges into the custom attributes of the contact. Adding a contact to a list that requires opt-in queues the opt-in email. Tag, list and attribute changes run the live automations of the account. Items are independent: a failed item does not stop the other items, and the result reports each item as updated or failed. Find the contacts with list-contacts and the list ids with view-newsletter-filters-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -549,7 +549,7 @@ This tool takes no arguments.
 
 **List Email Identities Tool**
 
-> List the sender identities (verified sending domains) of the authenticated account, returning each id, email, name, domain, verification status, DKIM and MAIL FROM status and tracking flags. Use the returned id with email-identity-details, refresh-email-identity-status or update-email-identity-tracking. Only identities with identity_status "verified" can send mail.
+> List the sender identities (verified sending domains) of the authenticated account, returning each id, email, name, domain, verification status, DKIM and MAIL FROM status and tracking flags. Use the returned id with email-identity-details-tool, refresh-email-identity-status-tool or update-email-identity-tracking-tool. Only identities with identity_status "verified" can send mail.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -561,7 +561,7 @@ This tool takes no arguments.
 
 **Email Identity Details Tool**
 
-> Show a single sender identity in full: verification status, MAIL FROM subdomain, AWS region, custom link domain, tracking flags and the DNS records (DKIM CNAMEs, MAIL FROM MX/TXT and DMARC TXT) the domain owner must publish, each with a verified flag. Use it to guide someone through DNS setup. Find the id with list-email-identities.
+> Show a single sender identity in full: verification status, MAIL FROM subdomain, AWS region, custom link domain, tracking flags and the DNS records (DKIM CNAMEs, MAIL FROM MX/TXT and DMARC TXT) the domain owner must publish, each with a verified flag. Use it to guide someone through DNS setup. Find the id with list-email-identities-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -571,7 +571,7 @@ This tool takes no arguments.
 
 **Create Email Identity Tool**
 
-> Create a sender identity for the authenticated account. Registers the email's domain in the account's own AWS SES, sets up a MAIL FROM subdomain (default "mas.<domain>") and a per-identity configuration set, and returns the DNS records the domain owner must publish before the identity can verify. The account must already have AWS credentials configured in the dashboard. Set existing_aws_identity to true to import a domain that is already verified in SES instead of creating it. After the DNS records are published, call refresh-email-identity-status to check verification.
+> Create a sender identity for the authenticated account. Registers the email's domain in the account's own AWS SES, sets up a MAIL FROM subdomain (default "mas.<domain>") and a per-identity configuration set, and returns the DNS records the domain owner must publish before the identity can verify. The account must already have AWS credentials configured in the dashboard. Set existing_aws_identity to true to import a domain that is already verified in SES instead of creating it. After the DNS records are published, call refresh-email-identity-status-tool to check verification.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -586,7 +586,7 @@ This tool takes no arguments.
 
 **Refresh Email Identity Status Tool**
 
-> Ask AWS SES for the current verification state of a sender identity and sync it into the account: identity status, DKIM status and MAIL FROM status, plus the verified flag on each DNS record. Call it after the domain owner publishes the DNS records returned by create-email-identity or email-identity-details. Find the id with list-email-identities.
+> Ask AWS SES for the current verification state of a sender identity and sync it into the account: identity status, DKIM status and MAIL FROM status, plus the verified flag on each DNS record. Call it after the domain owner publishes the DNS records returned by create-email-identity-tool or email-identity-details-tool. Find the id with list-email-identities-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -596,7 +596,7 @@ This tool takes no arguments.
 
 **Update Email Identity Tracking Tool**
 
-> Turn open tracking and click tracking on or off for a sender identity. Updates the identity's SES configuration set so future mail from this identity reports (or stops reporting) opens and clicks. Both flags are required. Find the id with list-email-identities.
+> Turn open tracking and click tracking on or off for a sender identity. Updates the identity's SES configuration set so future mail from this identity reports (or stops reporting) opens and clicks. Both flags are required. Find the id with list-email-identities-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |

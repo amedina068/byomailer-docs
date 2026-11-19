@@ -60,7 +60,7 @@ Thus `composer install` accepts PHP 8.4.1 to 8.4.x only. The `Dockerfile` and th
 4. It runs `php artisan migrate --force`. If `database/database.sqlite` does not exist, the migration creates it.
 5. It runs `npm install` and `npm run build`.
 
-CAUTION: `npm run build` also makes the SSR bundle in `bootstrap/ssr`. While that folder exists, the PHP tests fail. Read [Testing](testing.md).
+`npm run build` also makes the SSR bundle in `bootstrap/ssr`. The PHP tests turn off SSR, so they pass while that folder exists. Read [Testing](testing.md).
 
 ### The owner account
 

@@ -31,17 +31,11 @@ For the local setup, read [Development setup](development-setup.md).
 
 The PHP tests use PHPUnit 12. They are in `tests/Unit` and `tests/Feature`.
 
-1. If the folder `bootstrap/ssr` exists, remove it:
+Run all tests. `--parallel` runs one process for each CPU core:
 
-   ```bash
-   rm -rf bootstrap/ssr
-   ```
-
-2. Run all tests. `--parallel` runs one process for each CPU core:
-
-   ```bash
-   php artisan test --compact --parallel
-   ```
+```bash
+php artisan test --compact --parallel
+```
 
 To run one file or one test, give the path or a filter:
 
@@ -52,17 +46,9 @@ php artisan test --compact --filter=test_it_refuses_to_run_when_a_user_already_e
 
 `composer test` clears the configuration cache, runs Pint in test mode, and runs `php artisan test --parallel`.
 
-### Why `bootstrap/ssr` breaks the PHP tests
+### Server-side rendering in the tests
 
-`npm run build` runs `vite build --ssr`, which writes `bootstrap/ssr/ssr.js`. `composer setup` runs `npm run build`, so a new checkout has this file after the setup.
-
-The PHP tests fail while this file exists. The cause is in the code:
-
-1. `config/inertia.php` turns on server-side rendering by default (`INERTIA_SSR_ENABLED` is `true`). `phpunit.xml` and `.env.testing` do not change it.
-2. When the bundle `bootstrap/ssr/ssr.js` exists, Inertia sends each page to `http://127.0.0.1:13714/render` with the Laravel HTTP client.
-3. `tests/TestCase.php` calls `Http::preventStrayRequests()`. That request has no fake, so the HTTP client throws `StrayRequestException`. Inertia does not catch this exception.
-
-As a result, each test that renders an Inertia page fails. Remove `bootstrap/ssr`, or set `INERTIA_SSR_ENABLED=false` in the shell before the test run. The CI does not have this problem, because the PHP job does not build the frontend.
+`npm run build` writes the SSR bundle to `bootstrap/ssr/ssr.js`. `phpunit.xml` sets `INERTIA_SSR_ENABLED=false`, so the PHP tests do not use the bundle. They pass while `bootstrap/ssr` exists.
 
 ### The test environment
 
@@ -76,6 +62,7 @@ As a result, each test that renders an Inertia page fails. Remove `bootstrap/ssr
 | `CACHE_STORE` | `array` |
 | `SESSION_DRIVER` | `array` |
 | `MAIL_MAILER` | `array` |
+| `INERTIA_SSR_ENABLED` | `false` |
 
 The tests use SQLite and production uses MySQL. Do not write SQL that works on one engine only.
 
@@ -179,8 +166,6 @@ The CI does not run ESLint and Prettier on the files that the branch does not ch
    ```
 
 The script starts `node bootstrap/ssr/ssr.js` on port 13714. It asks the bundle to render the `Welcome` page. If the body has fewer than 1000 characters or no HTML tags, the test fails.
-
-CAUTION: Remove `bootstrap/ssr` after the smoke test, before you run the PHP tests.
 
 ## Load tests
 
