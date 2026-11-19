@@ -185,7 +185,7 @@ The owner from `/setup` and invited team members do not go to the list. Only sig
 
 ## Open Graph images (Snapsbrew)
 
-BYOMailer can add an Open Graph image to the in-app documentation pages: the documentation index, the release notes, the guides and the API reference. An external Snapsbrew service renders the image from a template.
+BYOMailer can add an Open Graph image to the in-app documentation pages: the documentation index, the guides and the API reference. An external Snapsbrew service renders the image from a template.
 
 | Variable | Purpose |
 |---|---|
