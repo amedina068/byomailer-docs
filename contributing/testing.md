@@ -1,6 +1,6 @@
 ---
 title: Testing
-description: Run the PHP tests, the JavaScript tests, the code style checks, the SSR smoke test and the load tests of BYOMailer.
+description: Run the PHP tests, the JavaScript tests, the code style checks, the static analysis, the SSR smoke test and the load tests of BYOMailer.
 order: 3
 ---
 
@@ -14,13 +14,16 @@ For the local setup, read [Development setup](development-setup.md).
 
 | Check | Command | In the CI |
 |---|---|---|
-| PHP tests | `php artisan test --compact` | Yes |
+| PHP tests | `php artisan test --compact --parallel` | Yes |
 | PHP code style | `vendor/bin/pint --test` | Yes |
+| Static analysis (Larastan) | `composer analyse` | Yes |
 | JavaScript tests | `npm test` | Yes |
 | Production build | `npm run build` | Yes |
-| TypeScript types | `npx vue-tsc --noEmit` | No |
-| ESLint | `npx eslint <files>` | No |
-| Prettier | `npm run format:check` | No |
+| TypeScript types | `npm run types` | Yes |
+| ESLint and Prettier on the changed files | `npm run lint:changed` | Yes |
+| API documentation | `composer api-docs` | Yes |
+| ESLint on all files | `npx eslint <files>` | No |
+| Prettier on all files | `npm run format:check` | No |
 | SSR smoke test | `npm run test:ssr` | No |
 | Load tests | `k6 run tests/load/<file>.js` | No |
 
@@ -34,10 +37,10 @@ The PHP tests use PHPUnit 12. They are in `tests/Unit` and `tests/Feature`.
    rm -rf bootstrap/ssr
    ```
 
-2. Run all tests:
+2. Run all tests. `--parallel` runs one process for each CPU core:
 
    ```bash
-   php artisan test --compact
+   php artisan test --compact --parallel
    ```
 
 To run one file or one test, give the path or a filter:
@@ -47,7 +50,7 @@ php artisan test --compact tests/Feature/InstallCommandTest.php
 php artisan test --compact --filter=test_it_refuses_to_run_when_a_user_already_exists
 ```
 
-`composer test` clears the configuration cache, runs Pint in test mode, and runs `php artisan test`.
+`composer test` clears the configuration cache, runs Pint in test mode, and runs `php artisan test --parallel`.
 
 ### Why `bootstrap/ssr` breaks the PHP tests
 
@@ -135,11 +138,13 @@ The Vue code imports route helpers from `@/routes` and `@/actions`. Wayfinder ge
 |---|---|---|
 | Pint | `vendor/bin/pint --dirty` | Formats the PHP files that you changed. Run it before each commit. |
 | Pint check | `vendor/bin/pint --test` | Changes nothing. The CI runs it. |
-| `vue-tsc` | `npx vue-tsc --noEmit` | Checks the TypeScript types. |
+| Larastan | `composer analyse` | Runs PHPStan with Larastan at level 6. `phpstan-baseline.neon` holds the old errors, so only a new error fails. Do not add an entry to the baseline. Correct the code. |
+| `vue-tsc` | `npm run types` | Runs `vue-tsc --noEmit`. Checks the TypeScript types. Run `php artisan wayfinder:generate --with-form` first. |
+| ESLint and Prettier | `npm run lint:changed` | Checks only the files in `resources/js/` that your branch changes, compared with `origin/main`. Changes nothing. |
 | ESLint | `npx eslint <files>` | Checks the files that you give. `npm run lint` runs `eslint . --fix` and changes files. |
 | Prettier | `npm run format:check` | Checks the format of `resources/`. `npm run format` changes files. |
 
-`npm run build` does not check the types. A green build does not prove that the types and the lint are correct. Run `vue-tsc` and ESLint on the files that you change.
+`npm run build` does not check the types. A green build does not prove that the types and the lint are correct. Run `npm run types` and `npm run lint:changed`.
 
 ## CI
 
@@ -148,10 +153,14 @@ The Vue code imports route helpers from `@/routes` and `@/actions`. Wayfinder ge
 | Job | Steps |
 |---|---|
 | Pint | `composer install`, then `vendor/bin/pint --test` |
-| PHP tests | `composer install`, copy `.env.example` to `.env`, `php artisan key:generate`, then `php artisan test --compact` |
-| JavaScript tests | `composer install` and `npm ci`, copy `.env.example` to `.env`, `php artisan key:generate`, `php artisan wayfinder:generate --with-form`, `npm test`, then `npm run build` |
+| Larastan | `composer install`, then `composer analyse` |
+| PHP tests | `composer install`, copy `.env.example` to `.env`, `php artisan key:generate`, then `php artisan test --compact --parallel` |
+| JavaScript tests | `composer install` and `npm ci`, copy `.env.example` to `.env`, `php artisan key:generate`, `php artisan wayfinder:generate --with-form`, `npm run types`, `npm run lint:changed`, `npm test`, then `npm run build` |
+| API documentation | `composer install`, copy `.env.example` to `.env`, `php artisan key:generate`, `php artisan migrate --force`, `composer api-docs`, then `git diff --exit-code docs/api public/docs/openapi.json` |
 
-The CI does not run `vue-tsc`, ESLint, Prettier, the SSR smoke test or the load tests.
+The JavaScript job checks out the full Git history, because `npm run lint:changed` compares the branch with `main`. The API documentation job fails when the committed OpenAPI document or the Postman files are not current. Read [OpenAPI and Postman](../api/openapi.md).
+
+The CI does not run ESLint and Prettier on the files that the branch does not change. It also does not run the SSR smoke test or the load tests.
 
 ## SSR smoke test
 
