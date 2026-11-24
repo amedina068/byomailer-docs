@@ -59,7 +59,24 @@ The sending account creates the SNS subscription to the queue. When the queue is
 
 After that, the SES events of the sending account arrive in the queue. If the worker does not run when AWS sends the message, the message waits in the queue until the worker reads it.
 
-TODO(owner): The worker leaves a message with an invalid body in the queue and logs "leaving for DLQ". What dead-letter queue and redrive policy (`maxReceiveCount`) do you recommend?
+## Dead-letter queue
+
+The worker leaves a message in the queue in two cases. It logs "leaving for DLQ" when the body is not JSON. It logs "failed to dispatch job" when it cannot queue the job, for example when Redis is down. Each receive hides the message for 60 seconds (`--visibility-timeout`). Then the worker reads it again.
+
+Give the queue a dead-letter queue, so that such a message does not come back for ever:
+
+1. Create a standard SQS queue for the dead letters, for example `byomailer-ses-events-dlq`.
+2. Set the message retention of the dead-letter queue to 14 days.
+3. On the main queue, set the message retention to 14 days. The events then wait in the queue during a long stop of the worker.
+4. On the main queue, set a redrive policy with the dead-letter queue and `maxReceiveCount` 5.
+5. Create a CloudWatch alarm on `ApproximateNumberOfMessagesVisible` of the dead-letter queue, with a threshold of more than 0.
+
+With `maxReceiveCount` 5, SQS moves a message to the dead-letter queue after about 5 minutes. The worker needs no permission on the dead-letter queue.
+
+A message in the dead-letter queue is not always invalid. If Redis was down, the queue holds valid events. When the alarm starts, read the `ses-events` log:
+
+- If the log shows "failed to dispatch job", correct the fault. Then start a DLQ redrive in the SQS console. SQS moves the messages back to the main queue.
+- If the log shows "leaving for DLQ", the body is not JSON. Read the message in the console, then delete it.
 
 ## Permissions of the worker
 

@@ -57,7 +57,7 @@ TODO(owner): Who creates the release tag, from which branch, and how does the `[
 
 ## Docker image
 
-A push of a Git tag `v*` builds the image for `linux/amd64` and `linux/arm64`, and publishes it to `ghcr.io/<owner>/byomailer`. `<owner>` is the GitHub owner of the repository, in lowercase. A maintainer can also start the workflow manually.
+A push of a Git tag `v*` builds the image for `linux/amd64` and `linux/arm64`, and publishes it to `ghcr.io/amedina068/byomailer`. The workflow takes the owner from the GitHub owner of the repository, in lowercase. A maintainer can also start the workflow manually.
 
 | Git tag | Image tags |
 |---|---|

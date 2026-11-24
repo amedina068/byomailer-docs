@@ -105,7 +105,22 @@ The command needs `CLOUDFLARE_ORIGIN_SNI`. Without it, the command stops with `N
 
 `bootstrap/app.php` trusts the forwarded headers of the Cloudflare edge ranges. With Cloudflare in front of the instance, BYOMailer sees the real IP of each visitor.
 
-TODO(owner): Which permissions does `CLOUDFLARE_API_TOKEN` need, and how do you set up the fallback origin of Cloudflare for SaaS for an instance?
+### Set up Cloudflare for SaaS
+
+`CloudflareClient` calls the custom hostnames API of the zone. It creates, reads, changes and deletes custom hostnames. Do these steps one time for the instance:
+
+1. Add the zone to Cloudflare, for example `example.com`, and turn on Cloudflare for SaaS for it.
+2. In the zone, add a DNS record for the fallback origin, for example `link.example.com`. Point it to the public IP of the instance. Set it to **Proxied**.
+3. In **SSL/TLS > Custom Hostnames**, set the fallback origin to `link.example.com`. Wait until its status is **Active**.
+4. Set the SSL/TLS encryption mode of the zone to **Full (strict)**.
+5. Install a certificate for `link.example.com` on the web server of the instance. A Cloudflare Origin CA certificate is sufficient.
+6. Create an API token in **My Profile > API Tokens**. Give it the permission **Zone > SSL and Certificates > Edit**, for this zone only.
+7. In `.env`, set `CLOUDFLARE_API_TOKEN` to the token, `CLOUDFLARE_ZONE_ID` to the zone ID, and `CLOUDFLARE_CNAME_TARGET` to `link.example.com`.
+8. Restart the app services.
+
+The token needs no other permission. BYOMailer does not change DNS records.
+
+Cloudflare sends the requests of each link domain to the fallback origin with the `Host` of the link domain. The web server must answer them. [`deploy/nginx/byomailer.conf`](https://github.com/amedina068/byomailer/blob/main/deploy/nginx/byomailer.conf) is the default server for this reason. In Docker, the reverse proxy in front of port 8080 must also send these hosts to the `web` service.
 
 For the steps of a user, see [Custom domains](../using-byomailer/custom-domains.md).
 
@@ -167,7 +182,21 @@ https:// {
 
 Caddy adds the `domain` query parameter to the ask URL.
 
-TODO(owner): The repository has no configuration for the tracking proxy. To which upstream does the proxy forward the tracking requests, and with which `Host` header?
+### The upstream
+
+The proxy sends each request, except `/healthz`, to the SES tracking host of the AWS region of SES: `r.<region>.awstrack.me`, for example `r.us-east-1.awstrack.me`. It keeps the `Host` header of the tracking domain, as a CNAME record to SES does. It connects to the upstream with HTTPS.
+
+The app repository has the full Caddyfile: [`deploy/tracking-proxy/Caddyfile`](https://github.com/amedina068/byomailer/blob/main/deploy/tracking-proxy/Caddyfile).
+
+1. Install Caddy 2 on the server of `TRACKING_PROXY_IP`.
+2. Open the ports 80 and 443.
+3. Copy the Caddyfile to `/etc/caddy/Caddyfile`.
+4. Replace `byomailer.example` with the host of `APP_URL`.
+5. Replace `us-east-1` with the AWS region of SES.
+6. Set the environment variable `TRACKING_PROXY_ASK_TOKEN` for Caddy to the value in the `.env` file of BYOMailer.
+7. Start Caddy.
+
+One proxy serves one SES region. The accounts that use custom tracking domains must send in that region.
 
 ## BYOMailer API (sign-up list)
 

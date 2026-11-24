@@ -36,7 +36,34 @@ If a contact with the same email already exists, BYOMailer shows the error `A co
 
 You can also add contacts with a CSV import, the API or the MCP server. See [Imports and exports](imports-and-exports.md), [API: Contacts](../api/contacts.md) and [MCP tools reference](../mcp/tools-reference.md).
 
-TODO(owner): The dashboard and the API have no route that deletes a contact. Is there a supported way to delete a contact, for example for a GDPR erasure request?
+### Erase a contact
+
+The dashboard, the API and the MCP server cannot delete a contact. For an erasure request, for example under the GDPR, the owner of the instance erases the contact on the server.
+
+1. Open Tinker. In Docker, run `docker compose exec web php artisan tinker`. In a manual install, run `php artisan tinker`.
+2. Find the contact. Replace the address:
+
+   ```php
+   $contacts = App\Models\Contact::withoutGlobalScopes()->where('email', 'person@example.com')->get(['id', 'client_id', 'email']);
+   ```
+
+3. Make sure that the result has only the contacts of the request. One address can be a contact in more than one account.
+4. Erase the SES log rows of the address, then the contacts:
+
+   ```php
+   foreach ($contacts as $contact) {
+       App\Models\EmailLog::withoutGlobalScopes()->where('client_id', $contact->client_id)->where('recipient', $contact->email)->delete();
+       App\Models\Contact::withoutGlobalScopes()->whereKey($contact->id)->delete();
+   }
+   ```
+
+The database removes the rows that belong to the contact: the lists, the tags, the topics, the sequences, the automation enrollments, the sent emails and the clicks.
+
+BYOMailer keeps these items:
+
+- The suppression row of the address, if the address bounced or complained. With this row, BYOMailer does not send to the address again, also after a new import.
+- The webhook deliveries that name the address. `model:prune` removes them after 30 days (`WEBHOOKS_DELIVERY_RETENTION_DAYS`).
+- The database backups. They lose the address when they expire.
 
 ## The contacts page
 
