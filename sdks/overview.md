@@ -13,6 +13,7 @@ The status of the SDKs:
 - Version 0.2.0 is not released. No version tag exists.
 - Each SDK repository on GitHub is private now. To install an SDK, you must have read access to its repository.
 - No SDK is on a package registry yet. There is no package on npm, Packagist, PyPI or RubyGems.
+- Each SDK uses the [MIT license](#license).
 
 | Language | Repository | Package name |
 |---|---|---|
@@ -23,7 +24,7 @@ The status of the SDKs:
 
 ## What the SDKs share
 
-The four SDKs have the same design. The method names follow the style of each language.
+The four SDKs have the same design and the same behavior. The method names follow the style of each language, with the same argument order.
 
 - **One instance.** The client takes the URL of your instance, for example `https://mail.example.com`, and adds `/api/v1`. No SDK has a default URL, because each user runs their own instance.
 - **One token.** The client sends a personal [API token](../api/authentication.md) as `Authorization: Bearer <token>`. A read-only token gets a 403 error on each call that changes data.
@@ -34,11 +35,12 @@ The four SDKs have the same design. The method names follow the style of each la
 - **CSV export.** The export of the mails of a sequence step returns the CSV text, not JSON.
 - **Cursor pagination.** The SDK reads one page, or walks all pages. `per_page` is 1 to 100. The default is 25.
 - **Typed errors.** Each SDK has one error class for each HTTP status group, and one for a connection failure.
-- **Retries.** The SDK retries a 429, a 5xx and a connection error, with exponential backoff and jitter. The default is 2 retries.
-- **Webhook verification.** A server-side helper verifies the signature and the timestamp of a [webhook](../api/webhooks.md) delivery.
+- **Timeout.** One attempt has a time limit of 30 seconds.
+- **Retries.** The SDK retries a 429 for each call. It retries a 5xx, a connection error or a timeout only for an [idempotent call](#retries). The default is 2 retries, with exponential backoff and jitter.
+- **Webhook verification.** A server-side helper verifies the signature and the timestamp of a [webhook](../api/webhooks.md) delivery. It returns the same fields and the same failure reasons in the four SDKs.
 - **No telemetry.** The SDKs send no data to other hosts. The JavaScript, Python and Ruby SDKs have no runtime dependencies.
 
-The SDKs differ in some details. Each section below tells where they differ.
+The SDKs differ in some details, for example the names of the error classes and the pagination helpers. Each section below tells where they differ.
 
 ## Install from git
 
@@ -46,18 +48,11 @@ Each command below installs the newest commit of the `main` branch. Your git cli
 
 ### JavaScript and TypeScript
 
-The README of the SDK shows `npm install byomailer`. This command does not work yet, because the package is not on npm.
+```bash
+npm install github:amedina068/byomailer-js
+```
 
-An install from the git repository, for example `npm install github:amedina068/byomailer-js`, installs no code. The repository does not contain the built files in `dist/`, and the package has no `prepare` script. Thus, build the package, and install the package file:
-
-1. Clone the repository: `git clone https://github.com/amedina068/byomailer-js.git`
-2. Go to the folder: `cd byomailer-js`
-3. Install the build tools: `npm ci`
-4. Build the package: `npm run build`
-5. Make the package file: `npm pack`. The result is `byomailer-0.2.0.tgz`.
-6. In your project, install this file: `npm install ../byomailer-js/byomailer-0.2.0.tgz`
-
-Use Node.js 22 or later for the build. The built package also runs on Node.js 20.
+The package has a `prepare` script. During the install, npm builds the files in `dist/`. For Bun, use `bun add github:amedina068/byomailer-js`.
 
 ### PHP
 
@@ -77,7 +72,7 @@ Then install the package from the `main` branch:
 composer require byomailer/byomailer-php:dev-main
 ```
 
-The README of the SDK shows `composer require byomailer/byomailer-php` with no version. This command fails, because the repository has no version tag. Composer then says: `Could not find a version of package byomailer/byomailer-php matching your minimum-stability (stable)`.
+Give `:dev-main`, because the repository has no version tag.
 
 Composer needs a GitHub token with read access to the repository.
 
@@ -149,7 +144,7 @@ use Byomailer\Byomailer;
 
 $byomailer = new Byomailer('https://mail.example.com', getenv('BYOMAILER_TOKEN'));
 
-$contact = $byomailer->contacts()->addToList(3, 'ana@example.com', name: 'Ana');
+$contact = $byomailer->contacts()->add(3, 'ana@example.com', name: 'Ana');
 
 $contact->wasRecentlyCreated; // true for a new contact
 ```
@@ -174,7 +169,7 @@ require "byomailer"
 
 client = Byomailer::Client.new(url: "https://mail.example.com", token: ENV["BYOMAILER_TOKEN"])
 
-contact = client.contacts.add("ana@example.com", list: 3, name: "Ana")
+contact = client.contacts.add(3, "ana@example.com", name: "Ana")
 contact.created?   # => true for a new contact
 ```
 
@@ -334,24 +329,29 @@ The JavaScript errors also have a `code`, for example `validation_error` or `rat
 
 ## Retries
 
-The SDK sends a failed request again, up to the number of retries. The default is 2 retries.
+The four SDKs use the same retry rule and the same values. The SDK sends a failed request again, up to the number of retries. The default is 2 retries.
 
 - **Backoff.** The wait starts at 0.5 seconds and doubles on each retry: 0.5, 1, 2, 4, and 8 seconds at most. Jitter makes each wait a random value between half and all of this value.
 - **`Retry-After`.** If the response has a `Retry-After` header, the SDK waits for that time.
-- **Long waits.** If `Retry-After` is more than 60 seconds, the SDK does not retry. It raises the rate limit error at once.
-- **429.** The SDK retries a 429 for each request. The rate limiter refuses the request before the instance does the work.
-- **Connection not made.** The SDK retries a DNS error or a refused connection for each request. The instance did not get the request.
-- **5xx and timeouts.** The SDK retries these only for an idempotent call. The instance can have done the work, so a second call can do it two times.
+- **Long waits.** If `Retry-After` is more than 60 seconds, the SDK does not retry. It raises the error at once.
+- **429.** The SDK retries a 429 for each call. The rate limiter refuses the request before the instance does the work.
+- **5xx, connection errors and timeouts.** The SDK retries these only for an idempotent call. The instance can have done the work, so a second call can do it two times.
 - **Other 4xx.** The SDK does not retry.
 
-The SDKs do not agree on the list of idempotent calls:
+A call is idempotent when a second call gives the same result and has no second effect. Each GET and each DELETE is idempotent. These writes are also idempotent:
 
-| SDK | Calls that the SDK retries after a 5xx or a timeout |
-|---|---|
-| JavaScript | Each GET and DELETE. Also `newsletters.countRecipients()`, `contacts.unsubscribe()`, `contacts.subscribe()`, each `rename()`, `topics.update()`, `blocks.update()`, `webhookEndpoints.update()`, `replaceVariables()` and `replaceStepFilters()`. |
-| PHP | Each GET and DELETE. Also `countRecipients()`, `unsubscribe()`, `subscribe()`, each `rename()`, the `update()` of contacts, topics, blocks and webhook endpoints, `replaceVariables()` and `replaceStepFilters()`. |
-| Python | Each GET and DELETE only. The SDK sends each write as a POST or a PATCH, and does not retry these after a 5xx or a timeout. |
-| Ruby | Each GET, PATCH and DELETE, so each update and each rename. Also `contacts.unsubscribe`, `contacts.subscribe` and `newsletters.count_recipients`. |
+| Call | JavaScript | PHP | Python | Ruby |
+|---|---|---|---|---|
+| Update a contact | `contacts.update()` | `contacts()->update()` | `contacts.update()` | `contacts.update` |
+| Unsubscribe a contact | `contacts.unsubscribe()` | `contacts()->unsubscribe()` | `contacts.unsubscribe()` | `contacts.unsubscribe` |
+| Subscribe a contact again | `contacts.subscribe()` | `contacts()->subscribe()` | `contacts.subscribe()` | `contacts.subscribe` |
+| Count the recipients of filters | `newsletters.countRecipients()` | `newsletters()->countRecipients()` | `newsletters.count_recipients()` | `newsletters.count_recipients` |
+| Rename a list, a tag or a project | `rename()` | `rename()` | `rename()` | `rename` |
+| Update a topic, a block or a webhook endpoint | `update()` | `update()` | `update()` | `update` |
+| Replace the content variables of a newsletter or a sequence | `replaceVariables()` | `replaceVariables()` | `replace_variables()` | `replace_variables` |
+| Replace the filters of a sequence step | `sequences.replaceStepFilters()` | `sequences()->replaceStepFilters()` | `sequences.replace_step_filters()` | `sequences.replace_step_filters` |
+
+The other writes are not idempotent. For example, a second call that adds a contact to a list changes the result from new to existing. A newsletter update with the status `live` can start the send, and a second call then gets a 422.
 
 To change the retries in PHP, give a `RetryPolicy` with `retries`, `baseDelayMs`, `maxDelayMs` and `maxRetryAfter`. `RetryPolicy::none()` stops retries.
 
@@ -367,50 +367,50 @@ Three endpoints have a [rate limit](../api/overview.md#rate-limits):
 
 ## Webhook verification
 
-BYOMailer signs each [webhook delivery](../api/webhooks.md#delivery-behavior). The helper of each SDK verifies the delivery and returns the payload.
+BYOMailer signs each [webhook delivery](../api/webhooks.md#delivery-behavior). The helper of each SDK verifies the delivery and returns a verified event.
 
 WARNING: Verify webhooks only on your server. Do not put the endpoint secret in browser code or in a mobile app. With the secret, any person can send you fake events.
 
 The helper does these steps:
 
-1. It reads the `X-Byomailer-Timestamp` header and the `X-Byomailer-Signature` header. The header names are not case-sensitive.
-2. It calculates the HMAC-SHA256 of the timestamp, a dot (`.`) and the raw body. The key is the full secret, with its `whsec_` prefix.
-3. It compares this digest with the signature in constant time.
-4. It refuses a timestamp that is more than 300 seconds before or after the current time. You can change this tolerance.
-5. It decodes the JSON body and returns it.
+1. It reads the `X-Byomailer-Signature` header. If the header is missing, the reason is `signature`. The header names are not case-sensitive.
+2. It reads the `X-Byomailer-Timestamp` header. If the header is missing or is not a Unix time, the reason is `timestamp`.
+3. It calculates the HMAC-SHA256 of the timestamp, a dot (`.`) and the raw body. The key is the full secret, with its `whsec_` prefix.
+4. It changes the signature header to lowercase. Then it compares the header with `sha256=` and the digest, in constant time. If they are not equal, the reason is `signature`.
+5. It refuses a timestamp that is more than 300 seconds before or after the current time. The reason is `timestamp`. You can change this tolerance.
+6. It decodes the JSON body. If the body is not a JSON object, the reason is `payload`.
 
 Give the raw request body, byte for byte. Do not decode the JSON and encode it again. The instance escapes Unicode as `\uXXXX` and does not escape `/`, so a new encoding gives other bytes.
 
 | | JavaScript | PHP | Python | Ruby |
 |---|---|---|---|---|
 | Helper | `verifyWebhook({ body, headers, secret })` | `(new Webhook($secret))->verify($body, $headers)` | `verify_webhook(body, headers, secret)` | `Byomailer::Webhook.verify(body, headers)` |
-| Result | The payload object | A `WebhookEvent` object | The payload `dict` | The payload as a `Byomailer::Record` |
+| Result | A `VerifiedWebhook` object | A `WebhookEvent` object | A `WebhookEvent` object | A `Byomailer::Webhook::Event` |
 | Tolerance | `tolerance` option | `tolerance` constructor argument | `tolerance` argument | `tolerance:` keyword |
 | Current time for tests | `now` (a `Date`) | `$now` (Unix seconds) | `now` (Unix seconds) | `now:` (a `Time`) |
-| Failure reason | `"signature"`, `"timestamp"` | `Signature`, `Timestamp`, `Payload` | `"signature"`, `"timestamp"` | `:signature`, `:timestamp` |
+| Failure reason | `"signature"`, `"timestamp"`, `"payload"` | `VerificationFailure::Signature`, `Timestamp`, `Payload` | `"signature"`, `"timestamp"`, `"payload"` | `:signature`, `:timestamp`, `:payload` |
 | Sign a body in your tests | (none) | (none) | `byomailer.webhooks.sign()` | `Byomailer::Webhook.sign` |
 
 Each payload has `event` and `occurred_at`. The other fields depend on the event. See [The payload](../using-byomailer/webhooks.md#the-payload).
 
 The events are `contact.subscribed`, `contact.unsubscribed`, `contact.resubscribed`, `newsletter.sent`, `sequence_step.sent`, `sequence.completed` and `webhook.test`. The helper accepts an event type that it does not know, because a new version of BYOMailer can add events. For an A/B newsletter, `newsletter.sent` arrives one time, when the winner is picked.
 
-The PHP `WebhookEvent` has these fields:
+The verified event has these fields in each SDK:
 
-| Field | Value |
-|---|---|
-| `type` | The event type, for example `contact.subscribed`. |
-| `payload` | The decoded JSON body. |
-| `deliveryId` | The UUID of the delivery, from the `X-Byomailer-Delivery` header. |
-| `timestamp` | The Unix time when the instance signed the delivery. |
-| `occurredAt` | The `occurred_at` date. |
+| Field | JavaScript | PHP | Python | Ruby |
+|---|---|---|---|---|
+| The event type: `event` of the payload, or the `X-Byomailer-Event` header | `type` | `$type` | `type` | `type` |
+| The decoded JSON body | `payload` | `$payload` | `payload` | `payload` |
+| The Unix time when the instance signed the delivery | `timestamp` | `$timestamp` | `timestamp` | `timestamp` |
+| The UUID of the delivery, from the `X-Byomailer-Delivery` header | `deliveryId` | `$deliveryId` | `delivery_id` | `delivery_id` |
 
-The PHP failure reason `Payload` tells that the signature is valid, but the body is not a JSON object.
+The PHP `WebhookEvent` also has `occurredAt`, the `occurred_at` date, and the helpers `is()` and `contact()`. The Ruby payload is a `Byomailer::Record`.
 
 ### The delivery ID
 
 The `X-Byomailer-Delivery` header has a UUID for each delivery. BYOMailer sends a delivery again after a failure. Use the delivery ID to find a delivery that you received before.
 
-Only the PHP SDK puts the delivery ID in its result, as `deliveryId`. With the other SDKs, read the header from the request. In the JavaScript SDK, `WEBHOOK_HEADERS.delivery` has the header name.
+If the header is missing or empty, the verification passes and the delivery ID is null (`null`, `None` or `nil`). An older instance does not send the header.
 
 ### Express
 
@@ -424,14 +424,13 @@ const app = express();
 
 app.post("/webhooks/byomailer", express.raw({ type: "application/json" }), async (req, res) => {
 	try {
-		const event = await verifyWebhook({
+		const { type, payload, deliveryId } = await verifyWebhook({
 			body: req.body, // a Buffer
 			headers: req.headers,
 			secret: process.env.BYOMAILER_WEBHOOK_SECRET!,
 		});
-		const deliveryId = req.headers["x-byomailer-delivery"];
 
-		if (event.event === "contact.unsubscribed") {
+		if (type === "contact.unsubscribed") {
 			// Update your own database.
 		}
 
@@ -499,9 +498,8 @@ def byomailer_webhook(request: HttpRequest) -> HttpResponse:
     except WebhookVerificationError:
         return HttpResponseBadRequest()
 
-    delivery_id = request.headers.get("X-Byomailer-Delivery")
-    if event["event"] == "contact.unsubscribed":
-        print(event["contact"]["email"])
+    if event.type == "contact.unsubscribed":
+        print(event.payload["contact"]["email"], event.delivery_id)
     return HttpResponse(status=204)
 ```
 
@@ -513,10 +511,9 @@ def byomailer_webhook(request: HttpRequest) -> HttpResponse:
 class ByomailerWebhooksController < ActionController::API
   def create
     event = Byomailer::Webhook.verify(request.raw_post, request.headers)
-    delivery_id = request.headers["X-Byomailer-Delivery"]
 
-    case event.event
-    when "contact.unsubscribed" then Subscriber.goodbye(event.contact.email)
+    case event.type
+    when "contact.unsubscribed" then Subscriber.goodbye(event.payload.contact.email, event.delivery_id)
     end
 
     head :ok
@@ -596,19 +593,19 @@ rescue Byomailer::ValidationError => error
 end
 ```
 
-The JavaScript, PHP and Ruby SDKs retry `subscribe` after a 5xx or a timeout, because a second call does not change the contact. The Python SDK does not retry a POST after a 5xx or a timeout.
+Each SDK retries `subscribe` after a 5xx, a connection error or a timeout, because a second call does not change the contact.
 
 On a list with opt-in, the call that adds a contact sends the opt-in email only when the contact is new on the list. The contact gets newsletters and sequence emails from this list only after the confirmation.
 
-The names of the contact calls differ:
+The contact calls have the same names and the same argument order. The list ID comes first:
 
 | Action | JavaScript | PHP | Python | Ruby |
 |---|---|---|---|---|
-| Add to a list | `contacts.add(listId, { email })` | `contacts()->addToList($listId, $email)` | `contacts.add(list_id, email)` | `contacts.add(email, list:)` |
+| Add to a list | `contacts.add(listId, { email })` | `contacts()->add($listId, $email)` | `contacts.add(list_id, email)` | `contacts.add(list_id, email)` |
 | New contact? | `created` in the result | `$contact->wasRecentlyCreated` | `contact.created` | `contact.created?` |
-| Remove from a list | `contacts.removeFromList(listId, contactId)` | `contacts()->removeFromList($listId, $contactId)` | `contacts.remove_from_list(contact_id, list_id)` | `contacts.remove(contact_id, list:)` |
+| Remove from a list | `contacts.removeFromList(listId, contactId)` | `contacts()->removeFromList($listId, $contactId)` | `contacts.remove_from_list(list_id, contact_id)` | `contacts.remove_from_list(list_id, contact_id)` |
 
-CAUTION: Give the contact ID first to the Python `remove_from_list`. The JavaScript and PHP SDKs take the list ID first.
+The other calls also have the same names in the four SDKs. For example, `pickWinner` (`pick_winner`) picks the A/B winner, and `sendTest` (`send_test`) sends a test email of a newsletter or a test webhook delivery. PHP and Ruby use `find` to get one record, and JavaScript and Python use `get`.
 
 ## The two sequence types
 
@@ -639,6 +636,10 @@ $page = $byomailer->sequences()->list(status: SequenceStatus::Live);
 A list item does not have `steps`, `filters` or `content_variables`. To read these fields, get the full sequence.
 
 The export of the mails of a step does not send the `current_only` filter. The instance ignores this filter, and the export always has the full history of the step. If you give `current_only` to the Ruby gem, the gem gives a deprecation warning.
+
+## License
+
+Each SDK uses the MIT license. The `LICENSE` file of each repository has the full text. The BYOMailer app has its own license.
 
 ## More information
 
