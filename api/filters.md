@@ -166,9 +166,10 @@ The API returns `422` when a filter has one of these errors:
 - A mode category has no valid `mode`.
 - A `location` filter has no valid `field`, or a `mode` that is not `any` or `none`.
 - A `date` or `engagement` filter has an operator that is not valid for the category.
+- A value in `values` has the wrong form. For example, a tag name is empty, a list ID is not a positive integer, or an attribute condition has no `key`.
 - A tag, list, topic, attribute or newsletter in `values` does not exist in your account.
 
-The error key has the index of the filter, for example `filters.2.values`. Example messages: `The tag "vip" does not exist.` and `The list with ID 9 does not exist.`
+The error key has the index of the filter, for example `filters.2.values`. Example messages: `The tag "vip" does not exist.`, `The list with ID 9 does not exist.` and `Choose an attribute for this filter.`
 
 After validation, BYOMailer cleans each filter before it saves it. It removes a filter that has nothing left to match. For example, it removes a `date` filter with a date that is not in `YYYY-MM-DD` format. It also removes an attribute comparison that has no `value`. The response shows the filters that BYOMailer saved. Read them to make sure that BYOMailer kept all your filters.
 

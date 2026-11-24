@@ -320,7 +320,7 @@ See [Deliverability](../using-byomailer/deliverability.md) and [Connect AWS SES]
 
 `DELETE /api/v1/newsletters/{newsletterId}`
 
-Deletes a newsletter with the status `draft`, with its messages and mails. For other statuses, the response is `422` with the error key `status`.
+Deletes a newsletter with the status `draft`, with its messages and mails. For other statuses, the response is `422` with the error key `status`. A scheduled newsletter also gets `422`. To delete it, unschedule it first: send `PATCH /api/v1/newsletters/{newsletterId}` with `{"status": "draft"}`.
 
 ```bash
 curl -X DELETE https://byomailer.example/api/v1/newsletters/42 \
@@ -377,7 +377,7 @@ Response `200`:
 }
 ```
 
-If the newsletter has no sender identity, the response is `422` with the error key `email_identity_id` and the message `Please select a sender before sending a test email.` If the send fails, the error key is `send`.
+If the newsletter has no sender identity, the response is `422` with the error key `email_identity_id` and the message `Please select a sender before sending a test email.` If SES does not accept the email, the response is `422` with the error key `send` and the message `Failed to send test email. Please check your SES credentials.`
 
 ## Choose the A/B winner
 

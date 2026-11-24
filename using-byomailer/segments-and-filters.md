@@ -177,12 +177,18 @@ The validation shows these errors:
 | `Location filters support "any" or "none" only.` | A location row has another mode. |
 | `Choose a valid location field.` | A location row has a field that is not `country` or `timezone`. |
 | `The selected operator is not valid for a date filter.` | A date row has an operator that is not in the table. The engagement category has the same error with `engagement`. |
+| `Choose an attribute for this filter.` | An attribute condition has no attribute name. |
+| `Choose at least one tag.` | A value in a tags row is empty or is not text. |
+| `Choose at least one list.` | A value in a lists row is not a positive list ID. |
+| `Choose at least one topic.` | A value in a topics row is not a positive topic ID. |
 | `The selected operator is not valid for an attribute filter.` | An attribute condition has an unknown operator. |
 | `The attribute "<name>" does not exist.` | An attribute condition has an unknown attribute name. |
 | `The tag "<name>" does not exist.` | A tags row has an unknown tag name. |
 | `The list with ID <id> does not exist.` | A lists row has an unknown list ID. |
 | `The topic with ID <id> does not exist.` | A topics row has an unknown topic ID. |
 | `The selected newsletter does not exist.` | An engagement row has an unknown newsletter. |
+
+On the segment form, each error shows under its filter. If BYOMailer does not save the filters, the filter editor stays open.
 
 The API uses the same filters, in JSON. See [API: Filters](../api/filters.md).
 

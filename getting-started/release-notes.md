@@ -10,6 +10,22 @@ This page lists the changes to BYOMailer that users can see. The newest date is 
 
 The release notes have no version numbers. For developers, `CHANGELOG.md` in the [app repository](https://github.com/amedina068/byomailer/blob/main/CHANGELOG.md) lists the changes to the code for each version.
 
+## November 24, 2026
+
+- Small labels, dates and counts use a darker grey and are easier to read.
+- On a contact, Unsubscribe and the removal of an attribute now ask for a confirmation. The contact pages work better with the keyboard and on phones, and the contacts list marks unsubscribed contacts.
+- If a filter does not save, the error now shows under that filter and the filter editor stays open. A double click in the topic dialog creates one topic.
+- The login page has a link to the sign-up page when registration is open. The AWS credentials step shows each error under its field, and tells you to reload the page if your session expired.
+- The email logs page works on a phone and with a screen reader. Screen readers now announce success and error messages.
+- The REST API now allows 300 requests a minute for each user. A request over the limit gets a 429 response with a Retry-After header. Self-hosted installs can change the limit with API_RATE_LIMIT.
+- The double opt-in switch on the Edit list page works again. View contacts on a list now shows only the contacts of that list.
+- The MCP server instructions and tool descriptions now give the exact tool names, so AI assistants call the correct tools.
+- The API answers each error with JSON, also when a request has no Accept: application/json header. A missing record gives a message with the record type and the ID.
+- A complaint or a bounce now suppresses the contact also when another team member added the address to the suppression list first.
+- A newsletter starts one send only. If you send, schedule or unschedule a newsletter at the moment that the scheduler starts it, only the first change applies.
+- A Viewer can no longer change the time zone, the sunset policy or the postal address of the account on the profile page.
+- You can now edit, unschedule or delete a scheduled newsletter from its page. Unschedule returns the newsletter to draft, and it does not send.
+
 ## November 19, 2026
 
 - An opt-in email that does not send now shows the failed status and the reason. Before, it showed sent.

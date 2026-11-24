@@ -132,7 +132,9 @@ For a field in an array, the key has the index, for example `filters.0.values`.
 
 ## Rate limits
 
-Most endpoints have no rate limit. These endpoints have one:
+Each user can send 300 requests each minute to the `/api/v1` endpoints. The limit counts the requests of all the tokens of the user together. On a self-hosted instance, the `API_RATE_LIMIT` environment variable changes this limit. See [Configuration](../getting-started/configuration.md#accounts-and-access).
+
+These endpoints also have a lower limit:
 
 | Endpoint | Limit | Counted for each |
 |---|---|---|

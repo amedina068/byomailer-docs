@@ -151,6 +151,10 @@ The form accepts these values:
 | Secret Access Key | 40 to 128 characters. |
 | AWS Region | A region code, for example `us-east-1`. The default is `us-east-1`. |
 
+If a value is not valid, the error shows under its field. If your session expired, the step shows `Your session expired. Reload the page and try again.` Reload the page and enter the keys again.
+
+If the account already has AWS credentials, the step shows **AWS credentials already saved**. New keys replace the current credentials.
+
 When you click **Verify & Save**, BYOMailer does these steps:
 
 1. It calls `sts:GetCallerIdentity` to make sure that the keys work, and reads the AWS account ID.
@@ -160,7 +164,7 @@ When you click **Verify & Save**, BYOMailer does these steps:
 5. It creates an SES tenant with the name `byomailer`.
 6. It saves the credentials, encrypted with `APP_KEY`, and reads the sending quota.
 
-If step 4 or step 5 fails, BYOMailer removes the new SNS topic again. When all steps pass, the screen shows **Credentials Verified!**. Click **Set up Email Identity** to continue.
+If step 4 or step 5 fails, BYOMailer removes the new SNS topic again. When all steps pass, the screen shows **Credentials Verified!**. Click **Set up an email identity** to continue.
 
 If a step fails, the screen shows **Verification Failed** and one of these errors:
 

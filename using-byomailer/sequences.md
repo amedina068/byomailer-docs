@@ -46,7 +46,7 @@ The sequence page has these parts:
 
 A new step has the status `draft`. It sends nothing until you make it live.
 
-The test email goes to your own email address. Its subject starts with `[Test] `. It uses the default values of the variables of the sequence.
+The test email goes to your own email address. Its subject starts with `[Test] `. It uses the default values of the variables of the sequence. Each user can send 5 test emails each minute. The test emails of newsletters and sequence steps count together.
 
 ## The delay between steps
 

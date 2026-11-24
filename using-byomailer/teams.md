@@ -33,6 +33,8 @@ The code also has the value `invited`. The **Team** page does not offer it.
 
 A viewer has read-only access in the dashboard, the API and the MCP server. The `EnforceAccessLevel` middleware refuses each request of a viewer that changes data, with `403`. A viewer can still change the own profile and password, and delete the own account and the own API tokens.
 
+The **Profile** page also has three settings of the account: the time zone, the sunset policy and the postal address. These settings apply to the full team. A viewer can save the own profile, but cannot change these three settings. A change shows the error `Only an Admin or an Editor can change this account setting.`
+
 ### What team members share
 
 Many records belong to the account. Each team member sees and changes them, also when another team member made them:

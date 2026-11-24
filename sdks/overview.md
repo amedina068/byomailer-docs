@@ -358,7 +358,7 @@ To change the retries in PHP, give a `RetryPolicy` with `retries`, `baseDelayMs`
 
 The SDKs retry a DELETE after a lost response. If the first DELETE worked, the retry gets a 404, and the SDK raises the not found error.
 
-Three endpoints have a [rate limit](../api/overview.md#rate-limits):
+The API allows 300 requests each minute for each user. Three endpoints have a lower [rate limit](../api/overview.md#rate-limits):
 
 | Call | Limit |
 |---|---|

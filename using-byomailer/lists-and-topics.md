@@ -19,7 +19,7 @@ A topic is a content category inside one list, for example "Product updates" or 
 
 You can also create a list from the contact page and from the import page.
 
-The list page shows the number of contacts, the topics of the list, and the imports into the list. Click **View Contacts** to open the contacts page.
+The list page shows the number of contacts, the topics of the list, and the imports into the list. Click **View contacts** to open the contacts page. The page shows only the contacts of the list.
 
 The dashboard cannot delete a list. The API can delete a list. See [API: Lists](../api/lists.md).
 
@@ -44,10 +44,10 @@ With double opt-in, BYOMailer sends a confirmation email to each contact that th
 
 ### Turn on double opt-in
 
-Before you start, make sure that you have a verified sender identity. See [Sender identities](sender-identities.md).
+Before you start, make sure that you have a verified sender identity. See [Sender identities](sender-identities.md). If the account has no sender identity, the form shows the link **Add an email identity**.
 
 1. Open the list and click **Edit**.
-2. Turn on **Double opt-in**.
+2. Turn on **Double opt-in**. The fields of the opt-in email show.
 3. In **Send from**, select the sender identity.
 4. Enter the **Subject**. The default is `Confirm your subscription`.
 5. Write the **Content**. To start from the default text, click **Use template**.

@@ -103,7 +103,7 @@ BYOMailer marks each rate with a level:
 | Bounce rate | 5% | 10% |
 | Complaint rate | 0.1% | 0.5% |
 
-The code takes these levels as the points where SES starts a review and where SES can pause the account. If a rate of the last 24 hours reaches the review level, the page shows a warning.
+The code takes these levels as the points where SES starts a review and where SES can pause the account. If a rate of the last 24 hours reaches the review level, the page shows a warning. When a rate reaches a level, the rates table shows the text **Review level** or **Pause level** next to the rate.
 
 BYOMailer measures these rates from its own data. SES can count different numbers. Gmail shows its own spam rate only in Google Postmaster Tools.
 

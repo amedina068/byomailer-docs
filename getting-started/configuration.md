@@ -40,6 +40,7 @@ WARNING: Back up `APP_KEY`. If you lose the key, each account must enter its AWS
 | Variable | `.env.example` | Code default | Purpose |
 |---|---|---|---|
 | `REGISTRATION_ENABLED` | `false` | `false` | The registration mode until the owner sets one in **Admin > Settings**. With `false`, `/register` answers 404. The mode in the database overrides this value. |
+| `API_RATE_LIMIT` | `300` | `300` | The number of REST API requests that one user can send in one minute. A request over the limit gets `429` with a `Retry-After` header. The minimum is `1`. See [API overview](../api/overview.md#rate-limits). |
 | `ADMIN_EMAILS` | empty | empty | A comma-separated list of the users that can open Horizon at `/horizon`. The owner can always open Horizon. |
 
 [Accounts and registration](../self-hosting/accounts-and-registration.md) explains the registration modes.

@@ -102,6 +102,16 @@ The time in **Schedule for later** is in the time zone of your account. You set 
 
 If you click **Save draft** on a scheduled newsletter, BYOMailer removes the schedule. The status goes back to `draft`.
 
+## Edit, unschedule or delete a newsletter
+
+The page of a newsletter with the status `draft` or `scheduled` shows **Edit** and **Delete**. A scheduled newsletter also shows **Unschedule**.
+
+- To change the newsletter, click **Edit**. The wizard opens.
+- To stop a scheduled send, click **Unschedule**. The status goes back to `draft`, and the newsletter does not send.
+- To delete the newsletter, click **Delete**. Then click **Delete newsletter** in the dialog. You cannot undo the delete.
+
+After the send starts, the page does not show these buttons.
+
 ## Send a test email
 
 Click **Send test email** in the **Schedule** step. BYOMailer sends one copy to your own email address.
@@ -111,6 +121,7 @@ Click **Send test email** in the **Schedule** step. BYOMailer sends one copy to 
 - BYOMailer fills the variables from the contact that has your email address. If that contact does not exist, BYOMailer makes it with your name.
 - The test email always uses variant A.
 - BYOMailer sends the test email through your own SES account.
+- Each user can send 5 test emails each minute. The test emails of newsletters and sequence steps count together, from the dashboard and from the API.
 
 ## Checks before a send
 
@@ -150,6 +161,8 @@ BYOMailer adds the one-click `List-Unsubscribe` header to each newsletter email.
 5. When all chunks are done, BYOMailer sets the status to `sent`. If the A/B test is on, the status is `ab_testing`.
 
 A scheduled newsletter starts in the first scheduler run after its time. The command `contact-mails:send-due-newsletters` runs every minute.
+
+A newsletter starts one send only. If you send, schedule or unschedule a newsletter at the same moment that the scheduler starts it, only the first change applies.
 
 If a check fails in the job, the status becomes `failed`. If the cause is a missing SES permission, BYOMailer also sends an email to the author of the newsletter.
 

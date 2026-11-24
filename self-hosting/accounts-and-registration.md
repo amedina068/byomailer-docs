@@ -80,7 +80,7 @@ The instance has two registration modes:
 | Mode | Value | Effect |
 |---|---|---|
 | Invite only | `invite_only` | `/register` answers 404. The login page shows no sign-up link. A team admin invites each new user to an account. |
-| Open | `open` | Anyone can sign up at `/register`. Each new user gets a new account. |
+| Open | `open` | Anyone can sign up at `/register`. The login page shows a **Sign up** link. Each new user gets a new account. |
 
 In both modes, team invitations work.
 

@@ -8,7 +8,7 @@ order: 15
 
 A webhook endpoint is an HTTPS URL that receives a signed `POST` request when an event happens in your account. See [Webhooks](../using-byomailer/webhooks.md) for the payload of each event and for how to verify a signature.
 
-Only a token of a user with the `admin` role can use these endpoints. Other tokens get `403`.
+Only a token of a user with the `admin` role can use these endpoints. Other tokens get `403` with the message `Only an admin of the account can manage webhook endpoints.`
 
 ## Events
 

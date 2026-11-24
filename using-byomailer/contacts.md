@@ -74,7 +74,7 @@ The **Contacts** page shows 25 contacts on each page, newest first. You can use 
 | Search | Finds contacts by name or email. |
 | **Lists** | Shows only the contacts on the lists that you select. |
 | **Tags** | Shows only the contacts with the tags that you select. |
-| **Status** > **Include unsubscribed** | Also shows the unsubscribed contacts. By default the page hides them. |
+| **Status** > **Include unsubscribed** | Also shows the unsubscribed contacts, with an **Unsubscribed** badge. By default the page hides them. |
 | **Export** | Downloads the contacts that match the current filters as CSV. |
 | **Import contacts** | Opens the CSV import. |
 | **Add to sequence** | Adds the selected contacts to a live sequence. |
@@ -160,9 +160,9 @@ When an unsubscribed contact is subscribed again, BYOMailer sends the `contact.r
 
 ### Unsubscribe or subscribe a contact
 
-To unsubscribe a contact, click **Unsubscribe** on the contact page.
+To unsubscribe a contact, click **Unsubscribe** on the contact page. Then click **Unsubscribe** again in the dialog.
 
-To subscribe a contact again, click **Subscribe** on the contact page. The button shows only when a team member, a bounce or a complaint unsubscribed the contact. If the contact unsubscribed with a link, only the contact can subscribe again. See [Unsubscribe and preferences](unsubscribe-and-preferences.md).
+To subscribe a contact again, click **Subscribe** on the contact page. The button shows only when a team member, a bounce or a complaint unsubscribed the contact. If the contact unsubscribed with a link, only the contact can subscribe again. The page then shows `This contact unsubscribed. Only the contact can subscribe again.` See [Unsubscribe and preferences](unsubscribe-and-preferences.md).
 
 The API and the MCP server also change this state. If the API or the MCP server saves a contact that a team member or a bounce unsubscribed, BYOMailer subscribes the contact again. It does not do this when the address is on the suppression list.
 

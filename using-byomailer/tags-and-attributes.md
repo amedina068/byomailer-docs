@@ -56,7 +56,7 @@ An attribute stores one value on a contact, under a name. BYOMailer stores all a
 
 In the dashboard, the name and the value are text with a maximum of 255 characters each.
 
-To change a value, click the edit button on the attribute. To remove the attribute from the contact, click the remove button.
+To change a value, click the edit button on the attribute. To remove the attribute from the contact, click the remove button. Then click **Remove attribute** in the dialog.
 
 ### Where attribute names come from
 

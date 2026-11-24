@@ -45,9 +45,15 @@ BYOMailer uses semantic versioning. The first version is 0.1.0. The version numb
 
 ## Changelog
 
-`CHANGELOG.md` holds the changelog in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. A pull request that changes the behavior for users adds one line under `[Unreleased]`. Use one of these sections: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
+`CHANGELOG.md` holds the changelog in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. A pull request that changes the behavior for users does not edit `CHANGELOG.md`. It adds one fragment file to `changelog.d/`. Two new files cannot have a merge conflict.
 
-`CHANGELOG.md` lists the changes of each version of the code. The release notes page of the docs lists the changes that users can see, by date. A change for users goes in `CHANGELOG.md` and in the `## Release note` section of the pull request.
+1. Name the file `<name>.<section>.md`, for example `changelog.d/newsletter-send-claim.fixed.md`.
+2. For `<section>`, use one of these values: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`.
+3. Write one entry as a Markdown list item that starts with `- `.
+
+At release time, `scripts/changelog-release.sh` moves each fragment into its section under `[Unreleased]` in `CHANGELOG.md`. Then it removes the fragment files. The script stops on a file name with an unknown section.
+
+`CHANGELOG.md` lists the changes of each version of the code. The release notes page of the docs lists the changes that users can see, by date. A change for users goes in a changelog fragment and in the `## Release note` section of the pull request.
 
 ## Tags
 
