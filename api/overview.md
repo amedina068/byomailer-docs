@@ -36,7 +36,7 @@ curl -L https://byomailer.example/api/contacts \
 2. Send `Accept: application/json` on each request.
 3. For a `POST`, `PUT` or `PATCH` request with a body, send JSON with `Content-Type: application/json`.
 
-The `Accept` header is necessary. Without it, Laravel answers some errors with a redirect instead of JSON. For example, a request with no valid token gets a redirect to the login page instead of `401`.
+Each error on an `/api` path is JSON, also when a request has no `Accept` header. Send the header to make the format of the response clear.
 
 Each response body is JSON. A single record is in a `data` object. A list of records is in a `data` array.
 
@@ -101,7 +101,7 @@ These list endpoints return all the records in one response, with no pagination:
 | `308` | The path is unversioned. Follow the `Location` header. |
 | `401` | The token is missing, not valid, or refused. See [Authentication](authentication.md). |
 | `403` | The token has no access for the request, or the user does not have the necessary role. See [Token abilities and expiry](authentication.md#token-abilities-and-expiry). |
-| `404` | The record does not exist, or it belongs to another account. |
+| `404` | The record does not exist, or it belongs to another account. The message names the record and the ID, for example `No contact with ID 5 exists in this account.` |
 | `422` | The input is not valid. Read the `errors` object. |
 | `429` | You sent too many requests. See [Rate limits](#rate-limits). |
 

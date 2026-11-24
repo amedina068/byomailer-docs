@@ -71,7 +71,7 @@ If you set the `SANCTUM_TOKEN_PREFIX` environment variable, Sanctum adds that pr
 The role of the token user also limits the API:
 
 - A user with the Viewer role has read-only access. Each request of a Viewer that changes data gets `403`, also with a read and write token.
-- Only a user with the `admin` role can use the [webhook](webhooks.md) endpoints. A token of another user gets `403` on those endpoints.
+- Only a user with the `admin` role can use the [webhook](webhooks.md) endpoints. A token of another user gets `403` on those endpoints, with the message `Only an admin of the account can manage webhook endpoints.`
 
 ## Revoke a token
 
@@ -103,4 +103,4 @@ A request with no token, a wrong token, a revoked token or a refused token gets 
 }
 ```
 
-Send `Accept: application/json` on each request. Without it, the response is a redirect to the login page, not `401`.
+The response is `401` with JSON, also when the request has no `Accept: application/json` header.
