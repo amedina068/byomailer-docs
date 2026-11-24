@@ -36,7 +36,7 @@ The four SDKs have the same design and the same behavior. The method names follo
 - **Cursor pagination.** The SDK reads one page, or walks all pages. `per_page` is 1 to 100. The default is 25.
 - **Typed errors.** Each SDK has one error class for each HTTP status group, and one for a connection failure.
 - **Timeout.** One attempt has a time limit of 30 seconds.
-- **Retries.** The SDK retries a 429 for each call. It retries a 5xx, a connection error or a timeout only for an [idempotent call](#retries). The default is 2 retries, with exponential backoff and jitter.
+- **Retries.** The SDK retries a 429 and a connection error before the send for each call. It retries a 5xx, a read timeout or a reset after the send only for an [idempotent call](#retries). The default is 2 retries, with exponential backoff and jitter.
 - **Webhook verification.** A server-side helper verifies the signature and the timestamp of a [webhook](../api/webhooks.md) delivery. It returns the same fields and the same failure reasons in the four SDKs.
 - **No telemetry.** The SDKs send no data to other hosts. The JavaScript, Python and Ruby SDKs have no runtime dependencies.
 
@@ -335,7 +335,8 @@ The four SDKs use the same retry rule and the same values. The SDK sends a faile
 - **`Retry-After`.** If the response has a `Retry-After` header, the SDK waits for that time.
 - **Long waits.** If `Retry-After` is more than 60 seconds, the SDK does not retry. It raises the error at once.
 - **429.** The SDK retries a 429 for each call. The rate limiter refuses the request before the instance does the work.
-- **5xx, connection errors and timeouts.** The SDK retries these only for an idempotent call. The instance can have done the work, so a second call can do it two times.
+- **Connection not made.** The SDK retries a DNS failure, a refused connection or a connect timeout for each call, also a write that is not idempotent. The instance did not get the request, so a retry is safe.
+- **5xx, read timeouts and resets after the send.** The SDK retries these only for an idempotent call. The instance can have done the work, so a second call can do it two times.
 - **Other 4xx.** The SDK does not retry.
 
 A call is idempotent when a second call gives the same result and has no second effect. Each GET and each DELETE is idempotent. These writes are also idempotent:
