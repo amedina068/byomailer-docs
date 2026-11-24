@@ -169,6 +169,8 @@ Newsletter #42 is live. It is scheduled to send to real contacts at 2026-11-20T1
 
 The assistant must show the change to the user. After the user confirms, the assistant calls the tool again with `confirm_live` set to `true`. A draft or a paused record needs no confirmation.
 
+The scheduler can start the send of a newsletter while `update-newsletter-tool` runs. Then the tool returns the error `Newsletter #42 is queued and can no longer be edited.` and saves nothing.
+
 ### Status changes
 
 `schedule-newsletter`, `set-sequence-status`, `set-sequence-step-status` and `set-automation-status` need two calls:
@@ -177,6 +179,11 @@ The assistant must show the change to the user. After the user confirms, the ass
 2. The assistant shows the preview to the user.
 3. After the user confirms, the assistant calls the tool again with the same arguments and `confirm_live` set to `true`.
 4. The result has `applied` set to `true` and a `message`.
+
+The scheduler can start the send of a newsletter between the preview and the confirmed call. Then `schedule-newsletter` returns `applied` set to `false`, and the newsletter does not change. The `message` is one of these texts. The second text is the same as in the dashboard.
+
+- `The send already started, so the newsletter was not scheduled.`
+- `The send already started, so the newsletter did not go back to draft.`
 
 These tools run the same checks as the dashboard. For example, a sequence cannot go live if the account cannot send email. A step cannot go live without a subject or a body. A newsletter without a sender identity cannot get a schedule.
 

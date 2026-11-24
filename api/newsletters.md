@@ -272,7 +272,7 @@ The body fields are the same as for [Create a newsletter](#create-a-newsletter),
 - `filters` replaces all the filters.
 - `status: draft` returns a scheduled newsletter to `draft` and clears `scheduled_at`.
 
-If the send starts before BYOMailer changes the status, the response is `422` with the error key `status`. The request changes nothing, also not the other fields.
+If the send starts before BYOMailer saves the change, the response is `422` with the error key `status`. The request changes nothing, also not the other fields. This rule applies also to a request without `status`.
 
 ```bash
 curl -X PATCH https://byomailer.example/api/v1/newsletters/42 \
@@ -431,7 +431,7 @@ A detected variable with no saved default has the value `""`.
 
 `PATCH /api/v1/newsletters/{newsletterId}/variables`
 
-Replaces all the saved defaults. You can change only a newsletter with the status `draft` or `scheduled`. A default can name a variable that the content does not use yet.
+Replaces all the saved defaults. You can change only a newsletter with the status `draft` or `scheduled`. For other statuses, the response is `422` with the error key `status`. If the send starts before BYOMailer saves the change, the response is also `422`, and the defaults do not change. A default can name a variable that the content does not use yet.
 
 | Body field | Type | Required | Rules |
 |---|---|---|---|
