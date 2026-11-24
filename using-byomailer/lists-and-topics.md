@@ -29,8 +29,9 @@ You can add contacts to a list in these ways:
 
 | Method | Opt-in email | Opt-in state after the add |
 | --- | --- | --- |
-| **Lists** panel on the contact page | Not sent | Not confirmed |
-| CSV import | Not sent | Confirmed at the time of the import |
+| **Lists** panel on the contact page | Sent if the list has double opt-in | Not confirmed |
+| CSV import | Sent if the list has double opt-in | Confirmed at the time of the import if the list has no double opt-in |
+| Automation action that adds the contact to a list | Sent if the list has double opt-in | Not confirmed |
 | API (`POST /api/v1/lists/{listId}/contacts`) | Sent if the list has double opt-in | Confirmed at once if the list has no double opt-in |
 | MCP tools (`create-contact`, `add-contact-to-list`, `bulk-update-contacts`) | Sent if the list has double opt-in | Confirmed at once if the list has no double opt-in |
 
@@ -40,7 +41,7 @@ When a contact joins a list, BYOMailer subscribes the contact to all topics of t
 
 ## Double opt-in
 
-With double opt-in, BYOMailer sends a confirmation email to each contact that the API or the MCP server adds to the list. The contact clicks the link in the email to confirm.
+With double opt-in, BYOMailer sends a confirmation email to each contact that joins the list. All the methods in the table above send it. The contact clicks the link in the email to confirm.
 
 ### Turn on double opt-in
 
