@@ -8,7 +8,7 @@ order: 8
 
 This page lists the changes to BYOMailer that users can see. The newest date is first.
 
-The release notes have no version numbers. For developers, `CHANGELOG.md` in the [app repository](https://github.com/amedina068/byoses/blob/main/CHANGELOG.md) lists the changes to the code for each version.
+The release notes have no version numbers. For developers, `CHANGELOG.md` in the [app repository](https://github.com/amedina068/byomailer/blob/main/CHANGELOG.md) lists the changes to the code for each version.
 
 ## November 19, 2026
 

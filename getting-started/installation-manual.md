@@ -17,11 +17,11 @@ A manual install has the same parts as the Docker stack: a web server with PHP-F
 | PHP | 8.4 | `composer.lock` needs PHP 8.4.1 or later (Symfony 8). PHP 8.5 does not work, because `phpoffice/phpspreadsheet` does not accept it. |
 | Composer | 2 | Installs the PHP dependencies. |
 | Node.js | 24 | Builds the frontend. The `.nvmrc` file names the version. Vite 7 does not work on older versions. Node is necessary only for the build. |
-| MySQL | The Docker stack uses 8.4 | Production uses MySQL. |
-| Redis | The Docker stack uses 7.4 | Horizon needs Redis. |
+| MySQL | 8.4 or later | Production uses MySQL. The Docker stack uses 8.4. |
+| Redis | 7.2 or later | Horizon needs Redis. The Docker stack uses 7.4. |
 | A web server with PHP-FPM | | The Docker image uses NGINX. |
 
-TODO(owner): Which is the oldest MySQL version and the oldest Redis version that BYOMailer supports?
+The oldest supported versions are MySQL 8.4 (LTS) and Redis 7.2. MySQL 8.0 reached its end of life in April 2026. The project does not test MariaDB or older Redis versions.
 
 ### PHP extensions
 
@@ -123,7 +123,19 @@ Point the document root of the web server to the `public/` folder. Send all requ
 
 Put TLS in front of the app. Open and click tracking and the unsubscribe links need HTTPS. Read [Reverse proxy and TLS](../self-hosting/reverse-proxy-and-tls.md).
 
-TODO(owner): The repository has no NGINX or Apache configuration for an install without Docker. Can you give one, or point to the configuration in the `serversideup/php` image?
+The app repository has an NGINX server block for this install: [`deploy/nginx/byomailer.conf`](https://github.com/amedina068/byomailer/blob/main/deploy/nginx/byomailer.conf). It serves `public/`, sends PHP requests to PHP-FPM, redirects HTTP to HTTPS, and accepts request bodies of 25 MB.
+
+1. Copy the file to `/etc/nginx/sites-available/byomailer.conf`.
+2. Replace `byomailer.example` with the host of `APP_URL`.
+3. Replace `/var/www/byomailer` with the folder of the app.
+4. Replace `/run/php/php8.4-fpm.sock` with the socket of your PHP 8.4 FPM pool.
+5. Replace the certificate paths with the files of your certificate.
+6. Link the file in `/etc/nginx/sites-enabled/`.
+7. Run `sudo nginx -t`. If the test passes, reload NGINX.
+
+The server block on port 443 is the `default_server`. With custom link domains, Cloudflare sends the requests of each link domain to this server with the `Host` of that domain. BYOMailer answers only the contact link routes on these hosts.
+
+The project gives no Apache configuration.
 
 ## Run the background processes
 
@@ -141,7 +153,25 @@ Run each command from the app folder, as the same user as PHP-FPM. A process man
 - `ses-events:poll` stops at once with an error if `PLATFORM_AWS_*` or `SES_EVENTS_SQS_QUEUE_URL` is empty. Read [SES events](../self-hosting/ses-events.md).
 - The Docker stack uses `php artisan schedule:work`. The standard Laravel alternative is a cron entry that runs `php artisan schedule:run` each minute. Read [Scheduler](../self-hosting/scheduler.md).
 
-TODO(owner): The code has no systemd unit and no Supervisor configuration for these processes. Which process manager do you recommend, and can you give a sample configuration for each process?
+Use systemd. It is on each current Linux distribution, so you do not install another package. The app repository has one unit for each process:
+
+- [`deploy/systemd/byomailer-horizon.service`](https://github.com/amedina068/byomailer/blob/main/deploy/systemd/byomailer-horizon.service)
+- [`deploy/systemd/byomailer-scheduler.service`](https://github.com/amedina068/byomailer/blob/main/deploy/systemd/byomailer-scheduler.service)
+- [`deploy/systemd/byomailer-ses-events.service`](https://github.com/amedina068/byomailer/blob/main/deploy/systemd/byomailer-ses-events.service)
+
+To install the units:
+
+1. Copy the three files to `/etc/systemd/system/`.
+2. In each file, replace `/var/www/byomailer` with the folder of the app.
+3. If PHP-FPM does not run as `www-data`, replace the `User` and the `Group`.
+4. Run `sudo systemctl daemon-reload`.
+5. Run `sudo systemctl enable --now byomailer-horizon byomailer-scheduler byomailer-ses-events`.
+
+Each unit has `Restart=always`. `ses-events:poll` and Horizon stop with exit code 0 by design, so `Restart=on-failure` does not start them again. The Horizon unit waits 330 seconds at stop, because a newsletter job can run for 300 seconds.
+
+If you use Supervisor, use [`deploy/supervisor/byomailer.conf`](https://github.com/amedina068/byomailer/blob/main/deploy/supervisor/byomailer.conf) instead. It has the same three programs. Do not run the processes with systemd and Supervisor at the same time.
+
+After each deploy, run `php artisan horizon:terminate` and `php artisan queue:restart`. The process manager then starts the processes with the new code.
 
 [Queues and Horizon](../self-hosting/queues-and-horizon.md) explains the queues in more detail.
 

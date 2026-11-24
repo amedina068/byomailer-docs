@@ -45,7 +45,7 @@ BYOMailer answers `/tls/ask` with 200 in two cases:
 
 In all other cases, it answers 404. A wrong token also gets 404. The endpoint accepts 20 requests each minute for each domain.
 
-TODO(owner): The repository has no proxy configuration. Add a Caddyfile example with the `on_demand_tls` ask URL, the `/healthz` response and the upstream SES tracking host.
+The app repository has a Caddyfile for this proxy: [`deploy/tracking-proxy/Caddyfile`](https://github.com/amedina068/byomailer/blob/main/deploy/tracking-proxy/Caddyfile). It uses the ask URL with the token, answers `/healthz` itself, and sends all other requests to `r.us-east-1.awstrack.me`. Replace `us-east-1` with the AWS region of SES. [Optional integrations](../self-hosting/optional-integrations.md#the-upstream) gives the steps.
 
 ### Set up a tracking domain
 
@@ -102,7 +102,7 @@ The origin certificate must cover the origin SNI name. If it does not, Cloudflar
 
 The identity page shows the **Custom link domain** section only when `CLOUDFLARE_CNAME_TARGET` is set. If `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ZONE_ID` is empty, BYOMailer shows: `Custom link domains are not available.`
 
-TODO(owner): Which permissions must the Cloudflare API token have, and how must the fallback origin of the Cloudflare for SaaS zone be set?
+The API token needs the permission **Zone > SSL and Certificates > Edit** on this zone, and no other permission. The fallback origin of the zone is a proxied DNS record with the name of `CLOUDFLARE_CNAME_TARGET`, which points to the instance. [Optional integrations](../self-hosting/optional-integrations.md#set-up-cloudflare-for-saas) gives the steps.
 
 ### Set up a link domain
 

@@ -64,7 +64,53 @@ Back up the database before you update BYOMailer. The `web` service runs the new
 
 ## Restore
 
-TODO(owner): The app has no restore command. What restore procedure do you support: the order of the steps, maintenance mode, and the commands to load the dump and the storage archive?
+The app has no restore command. Restore with the Docker commands below, in this order. The procedure stops the app services during the restore, so it does not use maintenance mode. While the `web` service is stopped, the reverse proxy answers with an error.
+
+`byomailer-2026-11-24.sql` and `byomailer-storage-2026-11-24.tar.gz` are the backup files. Use the names of your files.
+
+1. Put the `.env` file of the backup in the folder of `docker-compose.yml`. It must have the `APP_KEY` of the backup.
+2. Stop the app services. MySQL and Redis continue to run:
+
+   ```bash
+   docker compose --profile ses stop web horizon scheduler ses-events
+   ```
+
+3. Remove the database and create it again, empty. The grants of the database user stay:
+
+   ```bash
+   docker compose exec -T mysql sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS $MYSQL_DATABASE; CREATE DATABASE $MYSQL_DATABASE"'
+   ```
+
+4. Load the dump:
+
+   ```bash
+   docker compose exec -T mysql sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' < byomailer-2026-11-24.sql
+   ```
+
+5. Erase the Redis data. The queued jobs and the cache refer to rows that the restore replaced. If they stay, the workers can send email again or update the wrong rows:
+
+   ```bash
+   docker compose exec redis redis-cli FLUSHALL
+   ```
+
+6. Extract the storage archive into the `storage` volume:
+
+   ```bash
+   docker compose run --rm --no-deps -T --entrypoint tar web -xzf - -C /var/www/html/storage/app < byomailer-storage-2026-11-24.tar.gz
+   ```
+
+7. Start the stack:
+
+   ```bash
+   docker compose up -d
+   ```
+
+   If you run the SES events worker, start it with `docker compose --profile ses up -d`.
+
+8. Wait until `docker compose ps` shows the `web` service as healthy.
+9. Sign in, and open a newsletter and **Settings > Email Credentials**. Make sure that the data and the AWS credentials show.
+
+`FLUSHALL` also ends the web sessions, so each user signs in again. The SES events that arrived during the restore wait in the SQS queue. The worker reads them after step 7.
 
 These rules come from the code:
 

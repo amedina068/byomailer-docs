@@ -73,9 +73,41 @@ For more about tokens, read [API authentication](../api/authentication.md).
 
 ## Claude Desktop
 
-The in-app guide names Claude Desktop as a client for the same `mcpServers` block as Cursor.
+The configuration file of Claude Desktop starts only local commands. It does not accept an entry with `"type": "http"`. The **Connectors** settings of Claude Desktop sign in with OAuth, like Claude.ai, so they cannot send the API token.
 
-TODO(owner): The in-app guide gives one `mcpServers` block with `"type": "http"` and `headers` for Claude Desktop and Cursor. Does Claude Desktop accept this entry in its configuration file, or must a user add the server in another way?
+Use the `mcp-remote` bridge. It is a local command that connects to the BYOMailer server and sends the `Authorization` header. It needs Node.js on the computer.
+
+1. Open the configuration file of Claude Desktop:
+   - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+2. Add the `byomailer` entry to the `mcpServers` block:
+
+   ```json
+   {
+     "mcpServers": {
+       "byomailer": {
+         "command": "npx",
+         "args": [
+           "-y",
+           "mcp-remote",
+           "https://byomailer.example/mcp",
+           "--header",
+           "Authorization:${BYOMAILER_AUTH}"
+         ],
+         "env": {
+           "BYOMAILER_AUTH": "Bearer <your-token>"
+         }
+       }
+     }
+   }
+   ```
+
+3. Replace `<your-token>` with your token.
+4. Quit Claude Desktop and start it again.
+
+The token is in `env`, not in `args`. On Windows, Claude Desktop splits an argument at each space, so `Authorization: Bearer <your-token>` in `args` does not work.
+
+The in-app guide at `/documentation/guides/mcp-server` shows the same entry.
 
 ## Claude.ai
 

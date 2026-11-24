@@ -168,4 +168,4 @@ The values in the database stay encrypted with the old key. BYOMailer has no com
 
 WARNING: Do not remove an old key from `APP_PREVIOUS_KEYS` while the database has values that it encrypted. If you remove it, BYOMailer cannot read these values, and each account must enter its AWS credentials again.
 
-TODO(owner): Is a re-encryption command planned, so that an owner can remove an old key from `APP_PREVIOUS_KEYS` after a rotation?
+BYOMailer has no re-encryption command, and the project does not plan one. Keep each old key in `APP_PREVIOUS_KEYS` for the life of the instance. An old key in this list costs one more decryption attempt for each old value. Back up the old keys with `.env`.
