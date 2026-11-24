@@ -112,6 +112,11 @@ The page of a newsletter with the status `draft` or `scheduled` shows **Edit** a
 
 After the send starts, the page does not show these buttons.
 
+The scheduler can start the send while the page is open. Then **Unschedule** and **Delete** change nothing, and the page shows an error:
+
+- `The send already started, so the newsletter did not go back to draft.`
+- `The send already started, so the newsletter was not deleted.`
+
 ## Send a test email
 
 Click **Send test email** in the **Schedule** step. BYOMailer sends one copy to your own email address.
@@ -162,7 +167,7 @@ BYOMailer adds the one-click `List-Unsubscribe` header to each newsletter email.
 
 A scheduled newsletter starts in the first scheduler run after its time. The command `contact-mails:send-due-newsletters` runs every minute.
 
-A newsletter starts one send only. If you send, schedule or unschedule a newsletter at the same moment that the scheduler starts it, only the first change applies.
+A newsletter starts one send only. If you send, schedule, unschedule or delete a newsletter at the same moment that the scheduler starts it, only the first change applies.
 
 If a check fails in the job, the status becomes `failed`. If the cause is a missing SES permission, BYOMailer also sends an email to the author of the newsletter.
 
