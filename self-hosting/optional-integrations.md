@@ -16,6 +16,7 @@ Each integration on this page is off by default. While its environment variables
 | [Custom tracking domains](#custom-tracking-domains-tracking-proxy) | `TRACKING_PROXY_IP` and `TRACKING_PROXY_ASK_TOKEN` |
 | [BYOMailer API sign-up list](#byomailer-api-sign-up-list) | `BYOMAILER_API_URL`, `BYOMAILER_API_TOKEN` and `BYOMAILER_LIST_ID` |
 | [Open Graph images](#open-graph-images-snapsbrew) | `SNAPSBREW_SIGNED_URL_KEY` and `SNAPSBREW_OG_TEMPLATE_ID` |
+| [Google sign-in](accounts-and-registration.md#google-sign-in) | `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` |
 | [Slack](#slack) | See the section. |
 | [Outgoing webhook limits](#outgoing-webhook-limits) | Always on. The variables change the limits. |
 
