@@ -1,6 +1,6 @@
 ---
 title: Templates and blocks
-description: Reuse the same email layout and the same pieces of content, and personalize them with variables.
+description: Reuse the same email layout and the same pieces of content, and personalize them with variables and Liquid.
 order: 10
 ---
 
@@ -13,6 +13,7 @@ BYOMailer has three tools to reuse content in newsletters and sequence steps:
 | Email template | A layout with one content slot. | Apply it to a newsletter or a step. |
 | Block | A named piece of HTML. | Insert `{{ block.<name> }}` in the content. |
 | Variable | A placeholder for a value of the contact or the account. | Write `{{ <name> }}` in the subject or the content. |
+| Liquid | Conditions, loops and filters around the variables. | Write `{% if %}` or `{% for %}` tags, or a filter. See [Liquid](#liquid). |
 
 ## Email templates
 
@@ -112,7 +113,7 @@ BYOMailer replaces the placeholder at send time with the current HTML of the blo
 
 If you delete a block, the emails that use it get an empty string in its place.
 
-A block can contain `{{ variable }}` placeholders. BYOMailer inserts the blocks first. Then it replaces the variables of the message and of its blocks with the values of the contact. The **Variables** step shows only the variables of the message. A variable that is only in a block gets the global default of the attribute, if the contact has no value.
+A block can contain `{{ variable }}` placeholders and Liquid code. BYOMailer inserts the blocks first. Then it replaces the variables of the message and of its blocks with the values of the contact. The **Variables** step shows only the variables of the message. A variable that is only in a block gets the global default of the attribute, if the contact has no value.
 
 ## Variables
 
@@ -168,3 +169,81 @@ You can put a query string after a variable in a link:
 ```
 
 If the value of `checkout_url` already has a `?`, BYOMailer joins the query string with `&`. If the value has no `?`, BYOMailer keeps the `?`. Thus the link always has a correct query string.
+
+## Liquid
+
+The subject, the preview text and the body of a newsletter, a sequence step or an opt-in email use [Liquid](https://shopify.github.io/liquid/). Templates and blocks can use Liquid too. Liquid adds conditions, loops and filters to the variables:
+
+```html
+{% if plan == "pro" %}
+  <p>Thanks for your Pro plan.</p>
+{% else %}
+  <p>Try Pro free for 14 days.</p>
+{% endif %}
+
+<ul>
+{% for item in interests %}
+  <li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+<p>Hello {{ first_name | default: "there" | capitalize }},</p>
+```
+
+### Tags and filters
+
+BYOMailer accepts these tags: `if`, `unless`, `case`, `for`, `break`, `continue`, `tablerow`, `assign`, `capture`, `increment`, `decrement`, `ifchanged`, `raw`, `comment` and `doc`.
+
+These tags are not available: `render`, `include`, `echo`, `liquid` and `cycle`. Liquid content cannot read a file.
+
+BYOMailer accepts the standard Liquid filters, for example `default`, `upcase`, `downcase`, `capitalize`, `truncate`, `date`, `plus` and `size`. An unknown filter is an error.
+
+### Values in Liquid
+
+- A missing or empty value is `nil`. `{% if first_name %}` is false for a contact without a first name. The filter `default` fills the value.
+- A default value of the newsletter or the sequence fills a missing value, the same as for a placeholder. An empty default leaves the value `nil`.
+- An attribute with a list value is a list. `{% for item in interests %}` reads each item. `{{ interests }}` shows the JSON text of the list, the same as before.
+- Other attribute values are text. Compare them with text: `{% if count == "5" %}`. The operators `>` and `<` compare text that holds a number as a number.
+- A dotted name reads a nested attribute, for example `{{ address.city }}`.
+
+### Safety and limits
+
+Contact data is not trusted. These rules apply:
+
+- In the HTML body, BYOMailer escapes each `{{ }}` output. A value cannot add HTML to the email. Write the HTML tags in the content, not in a variable. The subject, the preview text and the plain-text body are not escaped.
+- A range must use two whole numbers and hold 1000 numbers or less, for example `(1..5)`.
+- One render can take 2 seconds and make 524288 bytes or less. A limit also stops a loop that renders too many times.
+
+If the data of one contact breaks the Liquid code, for example a division by zero, BYOMailer does not send the email to that contact. The email gets the status `failed`, with the error as the reason. The other contacts get the email.
+
+### Errors when you save
+
+BYOMailer refuses content that is not valid Liquid. The error names the line, for example:
+
+```text
+The Liquid code has an error on line 3: 'if' tag was never closed
+```
+
+To show Liquid code as text in an email, put it between `{% raw %}` and `{% endraw %}`.
+
+### The Variables step
+
+The **Variables** step lists each variable that the Liquid code reads, for example `first_name` in `{{ first_name | default: "there" }}`. Loop variables, assigned variables and the built-in variables are not in the list.
+
+### Content from before Liquid
+
+Content that uses only `{{ variable }}` placeholders sends the same email as before.
+
+Content with other text between double braces, for example `{{ first name }}`, is not valid Liquid. BYOMailer sends it as before and shows the text. When you edit and save it, BYOMailer asks you to correct it.
+
+To list the unsent messages that use Liquid, or that are not valid Liquid, run this command on the server:
+
+```bash
+php artisan messages:liquid-check
+```
+
+The command changes nothing. Run it before you update an instance, and correct the messages that it lists.
+
+### Newsletters with Liquid code
+
+The SES bulk API cannot render Liquid. A newsletter with Liquid code sends one email for each contact through the SES mailer, the same as a sequence step. A newsletter with only `{{ variable }}` placeholders keeps the SES bulk API.

@@ -209,6 +209,8 @@ BYOMailer fills a placeholder in this order:
 
 The names `content`, `unsubscribe_url`, `preferences_url` and `opt_in_url` are reserved. BYOMailer fills them when it renders the email. For more about placeholders, read [Templates and blocks](../using-byomailer/templates-and-blocks.md).
 
+The subject, the preview text and the body can also use Liquid tags and filters, for example `{% if vip %}` and `{{ name | default: "friend" }}`. The create and update tools refuse content that is not valid Liquid. The error names the line. For the rules, read [Liquid](../using-byomailer/templates-and-blocks.md#liquid).
+
 ## Warnings
 
 A missing `{{ unsubscribe_url }}` link and a missing postal address never block a status change. The sender is responsible for them. `schedule-newsletter`, `set-sequence-status` and `set-sequence-step-status` return them in `warnings`, in the preview and in the result. The assistant must show the warnings to the user.

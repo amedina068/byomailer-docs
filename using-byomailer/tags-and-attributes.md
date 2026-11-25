@@ -88,7 +88,7 @@ Example of a stored value:
 
 BYOMailer compares values as text when it checks for a change. An array or an object becomes its JSON text. This comparison decides if an `attribute_changed` automation starts.
 
-If the value is an array or an object, a `{{ placeholder }}` shows its JSON text. For example, `{{ interests }}` shows `["design","email"]`.
+If the value is an array or an object, a `{{ placeholder }}` shows its JSON text. For example, `{{ interests }}` shows `["design","email"]`. A Liquid loop reads each item of a list: `{% for item in interests %}{{ item }}{% endfor %}`. See [Liquid](templates-and-blocks.md#liquid).
 
 ### Attributes in emails
 

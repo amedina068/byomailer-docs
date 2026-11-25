@@ -130,9 +130,9 @@ This tool takes no arguments.
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `title` | string | No |  | Internal title for the newsletter. Defaults to "Untitled newsletter". |
-| `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
+| `subject` | string | No |  | Email subject line. Supports Liquid: {{ variable }} placeholders, filters such as {{ name \| default: "friend" }}, and tags such as {% if %}. |
 | `preview_text` | string | No |  | Inbox preview / preheader text. |
-| `html_content` | string | No |  | HTML body of the email. Plain-text is derived automatically. |
+| `html_content` | string | No |  | HTML body of the email. Plain-text is derived automatically. Supports Liquid: {{ variable }} placeholders, filters, and the {% if %}, {% unless %}, {% case %} and {% for %} tags. Each output is HTML-escaped. Content that is not valid Liquid is refused with the line of the error. |
 | `email_identity_id` | integer | No |  | Verified sender identity id to send from. Required before the draft can be scheduled or test-mailed. |
 | `email_template_id` | integer | No |  | Optional email template id to wrap the content. |
 | `filters` | array of object | No |  | Audience targeting filters. Omit to target every active contact. |
@@ -154,9 +154,9 @@ This tool takes no arguments.
 | --- | --- | --- | --- | --- |
 | `newsletter_id` | integer | Yes |  | Id of the draft or scheduled newsletter to update. Use list-newsletters-tool to discover ids. |
 | `title` | string | No |  | Internal title for the newsletter. |
-| `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
+| `subject` | string | No |  | Email subject line. Supports Liquid: {{ variable }} placeholders, filters such as {{ name \| default: "friend" }}, and tags such as {% if %}. |
 | `preview_text` | string | No |  | Inbox preview / preheader text. |
-| `html_content` | string | No |  | HTML body of the email. Plain-text is derived automatically. |
+| `html_content` | string | No |  | HTML body of the email. Plain-text is derived automatically. Supports Liquid: {{ variable }} placeholders, filters, and the {% if %}, {% unless %}, {% case %} and {% for %} tags. Each output is HTML-escaped. Content that is not valid Liquid is refused with the line of the error. |
 | `email_identity_id` | integer | No |  | Verified sender identity id to send from. Required before the draft can be scheduled or test-mailed. |
 | `email_template_id` | integer | No |  | Optional email template id to wrap the content. |
 | `filters` | array of object | No |  | Audience targeting filters. Omit to target every active contact. |
@@ -254,9 +254,9 @@ This tool takes no arguments.
 | `delay_type` | string | Yes |  | Unit for the delay before this step sends: "days" or "hours". |
 | `delay_days` | integer | Yes |  | How many days (max 365) or hours (max 8760) after the previous step to send. Use 0 to send immediately on enrollment for the first step. |
 | `email_identity_id` | integer | Yes |  | Verified sender identity id to send this step from. |
-| `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
+| `subject` | string | No |  | Email subject line. Supports Liquid: {{ variable }} placeholders, filters such as {{ name \| default: "friend" }}, and tags such as {% if %}. |
 | `preview_text` | string | No |  | Inbox preview / preheader text. |
-| `html_content` | string | No |  | HTML body of the step. Plain-text is derived automatically. |
+| `html_content` | string | No |  | HTML body of the step. Plain-text is derived automatically. Supports Liquid: {{ variable }} placeholders, filters, and the {% if %}, {% unless %}, {% case %} and {% for %} tags. Each output is HTML-escaped. Content that is not valid Liquid is refused with the line of the error. |
 | `filters` | array of object | No |  | Step filters. A contact who does not match them skips only this step and moves on to the next step. The sequence filters still apply first. Use view-newsletter-filters-tool to build the array. Omit to send this step to every contact in the sequence. |
 | `filters[].connector` | string | No | `and`, `or` | How this filter joins the previous one. Defaults to "and". |
 | `filters[].category` | string | No | `attributes`, `tags`, `lists`, `topics`, `date`, `engagement`, `location` | The filter category. |
@@ -278,9 +278,9 @@ This tool takes no arguments.
 | `delay_days` | integer | No |  | How many days (max 365) or hours (max 8760) after the previous step to send. Required together with delay_type. |
 | `email_identity_id` | integer | No |  | Verified sender identity id to send this step from. |
 | `email_template_id` | integer | No |  | Optional email template id to wrap the content. Pass null to remove the template. |
-| `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
+| `subject` | string | No |  | Email subject line. Supports Liquid: {{ variable }} placeholders, filters such as {{ name \| default: "friend" }}, and tags such as {% if %}. |
 | `preview_text` | string | No |  | Inbox preview / preheader text. |
-| `html_content` | string | No |  | HTML body of the step. Plain-text is derived automatically. |
+| `html_content` | string | No |  | HTML body of the step. Plain-text is derived automatically. Supports Liquid: {{ variable }} placeholders, filters, and the {% if %}, {% unless %}, {% case %} and {% for %} tags. Each output is HTML-escaped. Content that is not valid Liquid is refused with the line of the error. |
 | `filters` | array of object | No |  | Step filters. A contact who does not match them skips only this step and moves on to the next step. The sequence filters still apply first. Use view-newsletter-filters-tool to build the array. Pass an empty array to clear the filters. |
 | `filters[].connector` | string | No | `and`, `or` | How this filter joins the previous one. Defaults to "and". |
 | `filters[].category` | string | No | `attributes`, `tags`, `lists`, `topics`, `date`, `engagement`, `location` | The filter category. |
