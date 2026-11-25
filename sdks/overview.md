@@ -11,7 +11,7 @@ BYOMailer has SDKs for JavaScript and TypeScript, PHP, Python and Ruby. Each SDK
 The status of the SDKs:
 
 - Version 0.2.0 is not released. No version tag exists.
-- Each SDK repository on GitHub is private now. To install an SDK, you must have read access to its repository.
+- Each SDK repository on GitHub is public.
 - No SDK is on a package registry yet. There is no package on npm, Packagist, PyPI or RubyGems.
 - Each SDK uses the [MIT license](#license).
 
@@ -44,7 +44,7 @@ The SDKs differ in some details, for example the names of the error classes and 
 
 ## Install from git
 
-Each command below installs the newest commit of the `main` branch. Your git client or package manager must have read access to the private repository.
+Each command below installs the newest commit of the `main` branch.
 
 ### JavaScript and TypeScript
 
@@ -74,7 +74,7 @@ composer require byomailer/byomailer-php:dev-main
 
 Give `:dev-main`, because the repository has no version tag.
 
-Composer needs a GitHub token with read access to the repository.
+The repository is public, so Composer needs no token.
 
 The SDK sends requests through a PSR-18 HTTP client. If your project has no PSR-18 client, install Guzzle:
 
