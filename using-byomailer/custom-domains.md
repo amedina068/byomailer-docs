@@ -118,11 +118,27 @@ If Cloudflare refuses the host name, BYOMailer changes nothing. The old link dom
 
 ### The check
 
-When you click **Check status**, BYOMailer reads the custom host name from Cloudflare. The domain is verified when the host name status and the certificate status are both `active`.
+When you click **Check status**, BYOMailer does these steps:
+
+1. It reads the custom host name from Cloudflare. The host name status and the certificate status must both be `active`.
+2. It sends `GET https://<subdomain>/up` through the link domain. The answer must be a status 2xx from BYOMailer.
+3. It marks the domain as verified.
 
 If the certificate is not ready, the page shows "Not yet active. Cloudflare is still issuing the TLS certificate". BYOMailer keeps a "not ready" result for 30 seconds and a "verified" result for 5 minutes.
 
+If the request through the link domain fails, the domain stays not verified, and the page shows the reason. For example: `https://links.example.com/up redirects to https://byomailer.example/up. The web server does not send this host to the app.` BYOMailer keeps this result for 30 seconds. The owner of the instance must correct the web server. See [Troubleshooting](../self-hosting/troubleshooting.md#a-custom-domain-check-fails).
+
+The request does not follow redirects. It stops after 10 seconds. BYOMailer does not send it when the subdomain resolves to a private IP address.
+
 The scheduler also runs `email-identities:check-link-domain` every 30 minutes. It checks each link domain that is not verified.
+
+### The hourly probe
+
+A verified link domain can stop working later, for example after a change to the web server. Each hour, `email-identities:probe-link-domains` sends the same request through each verified link domain.
+
+If a domain does not reach BYOMailer, the command reports an error to the log of the instance, and to Rollbar when it is on. The domain stays verified. If BYOMailer removes the verification, the emails use the host of `APP_URL` for the links again. Thus BYOMailer does not remove it.
+
+The page of the identity does not show the result of the hourly probe. The owner of the instance gets the alert.
 
 ### What a verified link domain does
 
@@ -134,7 +150,7 @@ When the link domain is verified, the emails of the identity use it for these li
 
 The opt-in link of a list uses the host of `APP_URL`.
 
-The link domain serves only these paths: `unsubscribe/*`, `one-click-unsubscribe/*`, `resubscribe/*`, `preferences/*`, `opt-in/*`, `build/*` and `up`. All other paths return 404. The dashboard, the API and the login stay on the host of `APP_URL`.
+The link domain serves only these paths: `unsubscribe/*`, `one-click-unsubscribe/*`, `resubscribe/*`, `preferences/*`, `opt-in/*`, `build/*` and `up`. All other paths return 404. BYOMailer answers `up` on each host, also before the link domain is verified. The dashboard, the API and the login stay on the host of `APP_URL`.
 
 A request to a host that is not the host of `APP_URL` and not a verified link domain gets 404.
 
@@ -160,6 +176,7 @@ If `CLOUDFLARE_ORIGIN_SNI` is empty, the command stops with `No origin SNI confi
 |---|---|---|
 | `email-identities:check-tracking-domain-dns` | Every 30 minutes | Puts a check job on the queue for each tracking domain that is not verified. |
 | `email-identities:check-link-domain` | Every 30 minutes | Checks each link domain that is not verified. |
+| `email-identities:probe-link-domains` | Each hour | Sends a request through each verified link domain, and reports each domain that does not reach BYOMailer. |
 | `email-identities:sync-hostname-origins` | Manual | Pins the origin server and the SNI of each Cloudflare custom host name. |
 
 For the scheduler, see [Scheduler](../self-hosting/scheduler.md). For the other environment variables, see [Optional integrations](../self-hosting/optional-integrations.md).
