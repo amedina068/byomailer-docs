@@ -1,6 +1,6 @@
 ---
 title: Optional integrations
-description: The environment variables, the on switch and the effect of each optional integration.
+description: "The environment variables and the effect of each optional integration: MaxMind GeoIP, Rollbar, custom link and tracking domains, the sign-up list, Open Graph images, Slack and webhook limits."
 order: 10
 ---
 

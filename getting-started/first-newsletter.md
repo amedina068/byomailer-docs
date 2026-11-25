@@ -1,6 +1,6 @@
 ---
 title: Send your first newsletter
-description: Go from a new account to a first sent newsletter - sender identity, contacts, list, content, test email, and send.
+description: Send a first newsletter from a new account. Add a sender identity and a postal address, make a list, add contacts, write, test and send.
 order: 6
 ---
 
