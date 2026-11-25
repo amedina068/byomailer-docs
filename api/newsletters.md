@@ -270,7 +270,9 @@ The body fields are the same as for [Create a newsletter](#create-a-newsletter),
 - `subject_b` and `html_content_b` are optional, also when `ab_test_enabled` is `true`.
 - `ab_test_enabled: false` deletes variant B.
 - `filters` replaces all the filters.
-- `status: draft` returns a scheduled newsletter to `draft`.
+- `status: draft` returns a scheduled newsletter to `draft` and clears `scheduled_at`.
+
+If the send starts before BYOMailer changes the status, the response is `422` with the error key `status`. The request changes nothing, also not the other fields.
 
 ```bash
 curl -X PATCH https://byomailer.example/api/v1/newsletters/42 \
@@ -320,7 +322,7 @@ See [Deliverability](../using-byomailer/deliverability.md) and [Connect AWS SES]
 
 `DELETE /api/v1/newsletters/{newsletterId}`
 
-Deletes a newsletter with the status `draft`, with its messages and mails. For other statuses, the response is `422` with the error key `status`. A scheduled newsletter also gets `422`. To delete it, unschedule it first: send `PATCH /api/v1/newsletters/{newsletterId}` with `{"status": "draft"}`.
+Deletes a newsletter with the status `draft` or `scheduled`, with its messages and mails. The dashboard uses the same rule. For other statuses, the response is `422` with the error key `status`. If the send starts before the delete, the response is also `422`, and the newsletter stays.
 
 ```bash
 curl -X DELETE https://byomailer.example/api/v1/newsletters/42 \
