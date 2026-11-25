@@ -8,7 +8,7 @@ order: 3
 
 # MCP tools reference
 
-The BYOMailer MCP server has 44 tools. This page lists them in the order that `tools/list` returns them.
+The BYOMailer MCP server has 45 tools. This page lists them in the order that `tools/list` returns them.
 
 A script makes this page from the tool classes in `app/Mcp/Tools`. Each description is the text that the server sends to the agent.
 
@@ -22,6 +22,7 @@ Read [the MCP overview](overview.md) for the workflow and the error format.
 | --- | --- | --- | --- |
 | [`list-newsletters-tool`](#list-newsletters-tool) | List Newsletters Tool | Yes | - |
 | [`newsletter-stats-tool`](#newsletter-stats-tool) | Newsletter Stats Tool | Yes | - |
+| [`link-clicks-tool`](#link-clicks-tool) | Link Clicks Tool | Yes | - |
 | [`newsletter-content-tool`](#newsletter-content-tool) | Newsletter Content Tool | Yes | - |
 | [`view-newsletter-filters-tool`](#view-newsletter-filters-tool) | View Newsletter Filters Tool | Yes | - |
 | [`calculate-newsletter-contacts-tool`](#calculate-newsletter-contacts-tool) | Calculate Newsletter Contacts Tool | Yes | - |
@@ -86,6 +87,21 @@ Read [the MCP overview](overview.md) for the workflow and the error format.
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `newsletter_id` | integer | Yes |  | The id of the newsletter to read stats for. |
+
+## link-clicks-tool
+
+**Link Clicks Tool**
+
+> Report who clicked which link in one newsletter or one sequence step. Without "link", it lists each link with its unique contacts, total clicks and click rate (unique contacts / delivered * 100). A named link (data-bm-link attribute) groups by its name. Any other link groups by its URL without utm_* parameters. With "link" set to a key from that list, it lists the contacts who clicked that link, page by page with after_id. Clicks can include link scanners, for example Microsoft Safe Links.
+
+| Argument | Type | Required | Values | Description |
+| --- | --- | --- | --- | --- |
+| `newsletter_id` | integer | No |  | The newsletter to report on. Send this or sequence_id with step_id. |
+| `sequence_id` | integer | No |  | The sequence of the step. Required with step_id. |
+| `step_id` | integer | No |  | The sequence step to report on. |
+| `link` | string | No |  | A link key from the link list ("name:<link name>" or "url:<url>"). When set, the tool lists the contacts who clicked that link. |
+| `limit` | integer | No |  | Contacts per page when "link" is set. Default 50, maximum 200. |
+| `after_id` | integer | No |  | The next_after_id of the previous page. |
 
 ## newsletter-content-tool
 
@@ -183,7 +199,7 @@ This tool takes no arguments.
 
 **Schedule Newsletter Tool**
 
-> Schedule a draft newsletter to send at a future time (action "schedule"), move a scheduled newsletter to a new time (action "schedule"), or cancel the schedule and return it to draft (action "unschedule"). This affects real contacts, so the first call only returns a preview: the change, the send time and the number of recipients. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. If the send started before the change, the result has applied set to false, and the newsletter does not change. The dashboard runs the same checks before scheduling: subject and body, the SES account status, and the SES permissions. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the schedule. The preview and the result list them in warnings. Show the warnings to the user. Set the sender first with update-newsletter-tool. This tool never sends a newsletter immediately.
+> Schedule a draft newsletter to send at a future time (action "schedule"), move a scheduled newsletter to a new time (action "schedule"), or cancel the schedule and return it to draft (action "unschedule"). This affects real contacts, so the first call only returns a preview: the change, the send time and the number of recipients. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. The dashboard runs the same checks before scheduling: subject and body, the SES account status, and the SES permissions. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the schedule. The preview and the result list them in warnings. Show the warnings to the user. Set the sender first with update-newsletter-tool. This tool never sends a newsletter immediately.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -200,7 +216,7 @@ This tool takes no arguments.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
-| `status` | string | No | `draft`, `live`, `paused` | Optional status filter. |
+| `status` | string | No | `draft`, `live`, `paused` | Optional status filter. paused is the same as draft: a paused sequence has the status draft. |
 | `search` | string | No |  | Optional case-insensitive search against the sequence name. |
 | `limit` | integer | No |  | Maximum number of sequences to return (1-100, default 25). |
 
@@ -251,7 +267,7 @@ This tool takes no arguments.
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `sequence_id` | integer | Yes |  | The id of the sequence to add the step to. |
-| `delay_type` | string | Yes |  | Unit for the delay before this step sends: "days" or "hours". |
+| `delay_type` | string | Yes | `days`, `hours` | Unit for the delay before this step sends: "days" or "hours". |
 | `delay_days` | integer | Yes |  | How many days (max 365) or hours (max 8760) after the previous step to send. Use 0 to send immediately on enrollment for the first step. |
 | `email_identity_id` | integer | Yes |  | Verified sender identity id to send this step from. |
 | `subject` | string | No |  | Email subject line. Supports {{ variable }} template tags. |
@@ -274,7 +290,7 @@ This tool takes no arguments.
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `sequence_step_id` | integer | Yes |  | Id of the step to update. Use sequence-content-tool to discover step ids. |
-| `delay_type` | string | No |  | Unit for the delay before this step sends: "days" or "hours". Required together with delay_days. |
+| `delay_type` | string | No | `days`, `hours` | Unit for the delay before this step sends: "days" or "hours". Required together with delay_days. |
 | `delay_days` | integer | No |  | How many days (max 365) or hours (max 8760) after the previous step to send. Required together with delay_type. |
 | `email_identity_id` | integer | No |  | Verified sender identity id to send this step from. |
 | `email_template_id` | integer | No |  | Optional email template id to wrap the content. Pass null to remove the template. |
@@ -294,24 +310,24 @@ This tool takes no arguments.
 
 **Set Sequence Status Tool**
 
-> Activate (status "live") or pause (status "paused") a sequence. This affects real contacts, so the first call only returns a preview: the change, the enrolled contacts, the pending mails, the live steps and the live automations that add contacts to the sequence. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. A sequence sends only through its live steps, so activate the steps with set-sequence-step-status too. The dashboard runs the same checks: activation fails when the account cannot send email. A live step without a {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. Find sequence ids with list-sequences-tool.
+> Activate (status "live") or pause (status "draft", or its alias "paused") a sequence. The result returns the stored status: "live" or "draft". A paused sequence has the status "draft". This affects real contacts, so the first call only returns a preview: the change, the enrolled contacts, the pending mails, the live steps and the live automations that add contacts to the sequence. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. A sequence sends only through its live steps, so activate the steps with set-sequence-step-status too. The dashboard runs the same checks: activation fails when the account cannot send email. A live step without a {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. Find sequence ids with list-sequences-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `sequence_id` | integer | Yes |  | Id of the sequence. Use list-sequences-tool to discover sequence ids. |
-| `status` | string | Yes | `live`, `paused` | "live" activates the sequence. "paused" stops it. |
+| `status` | string | Yes | `draft`, `live`, `paused` | "live" activates the sequence. "draft" stops it. "paused" is an alias of "draft". |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
 
 ## set-sequence-step-status
 
 **Set Sequence Step Status Tool**
 
-> Activate (status "live") or pause (status "paused") one step of a sequence. This affects real contacts, so the first call only returns a preview: the change, the contacts enrolled in the sequence and the pending mails of this step. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. The dashboard runs the same checks: activation fails when the account cannot send email or the step has no subject or body. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. A live step sends only while its sequence is live. Find step ids with sequence-content-tool.
+> Activate (status "live") or pause (status "draft", or its alias "paused") one step of a sequence. The result returns the stored statuses: "live" or "draft". A paused step has the status "draft". This affects real contacts, so the first call only returns a preview: the change, the contacts enrolled in the sequence and the pending mails of this step. Nothing is saved. Show the preview to the user, and after the user confirms, call the tool again with the same arguments and confirm_live set to true. Never set confirm_live without that confirmation. The dashboard runs the same checks: activation fails when the account cannot send email or the step has no subject or body. A missing {{ unsubscribe_url }} link or a missing postal address never blocks the activation. The preview and the result list them in warnings. Show the warnings to the user. A live step sends only while its sequence is live. Find step ids with sequence-content-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
 | `sequence_step_id` | integer | Yes |  | Id of the sequence step. Use sequence-content-tool to discover step ids. |
-| `status` | string | Yes | `live`, `paused` | "live" activates the step. "paused" stops it. |
+| `status` | string | Yes | `draft`, `live`, `paused` | "live" activates the step. "draft" stops it. "paused" is an alias of "draft". |
 | `confirm_live` | boolean | No |  | Set to true only after the user explicitly confirms the change to a live record. A live record affects real contacts now. Leave it out for drafts. |
 
 ## send-sequence-step-test-mail-tool
@@ -484,7 +500,7 @@ This tool takes no arguments.
 
 **Create Contact Tool**
 
-> Create a contact for the authenticated account, or reuse the contact that already has this email. Optional name, tag names, and one list. A new blacklisted email is rejected. An existing email keeps attributes you do not send. Tags are added and never removed — removing a tag is not available through this API. When list_id is set, the contact is added to that list and an unsubscribe that an admin made is cleared; a list that requires opt-in queues the opt-in email. Without list_id, the subscription never changes. Find list ids with view-newsletter-filters-tool. Returns the contact id and whether a new row was created.
+> Create a contact for the authenticated account, or reuse the contact that already has this email. Optional name, tag names, and one list. A new blacklisted email is saved as unsubscribed. An existing email keeps attributes you do not send. Tags are added and never removed — removing a tag is not available through this API. When list_id is set, the contact is added to that list, and a list that requires opt-in queues the opt-in email. The subscription never changes: an unsubscribed contact stays unsubscribed. Find list ids with view-newsletter-filters-tool. Returns the contact id and whether a new row was created.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -497,7 +513,7 @@ This tool takes no arguments.
 
 **Add Contact To List Tool**
 
-> Add an existing contact to a mailing list without removing their other lists. A list that requires opt-in queues the opt-in email and does not mark the contact opted in. Calling it again for a list they already belong to does not send another subscription event. To change many contacts at once, use bulk-update-contacts. Find the contact with find-contact and the list id with view-newsletter-filters-tool.
+> Add an existing contact to a mailing list without removing their other lists. A list that requires opt-in queues the opt-in email and does not mark the contact opted in. The subscription never changes: an unsubscribed contact stays unsubscribed. Calling it again for a list they already belong to does not send another subscription event. To change many contacts at once, use bulk-update-contacts. Find the contact with find-contact and the list id with view-newsletter-filters-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -519,7 +535,7 @@ This tool takes no arguments.
 
 **Remove Contact From List Tool**
 
-> Remove a contact from one mailing list. Their other lists stay. The contact row is not deleted. Find the contact with find-contact and the list id with view-newsletter-filters-tool.
+> Remove a contact from one mailing list. Their other lists stay. The contact row is not deleted. The removal runs the live list automations of the account. Find the contact with find-contact and the list id with view-newsletter-filters-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -530,7 +546,7 @@ This tool takes no arguments.
 
 **Bulk Update Contacts Tool**
 
-> Update up to 100 existing contacts in one call. Each item names one contact by contact_id or by exact email, and gives its own changes: name, add_tags, remove_tags, set_attributes, remove_attributes, add_to_lists and remove_from_lists. Only the fields you send change. Unknown tag names in add_tags are created. Unknown tag names in remove_tags are ignored. set_attributes merges into the custom attributes of the contact. Adding a contact to a list that requires opt-in queues the opt-in email. Tag, list and attribute changes run the live automations of the account. Items are independent: a failed item does not stop the other items, and the result reports each item as updated or failed. Find the contacts with list-contacts and the list ids with view-newsletter-filters-tool.
+> Update up to 100 existing contacts in one call. Each item names one contact by contact_id or by exact email, and gives its own changes: name, add_tags, remove_tags, set_attributes, remove_attributes, add_to_lists and remove_from_lists. Only the fields you send change. Unknown tag names in add_tags are created. Unknown tag names in remove_tags are ignored. set_attributes merges into the custom attributes of the contact. Adding a contact to a list that requires opt-in queues the opt-in email. Adding a contact to a list never changes the subscription. Tag, list and attribute changes run the live automations of the account. Items are independent: a failed item does not stop the other items, and the result reports each item as updated or failed. Find the contacts with list-contacts and the list ids with view-newsletter-filters-tool.
 
 | Argument | Type | Required | Values | Description |
 | --- | --- | --- | --- | --- |
@@ -630,7 +646,7 @@ This tool takes no arguments.
 
 **View Automation Options Tool**
 
-> Describe the building blocks of an automation for the authenticated account: the trigger condition types, the action types, and the lists, tags, sequences and contact attributes that a condition or action can reference by id or name. Use the result to assemble the "condition" and "actions" for create-automation and update-automation. A paused automation can use a draft sequence in an "add_sequence" action. The automation can go live only when that sequence is live.
+> Describe the building blocks of an automation for the authenticated account: the trigger condition types, the action types, and the lists, tags, sequences, contact attributes and link names that a condition or action can reference by id or name. Use the result to assemble the "condition" and "actions" for create-automation and update-automation. A paused automation can use a draft sequence in an "add_sequence" action. The automation can go live only when that sequence is live.
 
 This tool takes no arguments.
 
@@ -645,8 +661,8 @@ This tool takes no arguments.
 | `name` | string | Yes |  | Name for the automation. |
 | `type` | string | No | `simple` | Automation type. The only type is "simple". |
 | `condition` | object | Yes |  | The trigger. Use view-automation-options to find the ids. |
-| `condition.type` | string | No | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed` | The event that starts the automation. |
-| `condition.value` | string | No |  | The list, tag or sequence id of the event. For "attribute_changed" with operator "changed_to", the new attribute value. |
+| `condition.type` | string | No | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed`, `link_clicked` | The event that starts the automation. |
+| `condition.value` | string | No |  | The list, tag or sequence id of the event. For "attribute_changed" with operator "changed_to", the new attribute value. For "link_clicked", the link name. |
 | `condition.attribute` | string | No |  | Only for "attribute_changed": the contact attribute name. |
 | `condition.operator` | string | No | `changed_to`, `changed` | Only for "attribute_changed": "changed_to" needs a value, "changed" matches any change. |
 | `actions` | array of object | Yes |  | What happens to the contact, in order. |
@@ -665,8 +681,8 @@ This tool takes no arguments.
 | `name` | string | No |  | Name for the automation. |
 | `type` | string | No | `simple` | Automation type. The only type is "simple". |
 | `condition` | object | No |  | The trigger. Use view-automation-options to find the ids. |
-| `condition.type` | string | No | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed` | The event that starts the automation. |
-| `condition.value` | string | No |  | The list, tag or sequence id of the event. For "attribute_changed" with operator "changed_to", the new attribute value. |
+| `condition.type` | string | No | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed`, `link_clicked` | The event that starts the automation. |
+| `condition.value` | string | No |  | The list, tag or sequence id of the event. For "attribute_changed" with operator "changed_to", the new attribute value. For "link_clicked", the link name. |
 | `condition.attribute` | string | No |  | Only for "attribute_changed": the contact attribute name. |
 | `condition.operator` | string | No | `changed_to`, `changed` | Only for "attribute_changed": "changed_to" needs a value, "changed" matches any change. |
 | `actions` | array of object | No |  | What happens to the contact, in order. |

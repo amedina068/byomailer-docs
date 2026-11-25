@@ -42,6 +42,7 @@ A new automation is live at once.
 | `added_to_sequence` | Added to sequence | The contact joins the selected sequence. |
 | `sequence_finished` | Sequence finished | The contact completes the selected sequence. See [Sequences](sequences.md). |
 | `attribute_changed` | Attribute changes | A custom attribute of the contact changes. |
+| `link_clicked` | Link clicked | The contact clicks a link with the name that you enter. See [Link clicks](link-clicks.md). |
 
 The form shows **Added to sequence** and **Sequence finished** only when you have a sequence. It shows **Attribute changes** only when your account has a custom attribute.
 
@@ -110,6 +111,9 @@ A visual automation is a workflow on a canvas. The workflow has nodes and the li
 | `removed_tag` | Tag removed |
 | `added_to_sequence` | Added to sequence |
 | `sequence_finished` | Sequence finished |
+| `link_clicked` | Link clicked |
+
+The **Link clicked** trigger takes a link name, not a list, tag or sequence. See [Link clicks](link-clicks.md).
 
 #### Actions
 
