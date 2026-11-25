@@ -134,4 +134,4 @@ The `signed` middleware then also accepts a signature that BYOMailer made on a U
 
 ## The health check
 
-The `web` service answers `GET /up` when Laravel starts correctly. `docker-compose.yml` uses this path for the health check of the container. The host rule also allows `/up` on a verified custom link domain, so an uptime monitor can check that path.
+The `web` service answers `GET /up` when Laravel starts correctly. `docker-compose.yml` uses this path for the health check of the container. The host rule allows `/up` on each host, so an uptime monitor can check that path on a custom link domain. BYOMailer also sends a request to `/up` through each custom link domain. See [Custom domains](../using-byomailer/custom-domains.md#the-hourly-probe).

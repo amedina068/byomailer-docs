@@ -23,7 +23,8 @@ All the tasks are in `routes/console.php`. The times are in UTC, because `config
 | `visual-automations:process` | Each minute, no overlap | Puts the pending steps of visual automations on the `automations` queue. |
 | `email-identities:refresh-dns-status` | Every 15 minutes | Checks the DNS status of the sender identities that are pending or verifying. It also checks the DMARC record of a verified identity again after one day. |
 | `email-identities:check-tracking-domain-dns` | Every 30 minutes, no overlap | Queues a `VerifyTrackingDomainJob` for each custom tracking domain that is not verified. |
-| `email-identities:check-link-domain` | Every 30 minutes, no overlap | Activates each custom link domain after Cloudflare for SaaS issued its certificate. |
+| `email-identities:check-link-domain` | Every 30 minutes, no overlap | Activates each custom link domain after Cloudflare for SaaS issued its certificate and a request through the domain reached BYOMailer. |
+| `email-identities:probe-link-domains` | Each hour, no overlap | Sends a request through each verified custom link domain. It reports an error for each domain that does not reach BYOMailer, and exits with a failure code. |
 | `ses:fetch-quota` | Each hour | Reads the SES quota and status of each account with AWS credentials: sandbox or production, sending paused or not, the 24-hour limit and the send rate. |
 | `ses:sync-configuration-sets` | Each hour | Reads the tracking settings of the SES configuration sets and the API permissions from AWS, and stores them in the database. |
 | `ses:send-permission-alerts` | Each hour | Emails a user whose AWS credentials do not have the necessary SES permissions. |

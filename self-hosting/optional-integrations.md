@@ -88,8 +88,10 @@ How it works:
 2. BYOMailer registers the host as a custom hostname in the zone, with HTTP domain validation. It sends `CLOUDFLARE_ORIGIN_SERVER` and `CLOUDFLARE_ORIGIN_SNI` when they are set.
 3. The user adds a CNAME record from the host to `CLOUDFLARE_CNAME_TARGET`.
 4. Every 30 minutes, `email-identities:check-link-domain` reads the custom hostname from Cloudflare.
-5. When the hostname status and the certificate status are both `active`, BYOMailer marks the link domain as verified.
-6. From then on, the emails of that identity use `https://<link domain>/...` for the contact links.
+5. When the hostname status and the certificate status are both `active`, BYOMailer sends `GET https://<link domain>/up`. It does not follow redirects.
+6. When BYOMailer answers that request with a status 2xx, BYOMailer marks the link domain as verified.
+7. From then on, the emails of that identity use `https://<link domain>/...` for the contact links.
+8. Each hour, `email-identities:probe-link-domains` sends the same request through each verified link domain. It reports each failure to the log, and to Rollbar when it is on.
 
 On a verified link domain, BYOMailer serves only the contact link routes. See [Reverse proxy and TLS](reverse-proxy-and-tls.md#the-host-rule).
 
@@ -121,6 +123,8 @@ The command needs `CLOUDFLARE_ORIGIN_SNI`. Without it, the command stops with `N
 The token needs no other permission. BYOMailer does not change DNS records.
 
 Cloudflare sends the requests of each link domain to the fallback origin with the `Host` of the link domain. The web server must answer them. [`deploy/nginx/byomailer.conf`](https://github.com/amedina068/byomailer/blob/main/deploy/nginx/byomailer.conf) is the default server for this reason. In Docker, the reverse proxy in front of port 8080 must also send these hosts to the `web` service.
+
+CAUTION: Do not make a redirect block the default server on port 443. That block then answers each link domain with a redirect to the host of `APP_URL`. Mailbox providers change the one-click unsubscribe POST into a GET, and no contact is unsubscribed.
 
 For the steps of a user, see [Custom domains](../using-byomailer/custom-domains.md).
 

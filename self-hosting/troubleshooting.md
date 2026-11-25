@@ -155,6 +155,12 @@ The scheduler checks the custom domains every 30 minutes. See [Scheduler](schedu
 | `Cloudflare certificate not yet active.` | Make sure that the CNAME record points to `CLOUDFLARE_CNAME_TARGET`. Wait for Cloudflare. |
 | `No Cloudflare hostname registered.` | Save the link domain again on the sender identity. |
 | A Cloudflare error | Make sure that `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ZONE_ID` are correct. |
+| `https://<host>/up redirects to <location>. The web server does not send this host to the app.` | A server block of the web server catches the host and redirects it. Make the server block of BYOMailer the default server on port 443. See [Optional integrations](optional-integrations.md#set-up-cloudflare-for-saas). |
+| `https://<host>/up returned HTTP <status>. The app must answer with HTTP 200.` | The request did not reach BYOMailer. If the status is 526, see the paragraph after this table. For another status, read the log of the web server. |
+| `https://<host>/up did not answer: ...` | The request failed, or it had no answer in 10 seconds. Make sure that the origin server is on and accepts HTTPS. |
+| `<host> does not resolve to a public IP address.` | The DNS of the subdomain is not correct. Make sure that the CNAME record points to `CLOUDFLARE_CNAME_TARGET`. |
+
+`email-identities:probe-link-domains` prints the same reasons for the verified link domains. It prints `<host>: healthy.` for each domain that works. For each failure, it reports a `LinkDomainUnhealthyException` to the log and exits with a failure code. The domain stays verified.
 
 If a verified link domain answers error 526, the origin certificate does not cover `CLOUDFLARE_ORIGIN_SNI`. See [Optional integrations](optional-integrations.md#custom-link-domains-cloudflare-for-saas).
 
