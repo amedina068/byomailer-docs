@@ -145,6 +145,45 @@ After the action **Add to sequence**, the workflow waits until the contact compl
 
 A delay node has a duration of 1 or more, and a unit: `minutes`, `hours` or `days`.
 
+### Goals and exit conditions
+
+A visual automation can have goals and exit conditions. These rules end the workflow for a contact before the last node:
+
+- A goal ends the workflow for a contact as a conversion.
+- An exit condition ends the workflow for a contact with no conversion.
+
+Each rule has a type and a tag, list, topic or sequence of your account:
+
+| Rule | Label | The contact meets the rule when the contact |
+|---|---|---|
+| `has_tag` | Has tag | has the tag. |
+| `in_list` | In list | is in the list. |
+| `subscribed_to_topic` | Subscribed to topic | is subscribed to the topic and did not unsubscribe from it. |
+| `in_sequence` | In sequence | is in the sequence. |
+
+A workflow can have 10 goals and 10 exit conditions. BYOMailer stores them in the workflow, in the `goals` and `exit_conditions` keys.
+
+To add a rule:
+
+1. Open the visual automation.
+2. If the visual automation is live, pause it.
+3. Below the canvas, in **Goals** or in **Exit conditions**, click **Add**.
+4. Select the type and the value.
+5. Save.
+
+When a contact meets a rule, BYOMailer does these steps:
+
+1. It skips the remaining nodes of the contact. The contact gets no more actions from the workflow.
+2. It ends the enrollment and stores the reason: `goal` or `exit_condition`.
+
+BYOMailer checks the rules before each node. It also checks them every minute for each contact that waits in a delay node or after **Add to sequence**. If a contact meets a goal and an exit condition at the same time, the goal wins.
+
+A sequence that the workflow started does not stop when the contact leaves the workflow. To stop the sequence emails for these contacts, use the sequence filters. See [Sequences](sequences.md).
+
+A contact can be in a workflow only one time. A contact that leaves at a goal or at an exit condition does not enter the workflow again.
+
+You cannot delete a list or a topic that a goal or an exit condition uses. Remove the rule first.
+
 ### Build a visual automation
 
 1. Open **Visual Automations** and create a visual automation.
@@ -159,6 +198,8 @@ BYOMailer does not save the workflow in these cases:
 - The workflow has more than one trigger: `A workflow can only have one trigger node.`
 - A line points to a node that does not exist.
 - A node uses a tag, list, topic or sequence that does not belong to you.
+- The workflow has more than 10 goals or more than 10 exit conditions.
+- A goal or an exit condition uses a tag, list, topic or sequence of another account: `One or more selected tags do not belong to your account.` The message names `tags`, `lists`, `topics` or `sequences`.
 - An **Add to sequence** node uses a sequence that is not live.
 
 ### Statuses
@@ -184,7 +225,7 @@ Only live workflows of the account of the contact enroll the contact. A trigger 
 
 Each contact in a workflow has one enrollment. A contact can be in a workflow only one time.
 
-Every minute, the scheduler runs `visual-automations:process`. The command finds the enrollments of live workflows that have a step ready to run. It puts one job for each enrollment on the queue.
+Every minute, the scheduler runs `visual-automations:process`. The command finds the enrollments of live workflows that have a step ready to run. It also finds the enrollments whose contact meets a goal or an exit condition. It puts one job for each enrollment on the queue.
 
 The job moves the contact through the nodes:
 
@@ -193,8 +234,16 @@ The job moves the contact through the nodes:
 3. A delay node waits until its time is over.
 4. When the contact has no more nodes, the enrollment is complete.
 
-If the contact unsubscribes, BYOMailer ends the enrollment and skips the remaining nodes.
+If the contact unsubscribes, BYOMailer ends the enrollment and skips the remaining nodes. If the contact meets a goal or an exit condition, BYOMailer does the same. See [Goals and exit conditions](#goals-and-exit-conditions).
 
 If you pause a workflow, the steps of its contacts wait. They continue when the workflow is live again.
 
-The page of a workflow shows the number of contacts that wait at each node. The **Contacts** page of a workflow lists the enrolled contacts.
+The page of a workflow shows the number of contacts that wait at each node. The **Contacts** page of a workflow lists the enrolled contacts. It has these filters:
+
+| Filter | Contacts |
+|---|---|
+| All contacts | Each contact that entered the workflow. |
+| Active | The contacts that are in the workflow now. |
+| Completed | The contacts that left the workflow: at the end, at a goal, at an exit condition, or when they unsubscribed. |
+| Converted | The contacts that met a goal. |
+| Exited | The contacts that met an exit condition. |
