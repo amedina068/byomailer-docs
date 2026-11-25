@@ -117,6 +117,8 @@ The scheduler can start the send while the page is open. Then **Unschedule** and
 - `The send already started, so the newsletter did not go back to draft.`
 - `The send already started, so the newsletter was not deleted.`
 
+The same can occur while the wizard is open. If the send starts before you save a step, BYOMailer saves nothing. It opens the page of the newsletter and shows `The send already started, so the newsletter did not change.`
+
 ## Send a test email
 
 Click **Send test email** in the **Schedule** step. BYOMailer sends one copy to your own email address.
