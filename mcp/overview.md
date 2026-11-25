@@ -52,7 +52,7 @@ For more about tokens, read [API authentication](../api/authentication.md).
 
 ## Tool names
 
-The server publishes 44 tools. Some tool names end with `-tool`, for example `create-newsletter-tool`. Other tool names have no suffix, for example `schedule-newsletter`.
+The server publishes 45 tools. Some tool names end with `-tool`, for example `create-newsletter-tool`. Other tool names have no suffix, for example `schedule-newsletter`.
 
 The server instructions, the tool descriptions and the error messages use the names that `tools/list` returns. This page uses the same names.
 
@@ -129,12 +129,22 @@ For more about sender identities, read [Sender identities](../using-byomailer/se
 
 | Item | Values |
 |---|---|
-| Condition types | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed` |
+| Condition types | `contact_added_to_list`, `removed_from_list`, `tag_added`, `removed_tag`, `added_to_sequence`, `sequence_finished`, `attribute_changed`, `link_clicked` |
 | Action types | `add_tag`, `add_list`, `remove_tag`, `remove_list`, `add_sequence` |
 
 A paused automation can add contacts to a draft sequence. A live automation needs live sequences, because it drops each contact that it cannot enroll. A live automation runs on new events only. It does not run on contacts that matched before. The MCP server cannot delete an automation.
 
 For more about automations, read [Automations](../using-byomailer/automations.md).
+
+## Workflow for link clicks
+
+1. Add `data-bm-link="<name>"` to an `<a>` tag in the content of a newsletter or a step.
+2. After the send, call `link-clicks-tool` with `newsletter_id`, or with `sequence_id` and `step_id`. It lists each link with its clicks.
+3. To list the contacts who clicked one link, call the tool again with `link` set to a `key` from that list.
+4. To read the next page of contacts, send the `next_after_id` of the result as `after_id`.
+5. To act on a click, create an automation with the condition `link_clicked` and the link name as `value`.
+
+`view-automation-options` returns the link names of your content in `link_names`. For more, read [Link clicks](../using-byomailer/link-clicks.md).
 
 ## Drafts only
 
