@@ -81,6 +81,16 @@ BYOMailer marks the email as verified, signs you in, and opens the dashboard.
 
 If the link expired, the page shows `This invitation has expired, please contact your admin to get a new one.` Ask an admin to invite you again.
 
+### Log in with Google
+
+If the operator of the instance turned on Google sign-in, the login page shows **Log in with Google**. It works for an existing user only.
+
+1. Accept your invitation first.
+2. On the login page, click **Log in with Google**.
+3. Select the Google account with the same email address as your BYOMailer user.
+
+The first time, BYOMailer links the Google account to your user. If you turned on two-factor authentication, BYOMailer then asks for your code. The operator page [Google sign-in](../self-hosting/accounts-and-registration.md#google-sign-in) lists the rules and the error messages.
+
 ## Change a role
 
 You must be an admin.
@@ -140,7 +150,7 @@ To make a new set of codes, click **Regenerate Codes**. The old codes then stop 
 
 ### Sign in with 2FA
 
-After your password, BYOMailer asks for the code from your app. If you do not have your phone, use a recovery code.
+After your password or after Google, BYOMailer asks for the code from your app. If you do not have your phone, use a recovery code.
 
 If you lose your phone and your recovery codes, an operator of the instance can help. See [Recover access](../self-hosting/recover-access.md).
 

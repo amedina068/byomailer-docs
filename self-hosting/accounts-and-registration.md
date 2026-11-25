@@ -1,12 +1,12 @@
 ---
 title: Accounts and registration
-description: Create the owner, choose who can sign up, and deactivate users of the instance.
+description: Create the owner, choose who can sign up, turn on Google sign-in, and deactivate users of the instance.
 order: 8
 ---
 
 # Accounts and registration
 
-This page is about the users of the instance: the owner, the sign-up rules and the deactivation of a user. To invite a team member to one account, see [Teams](../using-byomailer/teams.md).
+This page is about the users of the instance: the owner, the sign-up rules, Google sign-in and the deactivation of a user. To invite a team member to one account, see [Teams](../using-byomailer/teams.md).
 
 ## The owner
 
@@ -99,6 +99,82 @@ After the owner saves a mode in **Admin > Settings**, `REGISTRATION_ENABLED` has
 
 If `BYOMAILER_API_*` is set, BYOMailer adds each user that signs up at `/register` to a list on another BYOMailer server. See [Optional integrations](optional-integrations.md#byomailer-api-sign-up-list).
 
+## Google sign-in
+
+Users can log in with their Google account in place of their password. Google sign-in is off by default. It turns on only when you set the two variables below in `.env`.
+
+| Variable | Purpose |
+|---|---|
+| `GOOGLE_CLIENT_ID` | The client ID of your OAuth client in Google Cloud. |
+| `GOOGLE_CLIENT_SECRET` | The client secret of the same OAuth client. |
+
+While one of the two values is empty, the login page shows no Google link. `/auth/google/redirect` and `/auth/google/callback` answer 404.
+
+### Turn on Google sign-in
+
+1. Open the [Google Cloud console](https://console.cloud.google.com/).
+2. Select a project, or create a project for your BYOMailer instance.
+3. Open **APIs & Services > OAuth consent screen**. In the newer console, this page is **Google Auth Platform**.
+4. Configure the consent screen. Give the app name, a support email and the domain of `APP_URL`.
+5. Select the user type. If all your users are in one Google Workspace organization, select **Internal**. If not, select **External**.
+6. Open **APIs & Services > Credentials**.
+7. Click **Create credentials > OAuth client ID**.
+8. Select the application type **Web application**.
+9. Under **Authorized redirect URIs**, add `https://byomailer.example/auth/google/callback`. Use the host of your `APP_URL`.
+10. Click **Create**. Copy the client ID and the client secret.
+11. Set the two values in `.env`:
+
+    ```bash
+    GOOGLE_CLIENT_ID=1234567890-example.apps.googleusercontent.com
+    GOOGLE_CLIENT_SECRET=your-client-secret
+    ```
+
+12. Recreate the containers with `docker compose up -d`.
+13. Open the login page. Make sure that it shows **Log in with Google**.
+
+BYOMailer asks Google for the `openid`, `email` and `profile` scopes only. Google Cloud does not classify these scopes as sensitive.
+
+With the user type **External**, an app in the testing status accepts only the test users that you add in Google Cloud. To let all your users sign in, publish the app.
+
+If Google shows `redirect_uri_mismatch`, the redirect URI in Google Cloud is not the same as `APP_URL` followed by `/auth/google/callback`. Correct the URI in Google Cloud. The scheme, the host and the path must be the same.
+
+### Who can use Google sign-in
+
+Google sign-in never creates an account. A new user still comes only from the setup, an invitation, or `/register` when registration is open.
+
+The first Google sign-in of a user links the Google account to the BYOMailer user with the same email address. BYOMailer stores the Google account ID in the `google_id` column of the `users` table. After the link, the user logs in with the same Google account, also after a change of the email address.
+
+BYOMailer links the accounts only when all of these rules pass:
+
+- Google says that the email address is verified.
+- The BYOMailer user has a confirmed email address. The owner and each user who accepted an invitation have one. A user who signed up at `/register` does not have one.
+- The user is not deactivated or archived.
+- The user has no open invitation.
+- The BYOMailer user is not linked to a different Google account.
+
+The email match ignores upper and lower case. BYOMailer compares the addresses in ASCII only, so an address with a lookalike character does not match.
+
+If a rule fails, BYOMailer does not sign in the user. The login page shows the reason:
+
+| Message | Cause |
+|---|---|
+| `No account uses this email address. Ask a team admin for an invitation.` | No BYOMailer user has the email address of the Google account. |
+| `Google did not verify this email address. Log in with your password.` | Google did not verify the email address of the Google account. |
+| `This account has no confirmed email address. Log in with your password.` | The BYOMailer user has no confirmed email address. |
+| `Accept your invitation first. Open the link in the invitation email.` | The user has an open invitation. |
+| `This account is linked to a different Google account.` | The BYOMailer user is linked to another Google account. |
+| `This account is archived.` | A team admin archived the user. |
+| `This account is deactivated. Ask the owner of this BYOMailer instance to reactivate it.` | The owner deactivated the user. |
+| `The Google sign-in did not complete. Try again.` | The user canceled the consent, the sign-in took too long, or the `state` value was not correct. |
+
+### Security of Google sign-in
+
+- BYOMailer sends a random `state` value to Google and keeps it in the session. The callback refuses a request with a different value.
+- BYOMailer uses PKCE for the exchange of the code.
+- A user with two-factor authentication must enter the code after Google, the same as after a password.
+- Google sign-in does not set the "Remember me" cookie.
+- The redirect and the callback accept 10 requests in one minute from one IP address.
+
 ## `ADMIN_EMAILS`
 
 `ADMIN_EMAILS` is a comma-separated list of emails. It has two uses:
@@ -114,7 +190,7 @@ The owner can deactivate a user in **Admin > Users**. The data of the user stays
 
 BYOMailer refuses a deactivated user everywhere:
 
-- The login form refuses the user and shows `This account is deactivated. Ask the owner of this BYOMailer instance to reactivate it.`
+- The login form and the Google sign-in refuse the user and show `This account is deactivated. Ask the owner of this BYOMailer instance to reactivate it.`
 - An open web session and a "Remember me" login end at the next request.
 - The API tokens of the user stop working on the API (`/api/v1`) and on the MCP server (`/mcp`).
 - The invitation link of an invited user stops working.
