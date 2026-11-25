@@ -153,7 +153,7 @@ If the app checkout has a `vendor/` folder, the script reads the command list fr
 
 The environment variable check reads each upper-case name with an underscore in code marks. Write an SES event name such as RENDERING_FAILURE without code marks, or the check reports it.
 
-The CI runs the same script on each push and pull request. If the repository has the secret `BYOMAILER_APP_TOKEN`, the CI clones the app and runs all the checks. Without the secret, it runs the link check only.
+The CI runs the same script on each push and pull request. The CI clones the public app repository `amedina068/byomailer` and runs all the checks.
 
 ## Generate the MCP tools reference
 
