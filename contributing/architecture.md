@@ -121,10 +121,14 @@ Horizon runs these queues: `default`, `newsletter`, `sequences`, `automations`, 
 
 ## Template variables
 
-Email content uses `{{ variable }}` placeholders.
+Email content uses Liquid. Content with only `{{ variable }}` placeholders is plain.
 
 - The `Message` model stores the subject and the content of a newsletter, a sequence step or a list. It is polymorphic (`messageable`).
-- The `DetectsTemplateVariables` trait finds the placeholders. The `ReplacesTemplateVariables` trait replaces them. Both are in `app/Support/`.
+- `App\Support\Liquid` renders Liquid in a sandbox: no file system, no PHP objects, a time limit, an output limit and a loop limit. In HTML, it escapes each `{{ }}` output.
+- `Message::usesLiquid()` is true when the content has Liquid code and each part is valid Liquid. `Message::render()` then uses Liquid. For other content, it uses the old replacement of the `ReplacesTemplateVariables` trait, so plain content sends the same as before. `tests/Feature/LegacyContentRenderTest.php` locks that output.
+- The `DetectsTemplateVariables` trait finds the variables of the content. For Liquid content, it reads the parse tree.
+- SES bulk templates know no Liquid. `NewsletterTransport` sends a newsletter with Liquid code one email at a time through the mailer.
+- The `ValidLiquid` rule refuses content that is not valid Liquid on each save.
 - The `BuildsFromContactMail` trait (`app/Mail/Concerns/`) holds the shared logic of `NewsletterMail` and `OptInMail`.
 - `Contact::getTemplateAttribute()` reads a value from a column of the contact, then from `extra_attributes`.
 - `Message::resolveTemplateData()` fills an empty value from the content variables of the newsletter or sequence, then from the attribute defaults of the account.

@@ -236,6 +236,8 @@ Response `200`:
 
 BYOMailer makes `text_content` from `html_content`. You cannot send `text_content`.
 
+The subject, the preview text and the body of both variants can use Liquid. If a field is not valid Liquid, the response is `422` with the error under the name of the field, for example `The Liquid code has an error on line 1: 'if' tag was never closed`. Content with only `{{ variable }}` placeholders is always valid. See [Liquid](../using-byomailer/templates-and-blocks.md#liquid).
+
 "Safe HTML" means that the HTML is valid and has no unsafe content. BYOMailer refuses these tags: `script`, `iframe`, `object`, `embed`, `form`, `input`, `textarea`, `select`, `button`, `applet`, `meta`, `link`, `base`, `svg`, `math`. It also refuses event attributes such as `onclick`, and `javascript:` and `vbscript:` URLs.
 
 ```bash

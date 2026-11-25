@@ -20,7 +20,7 @@ BYOMailer is a Laravel 13 app with an Inertia and Vue 3 dashboard. You can run i
 | Sequences | Send a series of emails to each contact, with a delay between the steps. Each step can have its own audience filters. |
 | Automations | Start actions when a contact joins a list, gets a tag, finishes a sequence, or has an attribute change. A visual builder is also available. |
 | Contacts | Lists, topics, tags, and custom attributes. Import and export CSV files. Each contact has a preference center and a one-click unsubscribe link (RFC 8058). |
-| Templates and blocks | Reusable email templates and content blocks with `{{ variable }}` placeholders. |
+| Templates and blocks | Reusable email templates and content blocks with `{{ variable }}` placeholders and Liquid tags and filters. |
 | Deliverability | BYOMailer records the deliveries, bounces, complaints, opens, and clicks that SES reports. It suppresses addresses that bounced or complained. A reputation page shows the rates that AWS monitors. |
 | Custom domains | Optional custom tracking domains and custom link domains for each sender identity. |
 | Teams | Invite users with the `admin`, `editor`, or `viewer` role. Two-factor authentication is available. |
