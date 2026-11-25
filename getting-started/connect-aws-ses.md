@@ -31,7 +31,39 @@ The AWS onboarding is at `/onboarding/aws`. You can also open it in these places
 - The **Getting Started** checklist in the dashboard: **Add AWS credentials**.
 - **Settings > Email Credentials**, when no credentials exist.
 
-The onboarding has four steps: **IAM User**, **Permissions**, **Credentials**, and **Complete**.
+You can connect in two ways:
+
+- With an IAM role. BYOMailer keeps no AWS keys. The onboarding shows this way first, but only when the owner of the instance turned on the [IAM role connection](../self-hosting/iam-role-connection.md).
+- With the access key of an IAM user. The key steps have four parts: **IAM User**, **Permissions**, **Credentials**, and **Complete**.
+
+## Connect with an IAM role
+
+A CloudFormation stack makes an IAM role in your AWS account. Only the BYOMailer server can assume the role, and only with the external ID of your account. The role can use only the SES and SNS actions that BYOMailer needs.
+
+1. In the onboarding, find **Connect with an IAM role**.
+2. If the page shows **Open AWS CloudFormation**, click it. The console opens with the values filled in.
+3. If the page shows only **Download the template**, download the file. In the CloudFormation console, click **Create stack**, then **Upload a template file**. Enter the **TrustedPrincipalArn**, **ExternalId** and **RoleName** values from the page.
+4. Select the check box that lets CloudFormation create IAM resources.
+5. Create the stack. Wait until the stack status is CREATE_COMPLETE.
+6. In BYOMailer, enter your 12-digit **AWS account ID** and the **SES region**, for example `eu-west-1`.
+7. Click **Connect**.
+
+CAUTION: Do not change the **ExternalId** value. If it is not the value of your account, AWS refuses the role.
+
+BYOMailer then assumes the role and makes sure that it can call SES. It creates the SNS topic and the SES tenant, as for access keys. When all steps pass, **Settings > Email Credentials** opens and shows the role ARN.
+
+If a step fails, the error shows under **AWS account ID**:
+
+| Error | Cause |
+|---|---|
+| "Enter the 12-digit ID of your AWS account." | The account ID does not have 12 digits. |
+| "AWS refused to let BYOMailer use the IAM role. ..." | The stack is not complete, the account ID is wrong, or the stack uses another external ID. A new role can need 1 minute before it works. |
+| "SES access denied: ..." | The role cannot call SES in that region. |
+| "Failed to create SNS topic: ...", "Failed to subscribe SNS topic: ...", "Failed to provision SES tenant: ..." | The SNS or SES setup failed. BYOMailer removes the new SNS topic again. |
+
+An account with access keys can move to a role at any time. **Settings > Email Credentials** shows **Connect with an IAM role** for that account. The connection keeps the same credential record and removes the saved keys. After the move, delete the old access key in IAM.
+
+To move back to access keys, save new keys in **Update Credentials**. BYOMailer then removes the role from the account.
 
 ## Step 1: Create an IAM user
 
@@ -184,9 +216,9 @@ BYOMailer receives the SES events through the SQS queue of the instance. You do 
 
 Open **Settings > Email Credentials**. The page shows:
 
-- The region, the date of the last change, and a hint of the access key.
+- The region, the date of the last change, and a hint of the access key. For an IAM role, the page shows the role ARN.
 - The SES sending quota: **Sandbox** or **Production**, the sending status, the emails sent in the last 24 hours, the 24-hour limit, and the **Max Send Rate**. Click **Refresh** to read the quota again.
-- **API Permissions**: the SES permissions that BYOMailer found for the IAM user. Click **Recheck** to read them again.
+- **API Permissions**: the SES permissions that BYOMailer found for the IAM user. Click **Recheck** to read them again. A role session cannot read its own policy. For a role, **Recheck** makes sure that BYOMailer can still assume the role, and shows all four permissions as granted.
 
 To rotate the keys, use the **Update Credentials** form. It changes only the keys and the region. It keeps the SNS topic, the SQS subscription, the SES tenant and the permission checks of the account.
 

@@ -32,6 +32,7 @@ The code of the app is in a separate repository. The docs describe that code, an
 - [Recover access](self-hosting/recover-access.md)
 - [Optional integrations](self-hosting/optional-integrations.md)
 - [Troubleshooting](self-hosting/troubleshooting.md)
+- [IAM role connection](self-hosting/iam-role-connection.md)
 
 ### Using BYOMailer
 
