@@ -75,3 +75,19 @@ Start a warning with `WARNING:` (a risk to data or security) or `CAUTION:` (a ri
 3. Fill in the pull request template.
 
 The CI must pass before a merge.
+
+## Pull request titles
+
+The title of each pull request must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). The `PR title` check fails when the title does not follow the format. Examples:
+
+- `docs(api): add the subscribe endpoint`
+- `fix: correct the link to the backups page`
+- `chore: check the anchors in the check script`
+
+Use one of these types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore` or `revert`. The scope in parentheses is optional.
+
+GitHub makes the release notes from the titles of the merged pull requests. Write each title for a person who reads the release notes.
+
+## Triage
+
+Each issue form adds a type label and the `needs-triage` label to a new issue. The maintainer reads each new issue, removes `needs-triage` and sets the correct type label: `bug`, `enhancement`, `documentation` or `question`.

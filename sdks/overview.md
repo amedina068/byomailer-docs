@@ -108,7 +108,7 @@ Then run `bundle install`.
 
 | Language | Runtime versions | Framework integration | Dependencies |
 |---|---|---|---|
-| JavaScript and TypeScript | Node.js 20, 22 and 24. Bun 1.x and Deno 2.x (smoke test only). Cloudflare Workers (no test in CI). | Examples for Next.js and Express | None. The SDK uses the global `fetch` and Web Crypto. |
+| JavaScript and TypeScript | Node.js 22.12 or later (CI tests Node.js 22 and 24). The build tools need Node.js 22.18. Bun 1.x and Deno 2.x (smoke test only). Cloudflare Workers (no test in CI). | Examples for Next.js and Express | None. The SDK uses the global `fetch` and Web Crypto. |
 | PHP | PHP 8.2, 8.3 and 8.4 | Laravel 11, 12 and 13. Laravel 13 needs PHP 8.3 or later. | A PSR-18 HTTP client. Guzzle is the default. |
 | Python | Python 3.10, 3.11, 3.12, 3.13 and 3.14 | Examples for Django and FastAPI | None. The SDK uses the standard library. |
 | Ruby | Ruby 3.2, 3.3 and 3.4 | Rails 7.2, 8.0 and 8.1 | None. The gem uses the standard library. |
