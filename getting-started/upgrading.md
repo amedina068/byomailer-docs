@@ -67,21 +67,34 @@ The container runs the new migrations when it starts. If you used `--env-file` b
    ```
 
 3. Compare `.env.example` with your `.env`. Add the new variables that you need.
-4. If you use the `ses-events` worker, add `--profile ses` to the command of the next step. Without the profile, Compose does not rebuild that service.
-5. Rebuild the image and restart the stack:
+4. Rebuild the image and restart the stack:
 
    ```bash
    docker compose up -d --build
    ```
 
-6. Wait until `docker compose ps` shows the `web` service as healthy.
-7. Read the log of the `web` service for errors:
+5. Wait until `docker compose ps` shows the `web` service as healthy.
+6. Read the log of the `web` service for errors:
 
    ```bash
    docker compose logs web
    ```
 
-The `web` service runs the new migrations each time it starts, before NGINX serves requests. The `horizon`, `scheduler`, and `ses-events` services start only after the `web` service is healthy. Only the `web` service runs the migrations.
+The `web` service runs the new migrations each time it starts, before NGINX serves requests. It also runs the queue worker, the scheduler and the SES events worker.
+
+### First upgrade to the one-container image
+
+The old Compose stack had separate `horizon` and `scheduler` services. It also set `DB_CONNECTION=mysql` itself. The new `docker-compose.yml` starts MySQL and Redis only with the `mysql` profile. Do these steps one time, before step 4:
+
+1. In `.env`, add `COMPOSE_PROFILES=mysql`.
+2. Add the other lines of the "MySQL and Redis" block of `.env.example` to `.env`: `DB_CONNECTION=mysql`, `DB_DATABASE`, `DB_USERNAME`, `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis` and `SESSION_DRIVER=redis`. Keep your `DB_PASSWORD`.
+3. Run this command one time. It removes the old `horizon` and `scheduler` containers:
+
+   ```bash
+   docker compose up -d --build --remove-orphans
+   ```
+
+CAUTION: Without these lines, the app starts on a new, empty SQLite database. Your MySQL data stays in the `mysql` volume, but the app does not use it.
 
 ## Upgrade with the published image
 
@@ -90,7 +103,7 @@ If you use `docker-compose.image.yml`, do these steps:
 1. Back up the instance.
 2. If you set an exact version, set the new `BYOMAILER_VERSION` in `.env`.
 3. Run `docker compose -f docker-compose.image.yml pull`.
-4. Run `docker compose -f docker-compose.image.yml up -d`. If you use the `ses-events` worker, add `--profile ses`.
+4. Run `docker compose -f docker-compose.image.yml up -d`. If you run the SES events worker in its own container, add `--profile ses`. For the first upgrade to the one-container image, do the steps of [First upgrade to the one-container image](#first-upgrade-to-the-one-container-image) first, with `-f docker-compose.image.yml`.
 5. Wait until the `web` service shows `healthy`. The `web` service runs the migrations.
 
 With `BYOMAILER_VERSION=latest`, each pull can move to a new version. Set an exact version to control the time of the upgrade.

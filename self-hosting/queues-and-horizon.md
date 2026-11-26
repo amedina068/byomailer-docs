@@ -102,14 +102,16 @@ After you change the code or `.env`, start the workers again. In the Docker stac
 docker compose up -d
 ```
 
-`docker-compose.yml` gives the `horizon` service 60 seconds to stop. Horizon finishes the current jobs in that time.
+`docker-compose.yml` gives the `web` container 60 seconds to stop. Horizon runs in that container and finishes the current jobs in that time.
 
 On a server without Docker, run `php artisan horizon:terminate`. Your process manager then starts Horizon again.
 
 ## Logs
 
 ```bash
-docker compose logs -f horizon
+docker compose logs -f web
 ```
+
+The `web` container runs Horizon, so the log of the jobs is in the log of `web`. With the one-container image, run `docker logs -f byomailer`.
 
 `docker-compose.yml` sets `LOG_CHANNEL=stderr`, so the errors of the jobs go to this log.

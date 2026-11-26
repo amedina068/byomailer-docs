@@ -8,7 +8,7 @@ order: 4
 
 BYOMailer uses the Laravel scheduler for the work that runs at fixed times. The scheduler sends the scheduled newsletters and the sequence steps. If the scheduler does not run, these emails do not go out.
 
-In the Docker stack, the `scheduler` service runs `php artisan schedule:work`. This command runs the due tasks each minute. The service starts after the `web` service is healthy.
+In the Docker image, the container runs `php artisan schedule:work` as a service. This command runs the due tasks each minute. The Compose stack runs it in the `web` container. It has no separate `scheduler` service.
 
 On a server without Docker, run `php artisan schedule:run` each minute from cron, or keep `php artisan schedule:work` running.
 
@@ -40,9 +40,9 @@ Run one scheduler process for each instance. The Docker stack runs one. The task
 
 ## Make sure that the scheduler runs
 
-1. Run `docker compose ps`.
-2. Make sure that the `scheduler` service shows `healthy`.
-3. If it does not, read its log with `docker compose logs scheduler`.
+1. Run `docker exec byomailer php artisan byomailer:status`. In the Compose stack, run `docker compose exec web php artisan byomailer:status`.
+2. Make sure that the last scheduler run is less than 2 minutes old.
+3. If it is not, read the log with `docker logs byomailer` or `docker compose logs web`.
 
 To see the list of tasks and their next run, run:
 

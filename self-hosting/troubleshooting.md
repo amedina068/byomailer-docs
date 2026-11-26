@@ -30,9 +30,8 @@ With the one-container image, run `docker logs byomailer`. The last two lines of
 |---|---|
 | `docker compose ps` | Show each service and its health. |
 | `docker compose logs web` | The web requests, the migrations at start and the setup URL. |
-| `docker compose logs -f horizon` | The queued jobs: sending, SES events, automations, webhooks. |
-| `docker compose logs -f scheduler` | The scheduled tasks. |
-| `docker compose logs -f ses-events` | The SQS worker. |
+| `docker compose logs -f web` | Also the queued jobs (Horizon), the scheduled tasks and the SQS worker. They run in the `web` container. |
+| `docker compose logs -f ses-events` | The SQS worker, only when you run it in its own container with the `ses` profile. |
 | `docker compose logs mysql` | The database. |
 
 The SQS worker also writes a daily file in its container:
@@ -100,8 +99,8 @@ Other onboarding errors start with `Failed to create SNS topic:` or `Failed to s
 
 **Correction.**
 
-1. Run `docker compose ps`. Make sure that `ses-events` and `horizon` run.
-2. If `ses-events` is not in the list, start it with `docker compose --profile ses up -d`.
+1. Run `byomailer:doctor`. Make sure that the `ses_events` check is `ok`.
+2. If the check is `warn`, set `PLATFORM_AWS_ACCESS_KEY_ID`, `PLATFORM_AWS_SECRET_ACCESS_KEY` and `SES_EVENTS_SQS_QUEUE_URL`. Then start the container again. The container starts the worker when the three values exist.
 3. If the log of `ses-events` shows `SQS SES events configuration is incomplete.`, set the `PLATFORM_AWS_*` values and `SES_EVENTS_SQS_QUEUE_URL`.
 4. If the log shows `SQS error:`, make sure that the worker keys have `sqs:ReceiveMessage` and `sqs:DeleteMessage` on the queue.
 5. If the `horizon` log shows `refused a notification from a topic that no tenant owns`, the topic in the message does not belong to a connected account.

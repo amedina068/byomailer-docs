@@ -185,7 +185,7 @@ The worker also prints each poll to its standard output:
 docker compose logs -f ses-events
 ```
 
-`ProcessSesEventJob` runs in the `horizon` service. Its warnings go to the log of that service, for example `ProcessSesEventJob: refused a notification from a topic that no tenant owns`.
+`ProcessSesEventJob` runs in the queue worker of the `web` container. Its warnings go to the log of that container, for example `ProcessSesEventJob: refused a notification from a topic that no tenant owns`.
 
 ## The HTTP endpoint `/webhooks/ses`
 

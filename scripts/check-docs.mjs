@@ -245,8 +245,11 @@ function loadCommands(app) {
   const names = new Set();
   if (existsSync(join(app, 'vendor', 'autoload.php'))) {
     try {
+      // The app loads Horizon only with the redis queue. The pages document
+      // both queues, so list the commands with the redis queue.
       const json = execFileSync('php', ['artisan', 'list', '--format=json', '--no-ansi'], {
         cwd: app,
+        env: { ...process.env, QUEUE_CONNECTION: 'redis' },
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
       });
