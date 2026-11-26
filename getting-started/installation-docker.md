@@ -204,24 +204,23 @@ The default database is SQLite, and it is enough for one server. To use MySQL 8.
    cp .env.example .env
    ```
 
-3. In `.env`, set `APP_DOMAIN`. Set `DB_PASSWORD` and `DB_ROOT_PASSWORD` to two strong passwords, for example from `openssl rand -hex 24`.
+3. In `.env`, set `APP_DOMAIN`.
 4. In `.env`, remove the `#` from the lines of the "MySQL and Redis" block. The block sets `COMPOSE_PROFILES=mysql`, so Compose also starts MySQL and Redis.
-5. Start the stack:
+5. In the same block, set `DB_PASSWORD` to a strong password, for example from `openssl rand -hex 24`.
+6. Start the stack:
 
    ```bash
    docker compose up -d --build
    docker compose logs -f web
    ```
 
-6. Wait for the line `BYOMailer is ready`. The next line is the setup URL. Open it and create the owner account.
+7. Wait for the line `BYOMailer is ready`. The next line is the setup URL. Open it and create the owner account.
 
-Compose stops with an error if `DB_PASSWORD` or `DB_ROOT_PASSWORD` is empty. The first start waits for MySQL and loads the schema dump. The `web` container stays up while the migrations run.
+The first start waits for MySQL and loads the schema dump. The `web` container stays up while the migrations run.
 
-In the Compose stack, replace `docker exec byomailer` with `docker compose exec web` in the commands of this documentation. To start the SES events worker of the Compose stack, set the SQS variables in `.env` and add the `ses` profile:
+The `web` container runs the web server, Horizon, the scheduler and the SES events worker. It listens on `127.0.0.1:8080` of the host, and Caddy is off. Put a reverse proxy with TLS on the host in front of it. Read [Reverse proxy and TLS](../self-hosting/reverse-proxy-and-tls.md).
 
-```bash
-docker compose --profile ses up -d
-```
+In the Compose stack, replace `docker exec byomailer` with `docker compose exec web` in the commands of this documentation. To start the SES events worker, set the SQS variables in `.env` and run `docker compose up -d`. The `web` container then starts the worker.
 
 WARNING: Never run `docker compose down -v`. It deletes the database volume.
 

@@ -132,13 +132,15 @@ The image starts the worker as a service when the access key, the secret key and
 
 ### In Docker Compose
 
-The `ses-events` service is in the `ses` profile of `docker-compose.yml`, because it needs the AWS values. Start it after you set the values:
+Set the values in `.env` and run `docker compose up -d`. The `web` container then starts the worker, as in the one-container image.
+
+You can also run the worker in its own container. The `ses-events` service is in the `ses` profile of `docker-compose.yml`. Set `BYOMAILER_SES_EVENTS=false` in `.env`, so that only that container reads the queue. Then start the profile:
 
 ```bash
 docker compose --profile ses up -d
 ```
 
-The service runs `php artisan ses-events:poll`. Its health check makes sure that the process runs. The `restart: unless-stopped` policy starts the container again after the command exits.
+The service runs `php artisan ses-events:poll`. Its health check makes sure that the process runs. The `restart: always` policy starts the container again after the command exits.
 
 ## Options of `ses-events:poll`
 
