@@ -127,6 +127,19 @@ These variables configure the one SQS queue that receives the SES events of all 
 
 If `SES_EVENTS_SQS_QUEUE_ARN` is empty, no account can connect AWS. If `PLATFORM_AWS_*` or `SES_EVENTS_SQS_QUEUE_URL` is empty, the worker stops with an error.
 
+## IAM role connection
+
+These variables let an account connect AWS through an IAM role in place of access keys. While `SES_ROLE_PRINCIPAL_ARN` is empty, the role connection is off. [IAM role connection](../self-hosting/iam-role-connection.md) explains the setup.
+
+| Variable | `.env.example` | Code default | Purpose |
+|---|---|---|---|
+| `SES_ROLE_PRINCIPAL_ARN` | empty | - | The IAM user or IAM role of the server. The role of each account trusts this ARN. |
+| `SES_ROLE_ACCESS_KEY_ID` | empty | - | The access key of the principal. Keep it empty with an instance role. |
+| `SES_ROLE_SECRET_ACCESS_KEY` | empty | - | The secret key of that access key. |
+| `SES_ROLE_STS_REGION` | `us-east-1` | `us-east-1` | The region of the STS calls and of the console link. |
+| `SES_ROLE_NAME` | `byomailer-ses` | `byomailer-ses` | The name of the role in each AWS account. |
+| `SES_ROLE_TEMPLATE_URL` | empty | - | The S3 URL of the CloudFormation template. It turns on the quick-create link. |
+
 ## Footer address
 
 No variable is necessary. Each account enters its postal address in **Settings > Profile**. The `{{ postal_address }}` variable puts it in the email footer. While the address is empty, BYOMailer shows a warning before a send, but it does not block the send.
