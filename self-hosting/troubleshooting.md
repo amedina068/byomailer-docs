@@ -6,9 +6,23 @@ order: 11
 
 # Troubleshooting
 
-Each section gives a symptom, the signal that BYOMailer shows, and the correction. Start with the logs.
+Each section gives a symptom, the signal that BYOMailer shows, and the correction. Start with the doctor, then the logs.
+
+## Run the doctor
+
+`byomailer:doctor` checks the instance and gives a fix for each problem. It checks the app key, the database, the migrations, the storage, the queue worker, the scheduler, the mail driver and the owner. It also checks SES: the credentials, the region, the send quota, a verified identity and the SQS event queue.
+
+```bash
+docker exec byomailer php artisan byomailer:doctor
+```
+
+Each check is `ok`, `warn` or `fail`. On a new instance, the SES checks are `warn` until an account connects AWS. `--fix` applies only the safe fixes, for example the storage link. `--json` writes one JSON object for scripts and AI agents.
+
+In the Docker Compose stack, run `docker compose exec web php artisan byomailer:doctor`.
 
 ## Read the logs
+
+With the one-container image, run `docker logs byomailer`. The last two lines of the boot log are the ready line and the URL to open. The rest of this section is about the Docker Compose stack.
 
 `docker-compose.yml` sets `LOG_CHANNEL=stderr`, so each app service writes its log to Docker.
 
@@ -16,9 +30,8 @@ Each section gives a symptom, the signal that BYOMailer shows, and the correctio
 |---|---|
 | `docker compose ps` | Show each service and its health. |
 | `docker compose logs web` | The web requests, the migrations at start and the setup URL. |
-| `docker compose logs -f horizon` | The queued jobs: sending, SES events, automations, webhooks. |
-| `docker compose logs -f scheduler` | The scheduled tasks. |
-| `docker compose logs -f ses-events` | The SQS worker. |
+| `docker compose logs -f web` | Also the queued jobs (Horizon), the scheduled tasks and the SQS worker. They run in the `web` container. |
+| `docker compose logs -f ses-events` | The SQS worker, only when you run it in its own container with the `ses` profile. |
 | `docker compose logs mysql` | The database. |
 
 The SQS worker also writes a daily file in its container:
@@ -61,10 +74,12 @@ The health check of the `web` service calls `/up` on `localhost` inside the cont
 
 **Correction.**
 
-1. Run `docker compose exec web php artisan byomailer:setup-url`.
+1. Run `docker exec byomailer php artisan byomailer:setup-url`. In the Docker Compose stack, run `docker compose exec web php artisan byomailer:setup-url`.
 2. Open the URL that the command prints.
 
-If the command shows `An account already exists. The setup page is closed.`, the instance has a user. `/setup` then answers 404. To get access, use [Recover access](recover-access.md).
+If you open `/setup` without the token, the page shows these commands. It also has a field for the token or the full setup URL.
+
+If the command shows `An account already exists. The setup page is closed.`, the instance has a user. `/setup` then sends you to the login page. To get access, use [Recover access](recover-access.md).
 
 The token comes from `APP_KEY`. If `APP_KEY` changed after the container started, the URL in the old log does not work. Run the command again.
 
@@ -84,8 +99,8 @@ Other onboarding errors start with `Failed to create SNS topic:` or `Failed to s
 
 **Correction.**
 
-1. Run `docker compose ps`. Make sure that `ses-events` and `horizon` run.
-2. If `ses-events` is not in the list, start it with `docker compose --profile ses up -d`.
+1. Run `byomailer:doctor`. Make sure that the `ses_events` check is `ok`.
+2. If the check is `warn`, set `PLATFORM_AWS_ACCESS_KEY_ID`, `PLATFORM_AWS_SECRET_ACCESS_KEY` and `SES_EVENTS_SQS_QUEUE_URL`. Then start the container again. The container starts the worker when the three values exist.
 3. If the log of `ses-events` shows `SQS SES events configuration is incomplete.`, set the `PLATFORM_AWS_*` values and `SES_EVENTS_SQS_QUEUE_URL`.
 4. If the log shows `SQS error:`, make sure that the worker keys have `sqs:ReceiveMessage` and `sqs:DeleteMessage` on the queue.
 5. If the `horizon` log shows `refused a notification from a topic that no tenant owns`, the topic in the message does not belong to a connected account.

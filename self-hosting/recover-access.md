@@ -8,7 +8,9 @@ order: 9
 
 The "forgot password" form sends an email through the system mailer (`MAIL_MAILER`). If the instance has no working mailer, use the commands on this page. They need shell access to the server. See [System mail](system-mail.md).
 
-In the Docker stack, run each command in the `web` service with `docker compose exec web`.
+With the one-container image, run each command with `docker exec byomailer`, for example `docker exec byomailer php artisan byomailer:user:list`. In the Docker Compose stack, run each command in the `web` service with `docker compose exec web`.
+
+Each command on this page accepts `--json`. With `--json`, the command writes one JSON object to stdout, for scripts and AI agents.
 
 ## Find a user: `byomailer:user:list`
 

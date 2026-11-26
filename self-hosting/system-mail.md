@@ -50,7 +50,7 @@ With `MAIL_MAILER=log`, BYOMailer writes each system email to the log and sends 
 docker compose logs web
 ```
 
-The queued alert emails go to the log of the `horizon` service.
+The queued alert emails go to the log of the queue worker, that is, the log of the container.
 
 If the instance has no working mailer, the "forgot password" form cannot help a user. Use the commands in [Recover access](recover-access.md).
 

@@ -36,6 +36,34 @@ WARNING: Do not put the token in a file that you commit or share. A person with 
 
 For more about tokens, read [API authentication](../api/authentication.md).
 
+## Get the connect command from the server
+
+The server can make the token and the connect command for you. Run this command on the server:
+
+```bash
+docker exec byomailer php artisan byomailer:mcp:connect --client=claude --token=new
+```
+
+The output has two lines. The first line exports the token to `BYOMAILER_TOKEN`. The second line adds the server to Claude Code and reads the token from that variable, so the token is not in the command:
+
+```bash
+export BYOMAILER_TOKEN='<your-token>'
+claude mcp add --transport http byomailer https://byomailer.example/mcp \
+  --header "Authorization: Bearer ${BYOMAILER_TOKEN}"
+```
+
+`--client` also accepts `codex`, `cursor` and `json`. Without `--token=new`, the command makes no token. It prints only the line that reads the token from `BYOMAILER_TOKEN`. With `--token=new`, the command makes a read and write token for the owner. `byomailer:install --with-token=<name>` returns the same lines when it creates the owner.
+
+## The instance-admin MCP server
+
+A second MCP server operates the instance itself: status, doctor, users, tokens, the queue, the SES status and the accounts. It uses stdio, so it needs no token and no open port. Start it through SSH and `docker exec`:
+
+```bash
+claude mcp add byomailer-admin -- ssh my-server docker exec -i byomailer php artisan mcp:start byomailer-admin
+```
+
+A destructive tool returns a preview first. It changes data only after a second call with `confirm: true`. These actions stay CLI-only: create the owner, promote a user, rotate keys and delete data.
+
 ## Claude Code
 
 1. Run this command. Replace `<your-token>` with your token.

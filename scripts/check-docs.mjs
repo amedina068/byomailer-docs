@@ -36,6 +36,7 @@ const NON_PAGES = new Set(['README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md',
 // on purpose. Each entry says who reads it.
 const EXTERNAL_ENV = new Map([
   ['BYOMAILER_APP_PATH', 'read by the scripts of this repository'],
+  ['COMPOSE_PROFILES', 'read by Docker Compose, not by the app'],
   ['YOUR_API_TOKEN', 'the placeholder token of the Postman files of the app'],
   ['BYOMAILER_AUTH', 'read by mcp-remote in the Claude Desktop configuration'],
   ['BYOMAILER_URL', 'read by the SDKs and their Laravel and Rails integrations'],
@@ -244,8 +245,11 @@ function loadCommands(app) {
   const names = new Set();
   if (existsSync(join(app, 'vendor', 'autoload.php'))) {
     try {
+      // The app loads Horizon only with the redis queue. The pages document
+      // both queues, so list the commands with the redis queue.
       const json = execFileSync('php', ['artisan', 'list', '--format=json', '--no-ansi'], {
         cwd: app,
+        env: { ...process.env, QUEUE_CONNECTION: 'redis' },
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
       });

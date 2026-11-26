@@ -13,7 +13,9 @@ The tables show two defaults:
 - **`.env.example`** is the value in the example file. If you copy the file unchanged, the app uses this value.
 - **Code default** is the value that `config/` uses when the variable is not set. A dash means that the files in `config/` do not set a default.
 
-`.env.example` has values for local development. For production, change at least `APP_ENV`, `APP_DEBUG`, `APP_URL`, the database values, and the queue, cache, and session drivers. [Install with Docker](installation-docker.md) and [Install without Docker](installation-manual.md) give the production values.
+`.env.example` has values for a real install: `APP_ENV=production`, `APP_DEBUG=false`, SQLite and the database queue. For development on your computer, set `APP_ENV=local` and `APP_DEBUG=true`. [Install with Docker](installation-docker.md) and [Install without Docker](installation-manual.md) give the production values.
+
+The one-container Docker image needs no `.env` file. See [Defaults of the Docker image](#defaults-of-the-docker-image). For production, `APP_DOMAIN` is the only required variable. Give a variable to the container with `-e` or `--env-file`. Read [Install with Docker](installation-docker.md).
 
 If you cache the configuration with `php artisan config:cache`, run the command again after each change to `.env`. The Docker `web` container caches the configuration each time it starts.
 
@@ -22,11 +24,13 @@ If you cache the configuration with `php artisan config:cache`, run the command 
 | Variable | `.env.example` | Code default | Purpose |
 |---|---|---|---|
 | `APP_NAME` | `BYOMailer` | `Laravel` | The name of the app in the dashboard and in system mail. |
-| `APP_ENV` | `local` | `production` | The environment. Use `production` on a server. In `local`, any visitor can open Horizon. |
+| `APP_ENV` | `production` | `production` | The environment. Use `production` on a server. In `local`, any visitor can open Horizon. |
 | `APP_KEY` | empty | - | The encryption key. BYOMailer encrypts the AWS credentials, the storage keys, and the webhook secrets with it. The setup token also comes from it. |
+| `APP_KEY_FILE` | commented out | - | A file that holds the app key. The app reads it when `APP_KEY` is empty. The Docker image sets `/data/.secrets/app_key` and writes the key there on the first start. |
 | `APP_PREVIOUS_KEYS` | empty | empty | A comma-separated list of old keys. Use it when you rotate `APP_KEY`. Read [Upgrade BYOMailer](upgrading.md). |
-| `APP_DEBUG` | `true` | `false` | Shows error details on error pages. Use `false` on a server. |
-| `APP_URL` | `http://localhost` | `http://localhost` | The public URL of the instance. Emails, the API examples, the MCP guide, and the setup URL use it. |
+| `APP_DEBUG` | `false` | `false` | Shows error details on error pages. Use `false` on a server. |
+| `APP_URL` | commented out | `https://` and `APP_DOMAIN`, or else `http://localhost:8080` | The public URL of the instance. Emails, the API examples, the MCP guide, and the setup URL use it. |
+| `APP_DOMAIN` | commented out | - | The public domain, for example `mail.example.com`. When `APP_URL` is empty, the app uses `https://` and this domain. In the Docker image, it also starts Caddy with automatic HTTPS on ports 80 and 443. |
 | `APP_LOCALE` | `en` | `en` | The language of the app. |
 | `APP_FALLBACK_LOCALE` | `en` | `en` | The language when a translation is missing. |
 | `APP_FAKER_LOCALE` | `en_US` | `en_US` | The locale of the test data generator. |
@@ -59,24 +63,31 @@ WARNING: Back up `APP_KEY`. If you lose the key, each account must enter its AWS
 
 | Variable | `.env.example` | Code default | Purpose |
 |---|---|---|---|
-| `DB_CONNECTION` | `sqlite` | `sqlite` | The database driver. Use `mysql` in production. Docker Compose sets `mysql`. |
+| `DB_CONNECTION` | `sqlite` | `sqlite` | The database driver: `sqlite` or `mysql`. The "MySQL and Redis" block of `.env.example` sets `mysql`. |
 | `DB_HOST` | commented out | `127.0.0.1` | The MySQL host. |
 | `DB_PORT` | commented out | `3306` | The MySQL port. |
-| `DB_DATABASE` | commented out | `laravel` | The database name. Docker Compose uses `byomailer`. |
-| `DB_USERNAME` | commented out | `root` | The database user. Docker Compose uses `byomailer`. |
-| `DB_PASSWORD` | commented out | empty | The database password. Docker Compose needs it. |
-| `SESSION_DRIVER` | `database` | `database` | Where the web sessions are stored. Docker Compose sets `redis`. |
+| `DB_DATABASE` | commented out | `database/database.sqlite` for SQLite, `laravel` for MySQL | The SQLite file, or the MySQL database name. The Docker image uses `/data/database.sqlite`. The MySQL block of `.env.example` sets `byomailer`. |
+| `DB_USERNAME` | commented out | `root` | The MySQL user. The MySQL block of `.env.example` sets `byomailer`. |
+| `DB_PASSWORD` | commented out | empty | The MySQL password. The `mysql` Compose profile needs it. |
+| `DB_BUSY_TIMEOUT` | commented out | `5000` | SQLite only. The time in milliseconds that a write waits for a lock. |
+| `DB_JOURNAL_MODE` | commented out | `wal` | SQLite only. The journal mode. `wal` lets the web server, the queue worker and the scheduler use one file. |
+| `DB_SYNCHRONOUS` | commented out | `normal` | SQLite only. The `synchronous` setting. |
+| `DB_TRANSACTION_MODE` | commented out | `IMMEDIATE` | SQLite only. The mode of each transaction. |
+| `SESSION_DRIVER` | `database` | `database` | Where the web sessions are stored. The MySQL block of `.env.example` sets `redis`. The Docker image uses `file`. |
 | `SESSION_LIFETIME` | `120` | `120` | The session lifetime in minutes. |
 | `SESSION_ENCRYPT` | `false` | `false` | Encrypts the session data. |
 | `SESSION_PATH` | `/` | `/` | The path of the session cookie. |
 | `SESSION_DOMAIN` | `null` | - | The domain of the session cookie. |
+| `SESSION_SECURE_COOKIE` | `true` | `true` when the app URL starts with `https` | Sends the session cookie only over HTTPS. Set `false` only for local development over plain HTTP. |
+| `TRUSTED_PROXIES` | commented out | The Cloudflare ranges | The IP addresses or ranges of your proxy, comma-separated. Read [Reverse proxy and TLS](../self-hosting/reverse-proxy-and-tls.md). |
 | `BROADCAST_CONNECTION` | `log` | - | The broadcast driver. |
 | `FILESYSTEM_DISK` | `local` | `local` | The default file disk. |
 | `MEDIA_DISK` | `public` | `public` | The disk for the images that users upload in the email editor: `public` or `s3`. |
-| `QUEUE_CONNECTION` | `database` | `database` | The queue driver. Horizon needs `redis`. Docker Compose sets `redis`. |
-| `CACHE_STORE` | `database` | `database` | The cache driver. Docker Compose sets `redis`. |
+| `QUEUE_CONNECTION` | `database` | `database` | The queue driver. With `redis`, the app runs Horizon. With another driver, the Docker image runs `queue:work` and the app has no Horizon. The MySQL block of `.env.example` sets `redis`. |
+| `SES_SENDING_LIMITER` | commented out | `redis` when the queue is `redis`, or else `cache` | Where the send jobs keep the counters of the SES send rate. |
+| `CACHE_STORE` | `database` | `database` | The cache driver. The MySQL block of `.env.example` sets `redis`. The Docker image uses `file`. |
 | `REDIS_CLIENT` | `phpredis` | `phpredis` | The Redis client. `phpredis` needs the `redis` PHP extension. |
-| `REDIS_HOST` | `127.0.0.1` | `127.0.0.1` | The Redis host. Docker Compose sets `redis`. |
+| `REDIS_HOST` | `127.0.0.1` | `127.0.0.1` | The Redis host. `docker-compose.yml` sets `redis`. |
 | `REDIS_PASSWORD` | `null` | - | The Redis password. |
 | `REDIS_PORT` | `6379` | `6379` | The Redis port. |
 
@@ -179,23 +190,49 @@ No feature of BYOMailer uses the two `SLACK_BOT_USER_*` variables. They come fro
 | `VITE_APP_NAME` | `${APP_NAME}` | - | The app name in the frontend build. |
 | `INERTIA_SSR_ENABLED` | `true` | `true` | Server-side rendering. It needs a running `php artisan inertia:start-ssr` process. Docker Compose sets `false`. |
 
+## Defaults of the Docker image
+
+The image sets these values. A variable that you give with `-e`, `--env-file` or `.env` wins.
+
+| Variable | Value in the image |
+|---|---|
+| `APP_ENV`, `APP_DEBUG` | `production`, `false` |
+| `APP_KEY_FILE` | `/data/.secrets/app_key` |
+| `DB_CONNECTION`, `DB_DATABASE` | `sqlite`, `/data/database.sqlite` |
+| `QUEUE_CONNECTION` | `database` |
+| `CACHE_STORE`, `SESSION_DRIVER` | `file` |
+| `MAIL_MAILER` | `log` |
+| `LOG_CHANNEL` | `stderr` |
+| `INERTIA_SSR_ENABLED` | `false` |
+
+The image also reads these variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `CADDY_ENABLED` | `true` | When `APP_DOMAIN` is set, Caddy serves ports 80 and 443 with automatic HTTPS. Set `false` when your own proxy gives HTTPS. |
+| `BYOMAILER_QUEUE_WORKER` | `true` | Runs the queue worker in the container. Set `false` when another container runs it. |
+| `BYOMAILER_SCHEDULER` | `true` | Runs the scheduler in the container. Set `false` when another container runs it. |
+| `BYOMAILER_SES_EVENTS` | `true` | Runs `ses-events:poll` when `PLATFORM_AWS_ACCESS_KEY_ID`, `PLATFORM_AWS_SECRET_ACCESS_KEY` and `SES_EVENTS_SQS_QUEUE_URL` are set. Set `false` when another container runs it. |
+
 ## Docker Compose
 
-`docker-compose.yml` reads these values from `.env`. It sets `DB_CONNECTION`, `DB_HOST`, `REDIS_HOST`, `QUEUE_CONNECTION`, `CACHE_STORE`, and `SESSION_DRIVER` itself.
+`docker-compose.yml` loads `.env` into the app containers. The file `.env` is optional. Without it, the stack uses SQLite in the `data` volume. The "MySQL and Redis" block of `.env.example` sets `COMPOSE_PROFILES=mysql` and the MySQL and Redis drivers.
 
 | Variable | `.env.example` | Default in `docker-compose.yml` | Purpose |
 |---|---|---|---|
-| `APP_PORT` | `8080` | `8080` | The host port of the `web` service. |
-| `DB_ROOT_PASSWORD` | empty | - | The MySQL root password. Compose stops if it is empty. |
-| `DB_PASSWORD` | commented out | - | The MySQL password of the app. Compose stops if it is empty. |
-| `DB_DATABASE` | commented out | `byomailer` | The database name. |
-| `DB_USERNAME` | commented out | `byomailer` | The database user. |
-| `APP_ENV` | `local` | `production` | Compose uses `production` only when `.env` does not set the variable. |
-| `APP_DEBUG` | `true` | `false` | Compose uses `false` only when `.env` does not set the variable. |
+| `COMPOSE_PROFILES` | commented out | empty | `mysql` starts the `mysql` and `redis` services. Docker Compose reads it, not the app. |
+| `APP_PORT` | commented out | `8080` | The host port of the `web` service. |
+| `APP_BIND` | not listed | `127.0.0.1` | The host address of the port. Put a reverse proxy on the host in front of it. |
+| `CADDY_ENABLED` | not listed | `false` | Compose expects a reverse proxy on the host, so Caddy is off. |
+| `DB_PASSWORD` | commented out | empty | The MySQL password of the app user. The `mysql` service gets a random root password, and no command needs it. |
+| `DB_DATABASE` | commented out | `byomailer` for MySQL, `/data/database.sqlite` for SQLite | The database. |
+| `DB_USERNAME` | commented out | `byomailer` | The MySQL user. |
 | `BYOMAILER_IMAGE` | not listed | `byomailer:local` | The name of the image that Compose builds. |
 | `BYOMAILER_ENV_FILE` | not listed | `.env` | The file that Compose loads into the app containers. |
 
-WARNING: Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`. If you keep the values of `.env.example`, the containers run with `APP_ENV=local` and `APP_DEBUG=true`.
+`docker-compose.yml` also sets `DB_HOST=mysql`, `REDIS_HOST=redis`, `LOG_CHANNEL=stderr` and `INERTIA_SSR_ENABLED=false`.
+
+WARNING: An install from before the one-container image must add `COMPOSE_PROFILES=mysql` and the "MySQL and Redis" block to `.env` before the first start with the new files. Then run `docker compose up -d --build --remove-orphans` one time. The old Compose file set `DB_CONNECTION=mysql` itself, and the new file does not. Read [Upgrade BYOMailer](upgrading.md).
 
 ## Local seed data
 
