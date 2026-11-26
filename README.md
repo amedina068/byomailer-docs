@@ -1,5 +1,8 @@
 # BYOMailer documentation
 
+[![CI](https://github.com/amedina068/byomailer-docs/actions/workflows/ci.yml/badge.svg)](https://github.com/amedina068/byomailer-docs/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/amedina068/byomailer-docs/badge)](https://scorecard.dev/viewer/?uri=github.com/amedina068/byomailer-docs)
+
 This repository holds the documentation of BYOMailer, a self-hosted email marketing app that sends through the Amazon SES account of each account.
 
 Each Markdown file is one page. The folder of a file is the section of the page.
