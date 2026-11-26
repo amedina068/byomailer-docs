@@ -6,9 +6,47 @@ order: 7
 
 # Backups
 
-Back up three things: the `.env` file with `APP_KEY`, the MySQL database, and the `storage` volume. The app has no backup command. Use the Docker commands on this page or your own tools.
+The app has no backup command. Use the Docker commands on this page or your own tools.
 
-## What to back up
+- With the one-container image, back up the `/data` volume. It holds the SQLite database, the uploads and `APP_KEY`. See [Back up the /data volume](#back-up-the-data-volume).
+- With MySQL and Redis in Docker Compose, back up three things: the `.env` file with `APP_KEY`, the MySQL database, and the `storage` volume. The other sections of this page give the commands.
+
+## Back up the /data volume
+
+The container writes to the SQLite database while it runs. Stop the container before the backup, so the copy of the database is consistent:
+
+```bash
+docker stop byomailer
+docker run --rm -v byomailer:/data -v "$PWD":/backup alpine \
+  tar czf /backup/byomailer-$(date +%F).tar.gz -C /data .
+docker start byomailer
+```
+
+The archive holds `/data/.secrets/app_key`. Keep it in a safe place outside the server, for example an encrypted backup.
+
+## Restore the /data volume
+
+`byomailer-2026-11-24.tar.gz` is the backup file. Use the name of your file.
+
+1. Remove the container:
+
+   ```bash
+   docker rm -f byomailer
+   ```
+
+2. Extract the archive into a new, empty volume:
+
+   ```bash
+   docker volume create byomailer-restored
+   docker run --rm -v byomailer-restored:/data -v "$PWD":/backup alpine \
+     tar xzf /backup/byomailer-2026-11-24.tar.gz -C /data
+   ```
+
+3. Start the container with the restored volume. Use the same command as before, with `-v byomailer-restored:/data`.
+
+The container runs the migrations when it starts. A backup from an older version gets the new migrations at the next start.
+
+## What to back up with MySQL
 
 | Item | Where | Why |
 |---|---|---|

@@ -23,17 +23,41 @@ The [release notes](release-notes.md) list the changes that users can see, by da
 
 ## Back up first
 
-Back up these items before you start:
+With the one-container image, back up the `/data` volume. It holds the database, the uploads and `APP_KEY`.
+
+With Docker Compose or a manual install, back up these items before you start:
 
 - `.env`, with `APP_KEY`.
-- The database. In Docker, this is the `mysql` volume.
-- The uploaded files. In Docker, this is the `storage` volume.
+- The database. In Docker Compose, this is the `mysql` volume.
+- The uploaded files. In Docker Compose, this is the `storage` volume.
 
 [Backups](../self-hosting/backups.md) gives the commands.
 
 CAUTION: Do not start an upgrade without a database backup. The migrations change the database, and a failed upgrade can leave it in a mixed state.
 
-## Upgrade a Docker install
+## Upgrade the one-container image
+
+1. Back up the `/data` volume. See [Backups](../self-hosting/backups.md#back-up-the-data-volume).
+2. Run the installer again. It pulls the image, replaces the container and keeps the volume:
+
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/amedina068/byomailer/main/install.sh | bash
+   ```
+
+   Without the installer, pull the image and start a new container with the same volume:
+
+   ```bash
+   docker pull ghcr.io/amedina068/byomailer
+   docker rm -f byomailer
+   docker run -d --name byomailer ...   # the same command as before
+   ```
+
+3. Wait for the line `BYOMailer is ready` in `docker logs -f byomailer`.
+4. Run `docker exec byomailer php artisan byomailer:doctor`. Correct each check that has `fail`.
+
+The container runs the new migrations when it starts. If you used `--env-file` before, use it again.
+
+## Upgrade a Docker Compose install
 
 1. Back up the instance.
 2. Get the new code:

@@ -119,6 +119,19 @@ SQS SES events configuration is incomplete. Check PLATFORM_AWS_* and SES_EVENTS_
 
 ## Start the worker
 
+The AWS connection of each account subscribes its SNS topic to the queue. If `SES_EVENTS_SQS_QUEUE_ARN` is empty, the connection stops with an error. For this reason, set the queue before the first account connects AWS. The dashboard of the owner shows this step first.
+
+### In the one-container image
+
+The image starts the worker as a service when the access key, the secret key and `SES_EVENTS_SQS_QUEUE_URL` exist. Without them, the service does not start, and it does not restart in a loop.
+
+1. Put the five variables of the example above in a file, for example `/root/byomailer.env`.
+2. Set the file mode to 600: `chmod 600 /root/byomailer.env`.
+3. Give the file to the container. With the installer, run it again with `--env-file=/root/byomailer.env`. With `docker run`, add `--env-file /root/byomailer.env`.
+4. Run `docker exec byomailer php artisan byomailer:doctor`. The `ses_events` check must be `ok`.
+
+### In Docker Compose
+
 The `ses-events` service is in the `ses` profile of `docker-compose.yml`, because it needs the AWS values. Start it after you set the values:
 
 ```bash

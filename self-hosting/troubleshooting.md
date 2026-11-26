@@ -6,9 +6,23 @@ order: 11
 
 # Troubleshooting
 
-Each section gives a symptom, the signal that BYOMailer shows, and the correction. Start with the logs.
+Each section gives a symptom, the signal that BYOMailer shows, and the correction. Start with the doctor, then the logs.
+
+## Run the doctor
+
+`byomailer:doctor` checks the instance and gives a fix for each problem. It checks the app key, the database, the migrations, the storage, the queue worker, the scheduler, the mail driver and the owner. It also checks SES: the credentials, the region, the send quota, a verified identity and the SQS event queue.
+
+```bash
+docker exec byomailer php artisan byomailer:doctor
+```
+
+Each check is `ok`, `warn` or `fail`. On a new instance, the SES checks are `warn` until an account connects AWS. `--fix` applies only the safe fixes, for example the storage link. `--json` writes one JSON object for scripts and AI agents.
+
+In the Docker Compose stack, run `docker compose exec web php artisan byomailer:doctor`.
 
 ## Read the logs
+
+With the one-container image, run `docker logs byomailer`. The last two lines of the boot log are the ready line and the URL to open. The rest of this section is about the Docker Compose stack.
 
 `docker-compose.yml` sets `LOG_CHANNEL=stderr`, so each app service writes its log to Docker.
 
@@ -61,10 +75,12 @@ The health check of the `web` service calls `/up` on `localhost` inside the cont
 
 **Correction.**
 
-1. Run `docker compose exec web php artisan byomailer:setup-url`.
+1. Run `docker exec byomailer php artisan byomailer:setup-url`. In the Docker Compose stack, run `docker compose exec web php artisan byomailer:setup-url`.
 2. Open the URL that the command prints.
 
-If the command shows `An account already exists. The setup page is closed.`, the instance has a user. `/setup` then answers 404. To get access, use [Recover access](recover-access.md).
+If you open `/setup` without the token, the page shows these commands. It also has a field for the token or the full setup URL.
+
+If the command shows `An account already exists. The setup page is closed.`, the instance has a user. `/setup` then sends you to the login page. To get access, use [Recover access](recover-access.md).
 
 The token comes from `APP_KEY`. If `APP_KEY` changed after the container started, the URL in the old log does not work. Run the command again.
 

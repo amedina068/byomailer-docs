@@ -6,9 +6,18 @@ order: 3
 
 # Queues and Horizon
 
-BYOMailer does most of its work in queued jobs: it sends newsletters and sequence emails, processes SES events, runs automations and delivers webhooks. Laravel Horizon runs the workers for these jobs. Horizon needs Redis.
+BYOMailer does most of its work in queued jobs: it sends newsletters and sequence emails, processes SES events, runs automations and delivers webhooks. `QUEUE_CONNECTION` selects the worker for these jobs:
 
-In the Docker stack, the `horizon` service runs `php artisan horizon`. `docker-compose.yml` sets `QUEUE_CONNECTION=redis` for every app service. Horizon starts after the `web` service is healthy.
+| `QUEUE_CONNECTION` | Worker |
+|---|---|
+| `database` | `php artisan queue:work`. This is the default of the one-container image. It needs no Redis. |
+| `redis` | Laravel Horizon, with the supervisors of `config/horizon.php`. |
+
+The one-container image starts the worker as a service. It reads `QUEUE_CONNECTION` and starts `queue:work` or Horizon. When the queue is not `redis`, the app does not load Horizon, and `/horizon` does not exist.
+
+To see the state of the worker, run `docker exec byomailer php artisan byomailer:status`. The `queue` value shows the last heartbeat of the worker.
+
+The rest of this page is about Horizon on Redis. In the Docker Compose stack with the `mysql` profile, the queue is `redis`, so Horizon runs the workers.
 
 ## The queues
 

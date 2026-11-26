@@ -15,6 +15,8 @@ The tables show two defaults:
 
 `.env.example` has values for local development. For production, change at least `APP_ENV`, `APP_DEBUG`, `APP_URL`, the database values, and the queue, cache, and session drivers. [Install with Docker](installation-docker.md) and [Install without Docker](installation-manual.md) give the production values.
 
+The one-container Docker image needs no `.env` file. It uses SQLite, the database queue and a generated `APP_KEY` in the `/data` volume. For production, `APP_DOMAIN` is the only required variable. Give a variable to the container with `-e` or `--env-file`. Read [Install with Docker](installation-docker.md).
+
 If you cache the configuration with `php artisan config:cache`, run the command again after each change to `.env`. The Docker `web` container caches the configuration each time it starts.
 
 ## Application
@@ -27,6 +29,7 @@ If you cache the configuration with `php artisan config:cache`, run the command 
 | `APP_PREVIOUS_KEYS` | empty | empty | A comma-separated list of old keys. Use it when you rotate `APP_KEY`. Read [Upgrade BYOMailer](upgrading.md). |
 | `APP_DEBUG` | `true` | `false` | Shows error details on error pages. Use `false` on a server. |
 | `APP_URL` | `http://localhost` | `http://localhost` | The public URL of the instance. Emails, the API examples, the MCP guide, and the setup URL use it. |
+| `APP_DOMAIN` | empty | - | The public domain, for example `mail.example.com`. When `APP_URL` is empty, the app uses `https://` and this domain. In the Docker image, it also starts Caddy with automatic HTTPS on ports 80 and 443. |
 | `APP_LOCALE` | `en` | `en` | The language of the app. |
 | `APP_FALLBACK_LOCALE` | `en` | `en` | The language when a translation is missing. |
 | `APP_FAKER_LOCALE` | `en_US` | `en_US` | The locale of the test data generator. |
