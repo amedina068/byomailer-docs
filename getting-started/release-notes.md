@@ -8,7 +8,26 @@ order: 8
 
 This page lists the changes to BYOMailer that users can see. The newest date is first.
 
-The release notes have no version numbers. For developers, `CHANGELOG.md` in the [app repository](https://github.com/amedina068/byomailer/blob/main/CHANGELOG.md) lists the changes to the code for each version.
+A version heading marks the day of a release. The changes in the dated entries below a version heading are part of that version. For developers, `CHANGELOG.md` in the [app repository](https://github.com/amedina068/byomailer/blob/main/CHANGELOG.md) lists the changes to the code for each version.
+
+## November 25, 2026: version 0.1.0
+
+Version 0.1.0 is the first public release of BYOMailer. The [GitHub release](https://github.com/amedina068/byomailer/releases/tag/v0.1.0) lists all the changes. The Docker image is `ghcr.io/amedina068/byomailer:0.1.0`. Read [Install with Docker](installation-docker.md).
+
+With this version, you can:
+
+- Write newsletters in a block editor. Send them to the contacts that match your filters or a saved segment. Schedule a send, or do an A/B test on the subject or the content.
+- Send drip campaigns (sequences), with a delay between the steps and filters for each step.
+- Start an automation when a contact joins a list, gets a tag, finishes a sequence or has an attribute change. A visual builder shows each automation.
+- Keep your contacts in lists, topics and tags, with custom attributes. Import and export contacts as CSV.
+- Give each contact a preference center and a one-click unsubscribe link.
+- Use the same email templates and content blocks again, with `{{ variable }}` placeholders.
+- Send through your own Amazon SES account. BYOMailer suppresses the addresses that bounced or complained. The reputation page shows the rates that AWS monitors.
+- Use your own tracking domain and link domain for each sender identity.
+- Work in a team with the admin, editor and viewer roles. Two-factor authentication protects each login.
+- Connect other apps through the REST API and the webhooks. Connect AI assistants through the MCP server.
+- See a warning before a send if the email has no unsubscribe link or the account has no postal address.
+- Run BYOMailer on your own server with Docker Compose, or without Docker with the example files in `deploy/`.
 
 ## November 24, 2026
 
