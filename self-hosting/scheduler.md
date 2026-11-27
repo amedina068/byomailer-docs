@@ -32,11 +32,11 @@ All the tasks are in `routes/console.php`. The times are in UTC, because `config
 | `geoip:download` | Monday and Thursday at 03:00 | Downloads the MaxMind GeoLite2-City database. It runs only when `MAXMIND_LICENSE_KEY` is set. |
 | `model:prune --model=App\Models\WebhookDelivery` | Each day | Removes the webhook delivery rows that are older than `WEBHOOKS_DELIVERY_RETENTION_DAYS` (default 30). |
 
-"No overlap" means `withoutOverlapping()`. If the previous run of the task did not finish, the scheduler skips the new run. The lock is in the cache, which is Redis in the Docker stack.
+"No overlap" means `withoutOverlapping()`. If the previous run of the task did not finish, the scheduler skips the new run. The lock is in the cache. The Docker image uses the `file` cache. With the `mysql` profile of the Compose stack, the cache is Redis.
 
 `routes/console.php` also contains `summary:send-weekly` (`SendWeeklySummaryMail`), but the schedule entry is a comment. That task does not run.
 
-Run one scheduler process for each instance. The Docker stack runs one. The tasks do not use `onOneServer()`, so with two scheduler processes each process runs each task. The newsletter and sequence tasks claim their rows, so no email goes out two times. The other tasks run two times. For example, users then get two permission alert emails.
+Run one scheduler process for each instance. The Docker image runs one. The tasks do not use `onOneServer()`, so with two scheduler processes each process runs each task. The newsletter and sequence tasks claim their rows, so no email goes out two times. The other tasks run two times. For example, users then get two permission alert emails.
 
 ## Make sure that the scheduler runs
 
@@ -47,8 +47,10 @@ Run one scheduler process for each instance. The Docker stack runs one. The task
 To see the list of tasks and their next run, run:
 
 ```bash
-docker compose exec scheduler php artisan schedule:list
+docker exec byomailer php artisan schedule:list
 ```
+
+In the Compose stack, run `docker compose exec web php artisan schedule:list`.
 
 ## Related pages
 

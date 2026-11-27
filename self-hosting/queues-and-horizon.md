@@ -1,6 +1,6 @@
 ---
 title: Queues and Horizon
-description: The Redis queues, the Horizon supervisors, access to /horizon and failed jobs.
+description: The queue worker of the one-container image, Horizon on Redis, access to /horizon and failed jobs.
 order: 3
 ---
 
@@ -96,7 +96,7 @@ One exception exists. If a worker stops after SES accepted an email, but before 
 
 ## Restart the workers
 
-After you change the code or `.env`, start the workers again. In the Docker stack, recreate the services:
+After you change the code or `.env`, start the workers again. In the Compose stack, recreate the services:
 
 ```bash
 docker compose up -d

@@ -24,11 +24,13 @@ The owner is not the same as the `admin` role of a team. A team admin manages on
 
 While the instance has no user, BYOMailer sends `GET /`, `GET /login` and each request to `/register` to `/setup`.
 
-1. Get the setup URL. In the Docker stack, the `web` container prints it in its log when it starts:
+1. Get the setup URL. The container prints it in its log when it starts:
 
    ```bash
-   docker compose logs web
+   docker logs byomailer
    ```
+
+   In the Compose stack, run `docker compose logs web`.
 
 2. Open the URL. It has the form `https://byomailer.example/setup?token=<token>`.
 3. Enter the name, the email, the password and the timezone of the owner.
@@ -45,8 +47,10 @@ The owner gets a new account, the team `admin` role and a verified email. The pa
 You can also create the owner from the command line:
 
 ```bash
-docker compose exec web php artisan byomailer:install
+docker exec byomailer php artisan byomailer:install
 ```
+
+In the Compose stack, replace `docker exec byomailer` with `docker compose exec web`.
 
 The command asks for the name, the email and the password. To give them as options, use the table below.
 
@@ -61,7 +65,7 @@ The command asks for the name, the email and the password. To give them as optio
 
 Each run first creates the `public/storage` link if it is missing. Then:
 
-- With `--prepare`, the command stops. The `web` container runs `byomailer:install --prepare` each time that it starts.
+- With `--prepare`, the command stops. The container runs `byomailer:install --prepare` each time that it starts.
 - With `--promote`, the command sets the user as an owner. If no user has that email, it stops with `No user has the email ...`.
 - Without these options, the command creates the first owner. If the instance already has users, it stops with `This install already has users.`
 
@@ -70,7 +74,7 @@ After it creates the owner, the command reminds you to back up `APP_KEY`. See [B
 To make an existing user an owner:
 
 ```bash
-docker compose exec web php artisan byomailer:install --promote=person@example.com
+docker exec byomailer php artisan byomailer:install --promote=person@example.com
 ```
 
 ## Registration modes

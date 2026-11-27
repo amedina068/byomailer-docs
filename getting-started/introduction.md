@@ -10,7 +10,11 @@ BYOMailer is an email marketing app that you host on your own server. It does no
 
 The account keeps its contacts, its sending reputation, and its AWS bill. BYOMailer adds the lists, the editor, the campaigns, and the tracking.
 
-BYOMailer is a Laravel 13 app with an Inertia and Vue 3 dashboard. You can run it with Docker Compose on one server, or install it on a server without Docker.
+BYOMailer is a Laravel 13 app with an Inertia and Vue 3 dashboard. It runs in one Docker container with one `/data` volume and a SQLite database. You need no `.env` file, no database server, and no Redis. The server needs 1 GB of memory or more.
+
+The install takes about 1 minute, up to the login page. The connection to Amazon SES is a separate step after the first login.
+
+Docker Compose with MySQL and Redis, and an install without Docker, are also available. Read [Install with Docker](installation-docker.md) and [Install without Docker](installation-manual.md).
 
 ## Main features
 
@@ -49,7 +53,7 @@ This is the path of an SES event:
 SES  ->  SNS topic (in the AWS account of the account)
      ->  SQS queue (one queue for the instance)
      ->  ses-events:poll worker
-     ->  ses-events queue in Redis (Horizon)
+     ->  ses-events queue (the queue worker)
      ->  contacts, statistics, suppression
 ```
 
@@ -59,16 +63,19 @@ If the `ses-events:poll` worker does not run, BYOMailer does not see bounces and
 
 ## The parts of the stack
 
-An instance has these processes. The names are the service names in `docker-compose.yml`.
+The container runs these processes. s6-overlay starts them and starts them again if they stop.
 
 | Process | Command | Purpose |
 |---|---|---|
-| `web` | PHP-FPM and NGINX | The dashboard, the API, the MCP server, and the unsubscribe and preference pages. In Docker, it runs the database migrations each time it starts. |
-| `horizon` | `php artisan horizon` | The queue workers (Laravel Horizon). They send the newsletter batches and process the SES events, the automations, and the webhooks. |
-| `scheduler` | `php artisan schedule:work` | The Laravel scheduler. Each minute, it starts the scheduled newsletters and the due sequence steps. |
-| `ses-events` | `php artisan ses-events:poll` | Reads the SES events from the SQS queue. |
-| `mysql` | MySQL 8.4 | The database. |
-| `redis` | Redis 7.4 | The queues, the cache, and the sessions. |
+| Web server | PHP-FPM and NGINX | The dashboard, the API, the MCP server, and the unsubscribe and preference pages. The container runs the database migrations each time it starts. |
+| Queue worker | `php artisan queue:work`, or `php artisan horizon` when `QUEUE_CONNECTION=redis` | Sends the newsletter batches and processes the SES events, the automations, and the webhooks. |
+| Scheduler | `php artisan schedule:work` | The Laravel scheduler. Each minute, it starts the scheduled newsletters and the due sequence steps. |
+| SES events poller | `php artisan ses-events:poll` | Reads the SES events from the SQS queue. It runs only when the SQS settings are set. |
+| Caddy | `caddy run` | Gets a TLS certificate and serves HTTPS. It runs only when `APP_DOMAIN` is set. |
+
+The `/data` volume holds the SQLite database, the app key, the uploads, and the TLS certificates. The default queue, cache, and sessions do not need Redis.
+
+With the `mysql` profile of `docker-compose.yml`, MySQL 8.4 holds the data, and Redis 7.4 holds the queues, the cache, and the sessions. Then Horizon runs the queue workers.
 
 The app uses these main components:
 
@@ -78,7 +85,7 @@ The app uses these main components:
 | Inertia 3, Vue 3, Tailwind CSS 4, and Vite 7 | The dashboard. |
 | Laravel Fortify | Login, registration, password reset, and two-factor authentication. |
 | Laravel Sanctum | API tokens for the REST API and the MCP server. |
-| Laravel Horizon | The Redis queue workers and the queue dashboard at `/horizon`. |
+| Laravel Horizon | The queue workers and the queue dashboard at `/horizon`, only when the queue is Redis. |
 | Laravel MCP | The MCP server at `/mcp`. |
 | Scramble | The OpenAPI document at `/docs/api`. |
 | AWS SDK for PHP | The calls to SES, SNS, SQS, and STS. |

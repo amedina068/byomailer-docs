@@ -6,7 +6,11 @@ order: 10
 
 # Optional integrations
 
-Each integration on this page is off by default. While its environment variables are empty, BYOMailer makes no network call for it. After you change a variable, recreate the containers with `docker compose up -d`.
+Each integration on this page is off by default. While its environment variables are empty, BYOMailer makes no network call for it. After you change a variable, start the container again with the new value.
+
+To change a variable of the one-container image, remove the container with `docker rm -f byomailer`. Then run the same `docker run` command with the new value. The `/data` volume keeps the data. In the Compose stack, run `docker compose up -d`.
+
+The commands on this page use the one-container image. In the Compose stack, replace `docker exec byomailer` with `docker compose exec web`.
 
 | Integration | Turned on by |
 |---|---|
@@ -26,14 +30,14 @@ BYOMailer finds the city and the country of each open and click from the IP addr
 | Variable | Purpose |
 |---|---|
 | `MAXMIND_LICENSE_KEY` | Your MaxMind license key. Get a free key at <https://www.maxmind.com>. |
-| `MAXMIND_DATABASE_PATH` | The path of the database file. The default is `storage/app/geoip/GeoLite2-City.mmdb`, which is in the `storage` volume. |
+| `MAXMIND_DATABASE_PATH` | The path of the database file. The default is `storage/app/geoip/GeoLite2-City.mmdb`, which is in the `/data` volume. |
 
 The scheduler runs `geoip:download` on Monday and Thursday at 03:00 UTC, only when `MAXMIND_LICENSE_KEY` is set. The command downloads the archive, extracts `GeoLite2-City.mmdb` and moves it to `MAXMIND_DATABASE_PATH`.
 
 To download the database at once, run:
 
 ```bash
-docker compose exec web php artisan geoip:download
+docker exec byomailer php artisan geoip:download
 ```
 
 If the key is empty, the command stops with `MAXMIND_LICENSE_KEY is not set.` While the database file is missing, BYOMailer records no location. It also skips private IP addresses.
@@ -47,7 +51,15 @@ If the key is empty, the command stops with `MAXMIND_LICENSE_KEY is not set.` Wh
 
 The `rollbar` log channel sends the log entries to Rollbar. The `stack` channel uses it only when `LOG_STACK` contains `rollbar`.
 
-`docker-compose.yml` sets `LOG_CHANNEL=stderr` for each app service. This value replaces the value in `.env`. To send the errors of a Docker instance to Rollbar, use a Compose override file:
+The Docker image sets `LOG_CHANNEL=stderr`. To send the errors of the one-container image to Rollbar, give these values to the container, then start it again:
+
+```dotenv
+ROLLBAR_TOKEN=<your-token>
+LOG_CHANNEL=stack
+LOG_STACK=stderr,rollbar
+```
+
+`docker-compose.yml` also sets `LOG_CHANNEL=stderr` for each app service. This value replaces the value in `.env`. In the Compose stack, use an override file:
 
 1. Set `ROLLBAR_TOKEN` in `.env`.
 2. Create `docker-compose.override.yml` next to `docker-compose.yml`, with this content:
@@ -55,10 +67,6 @@ The `rollbar` log channel sends the log entries to Rollbar. The `stack` channel 
    ```yaml
    services:
      web:
-       environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
-     horizon:
-       environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
-     scheduler:
        environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
      ses-events:
        environment: { LOG_CHANNEL: stack, LOG_STACK: "stderr,rollbar" }
@@ -98,7 +106,7 @@ CAUTION: Make sure that the origin certificate covers the name in `CLOUDFLARE_OR
 To pin the custom hostnames that exist already to the origin server and SNI, run:
 
 ```bash
-docker compose exec web php artisan email-identities:sync-hostname-origins
+docker exec byomailer php artisan email-identities:sync-hostname-origins
 ```
 
 The command needs `CLOUDFLARE_ORIGIN_SNI`. Without it, the command stops with `No origin SNI configured. Set CLOUDFLARE_ORIGIN_SNI first.`

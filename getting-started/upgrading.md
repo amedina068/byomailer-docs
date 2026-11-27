@@ -179,7 +179,7 @@ The migration of 2026-11-17 adds the owner of the instance. It makes each user i
 php artisan byomailer:install --promote=person@example.com
 ```
 
-In Docker, put `docker compose exec web` before the command.
+With the one-container image, put `docker exec byomailer` before the command. In the Compose stack, put `docker compose exec web` before the command.
 
 An instance that started on version 0.1.0 or later does not need `ses-events:migrate-to-sqs`, `ses:migrate-configuration-sets` or `ses:backfill-tenants`. These commands convert data from development builds before the first release. The current AWS onboarding creates the SQS subscription, the tenant and one configuration set for each identity.
 
@@ -198,8 +198,10 @@ Before this release, the **Update Credentials** form in **Settings > Email Crede
 
 3. In `.env`, copy the current value of `APP_KEY` to `APP_PREVIOUS_KEYS`.
 4. In `.env`, set `APP_KEY=base64:` followed by the new key.
-5. Restart the stack. In Docker, run `docker compose up -d`. In a manual install, cache the configuration again and restart the processes.
+5. Restart the app. In the Compose stack, run `docker compose up -d`. In a manual install, cache the configuration again and restart the processes.
 6. Open **Settings > Email Credentials** and make sure that the credentials still show.
+
+With the one-container image, the current key is in `/data/.secrets/app_key`. Give `APP_KEY` and `APP_PREVIOUS_KEYS` to the container with `--env-file`, then start the container again. A value in `APP_KEY` wins over the key file.
 
 The values in the database stay encrypted with the old key. BYOMailer has no command that encrypts them again with the new key. Keep the old key in `APP_PREVIOUS_KEYS` until BYOMailer saved each encrypted value again.
 

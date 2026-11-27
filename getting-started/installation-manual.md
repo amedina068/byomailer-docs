@@ -6,9 +6,9 @@ order: 3
 
 # Install without Docker
 
-This page installs BYOMailer directly on a Linux server. The Docker stack is easier to keep current. If you can use Docker, read [Install with Docker](installation-docker.md).
+This page installs BYOMailer directly on a Linux server. The Docker image is easier to install and to keep current. It runs in one container with SQLite and needs no MySQL and no Redis. If you can use Docker, read [Install with Docker](installation-docker.md).
 
-A manual install has the same parts as the Docker stack: a web server with PHP-FPM, MySQL, Redis, and three background processes. You must start and supervise each process yourself.
+The manual install on this page uses MySQL, Redis, and Horizon. It has a web server with PHP-FPM, MySQL, Redis, and three background processes. You must start and supervise each process yourself.
 
 ## Requirements
 
@@ -17,8 +17,8 @@ A manual install has the same parts as the Docker stack: a web server with PHP-F
 | PHP | 8.4 | `composer.lock` needs PHP 8.4.1 or later (Symfony 8). PHP 8.5 does not work, because `phpoffice/phpspreadsheet` does not accept it. |
 | Composer | 2 | Installs the PHP dependencies. |
 | Node.js | 24 | Builds the frontend. The `.nvmrc` file names the version. Vite 7 does not work on older versions. Node is necessary only for the build. |
-| MySQL | 8.4 or later | Production uses MySQL. The Docker stack uses 8.4. |
-| Redis | 7.2 or later | Horizon needs Redis. The Docker stack uses 7.4. |
+| MySQL | 8.4 or later | The database of this install. The `mysql` profile of the Compose stack uses 8.4. |
+| Redis | 7.2 or later | Horizon needs Redis. The `mysql` profile of the Compose stack uses 7.4. |
 | A web server with PHP-FPM | | The Docker image uses NGINX. |
 
 The oldest supported versions are MySQL 8.4 (LTS) and Redis 7.2. MySQL 8.0 reached its end of life in April 2026. The project does not test MariaDB or older Redis versions.
@@ -112,7 +112,7 @@ INERTIA_SSR_ENABLED=false
 
 - `APP_ENV=production` is necessary for Horizon. `config/horizon.php` has supervisor settings only for `production` and `local`. In `local`, any visitor can open `/horizon`.
 - `.env.example` sets `QUEUE_CONNECTION=database`. Horizon processes only Redis queues, so set `redis`.
-- `.env.example` sets `INERTIA_SSR_ENABLED=true`. Server-side rendering needs a separate `php artisan inertia:start-ssr` process. The Docker stack sets `false`. Do the same, or run and supervise that process.
+- `.env.example` sets `INERTIA_SSR_ENABLED=true`. Server-side rendering needs a separate `php artisan inertia:start-ssr` process. The Docker image sets `false`. Do the same, or run and supervise that process.
 - `.env.example` sets `MAIL_MAILER=log`. Invites and password resets then go to the log. Read [System mail](../self-hosting/system-mail.md).
 
 [Configuration](configuration.md) lists all the variables.

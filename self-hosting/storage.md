@@ -8,9 +8,9 @@ order: 6
 
 BYOMailer keeps the images that users upload for their emails. It also keeps the MaxMind database and some private files. This page tells where these files go and how to move the images to S3 or Cloudflare R2.
 
-## The `storage` volume
+## Where the files are
 
-`docker-compose.yml` mounts the volume `storage` at `/var/www/html/storage/app` in each app service. These folders are in the volume:
+The Docker image keeps the Laravel storage folder in the `/data` volume, at `/data/storage`. The Compose stack also mounts the `storage` volume at `/data/storage/app` in each app service. These folders hold the files:
 
 | Folder | Content |
 |---|---|
@@ -20,7 +20,7 @@ BYOMailer keeps the images that users upload for their emails. It also keeps the
 
 The `web` service makes the link from `public/storage` to `storage/app/public` when it starts. It runs `php artisan byomailer:install --prepare` for this. The command creates the link only when it is missing.
 
-The logs (`storage/logs`) are not in the volume. Back up the volume. See [Backups](backups.md).
+The Docker image sends the logs to the container output (`LOG_CHANNEL=stderr`). Back up the volumes. See [Backups](backups.md).
 
 ## Where uploaded images go
 

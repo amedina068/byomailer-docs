@@ -64,7 +64,7 @@ php artisan test --compact --filter=test_it_refuses_to_run_when_a_user_already_e
 | `MAIL_MAILER` | `array` |
 | `INERTIA_SSR_ENABLED` | `false` |
 
-The tests use SQLite and production uses MySQL. Do not write SQL that works on one engine only.
+The tests use SQLite. Production uses SQLite by default, or MySQL in the Compose stack with the `mysql` profile. Do not write SQL that works on one engine only.
 
 ### No real HTTP calls
 

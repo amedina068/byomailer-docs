@@ -1,12 +1,20 @@
 ---
 title: Reverse proxy and TLS
-description: Put a reverse proxy with a TLS certificate in front of port 8080 of the web service.
+description: Use the automatic HTTPS of the image, or put your own reverse proxy with a TLS certificate in front of port 8080.
 order: 1
 ---
 
 # Reverse proxy and TLS
 
-The `web` service of `docker-compose.yml` serves plain HTTP on port 8080 in the container. Docker Compose publishes it on the host port `APP_PORT` (default `8080`). The service has no TLS. Put a reverse proxy with a TLS certificate in front of it.
+The one-container image includes Caddy. When you set `APP_DOMAIN`, Caddy gets a TLS certificate and serves HTTPS on the ports 80 and 443. You need no reverse proxy. Read [Install with Docker](../getting-started/installation-docker.md).
+
+The rest of this page is for an install behind your own reverse proxy:
+
+- The one-container image with `CADDY_ENABLED=false`.
+- The Compose stack. `docker-compose.yml` sets `CADDY_ENABLED=false` by default.
+- A manual install.
+
+In these installs, the app serves plain HTTP on port 8080 in the container. Put a reverse proxy with a TLS certificate in front of it.
 
 ## Why HTTPS is necessary
 
@@ -20,11 +28,11 @@ Open and click tracking go through SES or through a custom tracking domain, not 
 
 ## Set the public URL
 
-1. In `.env`, set `APP_URL` to the public HTTPS URL, for example `APP_URL=https://byomailer.example`.
+1. Set `APP_URL` to the public HTTPS URL, for example `APP_URL=https://byomailer.example`. With the one-container image, give it with `-e` or `--env-file`. In the Compose stack, set it in `.env`.
 2. Do not add a path to the URL. BYOMailer compares only the host of `APP_URL` with the host of each request.
-3. Recreate the containers with `docker compose up -d`.
+3. Start the container again with the new value. In the Compose stack, run `docker compose up -d`.
 
-The `web` container caches the configuration each time that it starts. A change to `.env` has no effect until the containers start again.
+The container caches the configuration each time that it starts. A changed value has no effect until the container starts again.
 
 ## The host rule
 
@@ -61,13 +69,9 @@ CAUTION: Do not set `TRUSTED_PROXIES=*` when the app port is open to the interne
 
 ## Keep port 8080 private
 
-`docker-compose.yml` maps the port as `${APP_PORT:-8080}:8080`. Docker accepts an IP address before the host port. To publish the port on the loopback interface only, set this value in `.env`:
+`docker-compose.yml` maps the port as `${APP_BIND:-127.0.0.1}:${APP_PORT:-8080}:8080`. By default, the port is open on the loopback interface only. Then only a reverse proxy on the same server can reach the `web` service. Set `APP_BIND=0.0.0.0` only if the app must take traffic from other hosts with no proxy.
 
-```dotenv
-APP_PORT=127.0.0.1:8080
-```
-
-Then only a reverse proxy on the same server can reach the `web` service.
+With `docker run`, publish the port on the loopback interface with `-p 127.0.0.1:8080:8080`.
 
 ## Upload size
 
@@ -126,12 +130,12 @@ server {
 Signed links in emails that BYOMailer already sent contain the old host. To keep these links working after a move, do these steps:
 
 1. Make the old host redirect to the new host.
-2. In `.env`, set `APP_URL` to the new URL.
-3. In `.env`, set `APP_PREVIOUS_URLS` to the old URL, for example `APP_PREVIOUS_URLS=https://old.example.com`. You can give a comma-separated list.
-4. Recreate the containers with `docker compose up -d`.
+2. Set `APP_URL` to the new URL. With `APP_DOMAIN`, set `APP_DOMAIN` to the new host.
+3. Set `APP_PREVIOUS_URLS` to the old URL, for example `APP_PREVIOUS_URLS=https://old.example.com`. You can give a comma-separated list.
+4. Start the container again with the new values. In the Compose stack, run `docker compose up -d`.
 
 The `signed` middleware then also accepts a signature that BYOMailer made on a URL in `APP_PREVIOUS_URLS`.
 
 ## The health check
 
-The `web` service answers `GET /up` when Laravel starts correctly. `docker-compose.yml` uses this path for the health check of the container. The host rule also allows `/up` on a verified custom link domain, so an uptime monitor can check that path.
+The app answers `GET /up` when Laravel starts correctly. The image and `docker-compose.yml` use this path for the health check of the container. The host rule also allows `/up` on a verified custom link domain, so an uptime monitor can check that path.

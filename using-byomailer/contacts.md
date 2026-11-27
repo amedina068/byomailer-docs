@@ -40,7 +40,7 @@ You can also add contacts with a CSV import, the API or the MCP server. See [Imp
 
 The dashboard, the API and the MCP server cannot delete a contact. For an erasure request, for example under the GDPR, the owner of the instance erases the contact on the server.
 
-1. Open Tinker. In Docker, run `docker compose exec web php artisan tinker`. In a manual install, run `php artisan tinker`.
+1. Open Tinker. In Docker, run `docker exec -it byomailer php artisan tinker`. In the Compose stack, run `docker compose exec web php artisan tinker`. In a manual install, run `php artisan tinker`.
 2. Find the contact. Replace the address:
 
    ```php
