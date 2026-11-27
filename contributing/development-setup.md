@@ -17,7 +17,7 @@ For the structure of the code, read [Architecture](architecture.md).
 | PHP | 8.4.1 or later, not 8.5 | Extensions: `bcmath`, `exif`, `gd`, `intl`, `pdo_sqlite`, `redis`. The CI also loads `zip`. |
 | Composer | | Installs the PHP packages. |
 | Node | 24 | The `.nvmrc` file names the version. Vite 7 and Vitest 4 fail on older versions. |
-| Redis | Optional | Only the jobs that send email need it. Read [Send email locally](#send-email-locally). |
+| Redis | Optional | Only for work on Horizon or on the Redis drivers. |
 
 ### Why PHP 8.5 does not work
 
@@ -171,6 +171,6 @@ WARNING: Do not put real AWS keys in `TEST_AWS_KEY_ID` and `TEST_AWS_KEY_SECRET`
 
 Each campaign email goes through the SES API with the AWS keys of the account. The fake keys of the seeder make AWS refuse the call. To send real email, connect a real SES account in the dashboard. Read [Connect AWS SES](../getting-started/connect-aws-ses.md).
 
-The jobs that send newsletters and sequence steps use the `ses-sending` rate limiter. It needs Redis. Install Redis, and set `REDIS_HOST` and `REDIS_PORT` in `.env`.
+The jobs that send newsletters and sequence steps use the `ses-sending` rate limiter. With the `database` queue of `.env.example`, the limiter keeps its counters in the cache. It needs no Redis.
 
 CAUTION: Before you run a send command by hand, make sure that the local database has no real AWS credentials. To check the send code, write a test. Read [Testing](testing.md).

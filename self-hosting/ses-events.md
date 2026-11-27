@@ -61,7 +61,7 @@ After that, the SES events of the sending account arrive in the queue. If the wo
 
 ## Dead-letter queue
 
-The worker leaves a message in the queue in two cases. It logs "leaving for DLQ" when the body is not JSON. It logs "failed to dispatch job" when it cannot queue the job, for example when Redis is down. Each receive hides the message for 60 seconds (`--visibility-timeout`). Then the worker reads it again.
+The worker leaves a message in the queue in two cases. It logs "leaving for DLQ" when the body is not JSON. It logs "failed to dispatch job" when it cannot queue the job, for example when the queue database or Redis is down. Each receive hides the message for 60 seconds (`--visibility-timeout`). Then the worker reads it again.
 
 Give the queue a dead-letter queue, so that such a message does not come back for ever:
 
@@ -73,7 +73,7 @@ Give the queue a dead-letter queue, so that such a message does not come back fo
 
 With `maxReceiveCount` 5, SQS moves a message to the dead-letter queue after about 5 minutes. The worker needs no permission on the dead-letter queue.
 
-A message in the dead-letter queue is not always invalid. If Redis was down, the queue holds valid events. When the alarm starts, read the `ses-events` log:
+A message in the dead-letter queue is not always invalid. If the queue database or Redis was down, the dead-letter queue holds valid events. When the alarm starts, read the `ses-events` log:
 
 - If the log shows "failed to dispatch job", correct the fault. Then start a DLQ redrive in the SQS console. SQS moves the messages back to the main queue.
 - If the log shows "leaving for DLQ", the body is not JSON. Read the message in the console, then delete it.
@@ -202,9 +202,11 @@ If a check fails, the endpoint answers 403 and logs `SesWebhookController: rejec
 New accounts do not use this endpoint. To move the old HTTPS subscriptions to the SQS queue, run:
 
 ```bash
-docker compose exec web php artisan ses-events:migrate-to-sqs --dry-run
-docker compose exec web php artisan ses-events:migrate-to-sqs
+docker exec byomailer php artisan ses-events:migrate-to-sqs --dry-run
+docker exec byomailer php artisan ses-events:migrate-to-sqs
 ```
+
+In the Compose stack, replace `docker exec byomailer` with `docker compose exec web`.
 
 | Option | Effect |
 |---|---|

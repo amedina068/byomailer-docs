@@ -17,7 +17,7 @@ Each command on this page accepts `--json`. With `--json`, the command writes on
 The command shows a table of the users of the instance, with the columns `ID`, `Name`, `Email`, `Account`, `Owner`, `Status` and `Created`. The status is `active` or `deactivated`.
 
 ```bash
-docker compose exec web php artisan byomailer:user:list --search=person
+docker exec byomailer php artisan byomailer:user:list --search=person
 ```
 
 | Option | Effect |
@@ -31,7 +31,7 @@ If no user matches, the command shows `No user matches.`
 The command sets a new password for the user with the email that you give. It does not send an email.
 
 ```bash
-docker compose exec web php artisan byomailer:user:password person@example.com
+docker exec byomailer php artisan byomailer:user:password person@example.com
 ```
 
 With no option, the command asks for the new password two times.
@@ -53,7 +53,7 @@ The new password must obey the same rules as the web form. In production, these 
 
 - It changes the "Remember me" token of the user. All "Remember me" logins end.
 - With the `database` session driver, it removes the web sessions of the user and shows the number.
-- With another session driver, for example `redis` in the Docker stack, it cannot find the sessions of one user. Each open web session ends at its next request, because the password changed.
+- With another session driver, for example `file` in the Docker image or `redis` in the Compose stack with MySQL, it cannot find the sessions of one user. Each open web session ends at its next request, because the password changed.
 - With `--reset-two-factor`, it removes the two-factor secret, the recovery codes and the confirmation date. The user can turn on two-factor authentication again in the account settings.
 
 The command does not reactivate a deactivated user. It shows a reminder when the user is deactivated. The owner must reactivate the user in **Admin > Users**. See [Accounts and registration](accounts-and-registration.md).
@@ -65,7 +65,7 @@ The command does not change the API tokens of the user.
 While the instance has no user, the command prints the URL of the setup page. Open it to create the owner.
 
 ```bash
-docker compose exec web php artisan byomailer:setup-url
+docker exec byomailer php artisan byomailer:setup-url
 ```
 
 If a user already exists, the command shows `An account already exists. The setup page is closed.`
@@ -77,5 +77,5 @@ The URL uses the host of `APP_URL`. The token in the URL comes from `APP_KEY`. I
 If no owner can sign in, make another user an owner:
 
 ```bash
-docker compose exec web php artisan byomailer:install --promote=person@example.com
+docker exec byomailer php artisan byomailer:install --promote=person@example.com
 ```

@@ -30,7 +30,7 @@ With the one-container image, run `docker logs byomailer`. The last two lines of
 |---|---|
 | `docker compose ps` | Show each service and its health. |
 | `docker compose logs web` | The web requests, the migrations at start and the setup URL. |
-| `docker compose logs -f web` | Also the queued jobs (Horizon), the scheduled tasks and the SQS worker. They run in the `web` container. |
+| `docker compose logs -f web` | Also the queued jobs, the scheduled tasks and the SQS worker. They run in the `web` container. |
 | `docker compose logs -f ses-events` | The SQS worker, only when you run it in its own container with the `ses` profile. |
 | `docker compose logs mysql` | The database. |
 
@@ -50,23 +50,23 @@ docker compose exec ses-events sh -c 'tail -n 50 storage/logs/ses-events-*.log'
 
 1. Open the instance with the host of `APP_URL`, not with an IP address or `localhost`.
 2. Make sure that the reverse proxy sends the original `Host` header.
-3. If `APP_URL` is wrong, correct it in `.env`. Then run `docker compose up -d`.
+3. If `APP_URL` is wrong, correct it. With the one-container image, set `APP_DOMAIN` or `APP_URL`, and start the container again. In the Compose stack, correct `.env` and run `docker compose up -d`.
 
 See [Reverse proxy and TLS](reverse-proxy-and-tls.md).
 
 ## The first start takes a long time
 
-**Signal.** `docker compose ps` shows `web` as `starting` for some minutes. The `horizon`, `scheduler` and `ses-events` services do not start.
+**Signal.** `docker ps` shows the container as `health: starting` for some minutes. The log shows no ready line.
 
-**Cause.** At each start, the `web` service runs the migrations before NGINX starts. The first start runs all the migrations. The health check of `web` allows 600 seconds for this. The other app services wait until `web` is healthy.
+**Cause.** At each start, the container runs the migrations before `/up` answers. A new database loads the schema dump first. The health check of the image allows 300 seconds for this. The Compose stack has the same limit. With the `ses` profile, the `ses-events` service waits until `web` is healthy.
 
 **Correction.**
 
-1. Read the progress with `docker compose logs -f web`.
-2. Wait until `docker compose ps` shows `web` as `healthy`.
-3. If a migration fails, read the error in the log. Make sure that the `mysql` service is healthy and that `DB_PASSWORD` is correct.
+1. Read the progress with `docker logs -f byomailer`. In the Compose stack, run `docker compose logs -f web`.
+2. Wait until `docker ps` shows the container as `healthy`. In the Compose stack, run `docker compose ps`.
+3. If a migration fails, read the error in the log. With MySQL, make sure that the `mysql` service is healthy and that `DB_PASSWORD` is correct.
 
-The health check of the `web` service calls `/up` on `localhost` inside the container. BYOMailer answers `/up` on each host, so the check passes for each value of `APP_URL`.
+The health check calls `/up` on `127.0.0.1` inside the container. BYOMailer answers `/up` on each host, so the check passes for each value of `APP_URL`.
 
 ## The setup URL is gone
 
@@ -144,7 +144,7 @@ BYOMailer reads the quota of each account. It sets the rate of the sending jobs 
 To read the status of one user from the command line, run:
 
 ```bash
-docker compose exec web php artisan ses:fetch-quota --user=<user id>
+docker exec byomailer php artisan ses:fetch-quota --user=<user id>
 ```
 
 The command prints `Production` or `Sandbox`, the sent count, the 24-hour limit and the send rate.
@@ -185,9 +185,9 @@ If a verified link domain answers error 526, the origin certificate does not cov
 
 **Signal.** A team admin sends an invitation, but the person gets no email.
 
-**Cause.** `.env.example` sets `MAIL_MAILER=log`. With this mailer, BYOMailer writes the email to the log and sends nothing.
+**Cause.** The Docker image and `.env.example` set `MAIL_MAILER=log`. With this mailer, BYOMailer writes the email to the log and sends nothing.
 
-**Correction.** Configure the system mailer. See [System mail](system-mail.md). Until then, read the invitation link with `docker compose logs web`, or reset a password with [Recover access](recover-access.md).
+**Correction.** Configure the system mailer. See [System mail](system-mail.md). Until then, read the invitation link with `docker logs byomailer`, or reset a password with [Recover access](recover-access.md).
 
 ## PHP 8.5 is not supported
 

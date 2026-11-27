@@ -21,7 +21,7 @@ The versions come from `composer.json` and `package.json`.
 | Dashboard | Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`), Vue 3.5, Tailwind CSS 4, Vite 7 |
 | Route helpers for the frontend | Laravel Wayfinder (`laravel/wayfinder`, `@laravel/vite-plugin-wayfinder`) |
 | Authentication | Laravel Fortify for the login, Laravel Sanctum for API tokens |
-| Queues | Laravel Horizon (Redis) |
+| Queues | The `database` queue with `queue:work` by default. Laravel Horizon when the queue is Redis. |
 | MCP server | Laravel MCP (`laravel/mcp`) |
 | API documentation | Scramble (`dedoc/scramble`) makes the OpenAPI document. |
 | AWS | `aws/aws-sdk-php`, `aws/aws-php-sns-message-validator` |
@@ -30,7 +30,7 @@ The versions come from `composer.json` and `package.json`.
 | Tests | PHPUnit 12, Vitest 4 with `happy-dom` |
 | Code style | Pint, ESLint 9, Prettier 3, `vue-tsc` |
 
-Production uses MySQL and Redis. The tests and local development use SQLite.
+The Docker image uses SQLite, the `database` queue, and the `file` cache in production. The Compose stack can use MySQL and Redis instead. The tests and local development use SQLite.
 
 ## Folders
 
@@ -94,7 +94,7 @@ Each campaign email goes out through the SES account of the account that sends i
 
 If `mail.use_ses_api` is `false` (`MAIL_USE_SES_API`), `UserMailerFactory` uses the default mailer of the instance instead.
 
-Newsletter chunks and sequence mails go through the `ses-sending` rate limiter. It uses Redis (`RateLimitedWithRedis`) and follows the send rate of the SES account.
+Newsletter chunks and sequence mails go through the `ses-sending` rate limiter. It follows the send rate of the SES account. `SesSendingLimit` keeps the counters in Redis (`RateLimitedWithRedis`) when the queue is Redis. Otherwise, it keeps them in the cache store (`RateLimited`). `SES_SENDING_LIMITER` changes this choice.
 
 If you add a new send path, gate it with `EmailSendingGate::evaluate()`. Run `SendableContentCheck::problems()` before a newsletter or a step goes live.
 

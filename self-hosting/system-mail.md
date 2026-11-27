@@ -40,15 +40,17 @@ MAIL_FROM_ADDRESS="byomailer@example.com"
 MAIL_FROM_NAME="BYOMailer"
 ```
 
-After you change these values, recreate the containers with `docker compose up -d`.
+To change a variable of the one-container image, remove the container with `docker rm -f byomailer`. Then run the same `docker run` command with the new value. The `/data` volume keeps the data. In the Compose stack, run `docker compose up -d`.
 
 ## The `log` mailer
 
-With `MAIL_MAILER=log`, BYOMailer writes each system email to the log and sends nothing. In the Docker stack, the log goes to the standard error of the container. To read an invitation link, run:
+With `MAIL_MAILER=log`, BYOMailer writes each system email to the log and sends nothing. In Docker, the log goes to the standard error of the container. To read an invitation link, run:
 
 ```bash
-docker compose logs web
+docker logs byomailer
 ```
+
+In the Compose stack, run `docker compose logs web`.
 
 The queued alert emails go to the log of the queue worker, that is, the log of the container.
 
